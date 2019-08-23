@@ -1,0 +1,18 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/config.2.0.schema.json",
+  "version": "2.0",
+  "bundles": {
+    "resignation-form-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/resignationForm/ResignationFormWebPart.js",
+          "manifest": "./src/webparts/resignationForm/ResignationFormWebPart.manifest.json"
+        }
+      ]
+    }
+  },
+  "externals": {},
+  "localizedResources": {
+    "ResignationFormWebPartStrings": "lib/webparts/resignationForm/loc/{locale}.js"
+  }
+}
