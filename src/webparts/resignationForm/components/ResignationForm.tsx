@@ -5,16 +5,18 @@ import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import Grid from '@material-ui/core/Grid';
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import Typography from '@material-ui/core/Typography';
 import Container from '@material-ui/core/Container';
-
+import Select from '@material-ui/core/Select';
+import { MenuItem, FormControl, InputLabel } from '@material-ui/core';
 
 const ResignationForm = () => {
-  const [count, setCount] = useState(0);
+  const [values, setValues] = React.useState({
+    age: '',
+    name: 'hai',
+  });
   return <div>
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -35,10 +37,21 @@ const ResignationForm = () => {
               <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Last Name" name="lastName" autoComplete="lastName" autoFocus />
             </Grid>
           </Grid>
-          <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Email Address" name="email" autoComplete="email" autoFocus
-          />
-          <TextField variant="outlined" margin="normal" required fullWidth name="password" label="Password" type="password" autoComplete="current-password" />
-          <FormControlLabel control={<Checkbox value="remember" color="primary" />} label="Remember me" />
+          <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Work Email" name="email" autoComplete="email" autoFocus />
+          <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Personal Email" name="email" autoComplete="email" autoFocus />
+          <FormControl >
+            <InputLabel htmlFor="age-simple">Reason for Resignation</InputLabel>
+            <Select inputProps={{ name: 'age', id: 'age-simple', }} value="Personal" >
+              <MenuItem value={10}>Personal</MenuItem>
+              <MenuItem value={20}>Health</MenuItem>
+              <MenuItem value={30}>Better Oppertunity</MenuItem>
+              <MenuItem value={40}>US Transfer</MenuItem>
+              <MenuItem value={50}>RG Transfer</MenuItem>
+              <MenuItem value={60}>Higher Education</MenuItem>
+              <MenuItem value={70}>Other</MenuItem>
+            </Select>
+          </FormControl>
+          <TextField variant="outlined" margin="normal" required fullWidth id="email" label="Specify(if other is selected)" name="email" autoFocus />
           <Button type="submit" fullWidth variant="contained" color="primary">
             Sign In
           </Button>
