@@ -57,7 +57,6 @@ const ResignationForm = () => {
           </Button>
         </form>
       </div>
-
     </Container>
   </div>;
 }
