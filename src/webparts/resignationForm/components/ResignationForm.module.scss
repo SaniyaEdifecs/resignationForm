@@ -36,7 +36,15 @@
     @include ms-font-l;
     @include ms-fontColor-white;
   }
-
+  .marginVertical16{
+    margin: 16px 0;
+  }
+  .fullWidth{
+    width:100%;
+    .MuiFormControl-root{
+      width: 100%;
+    }
+  }
   .button {
     // Our button
     text-decoration: none;
