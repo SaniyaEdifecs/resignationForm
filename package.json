@@ -24,6 +24,7 @@
     "@pnp/logging": "^1.3.5",
     "@pnp/odata": "^1.3.5",
     "@pnp/sp": "^1.3.5",
+    "@pnp/spfx-controls-react": "1.14.0",
     "@types/es6-promise": "0.0.33",
     "@types/react": "16.8.8",
     "@types/react-dom": "16.8.3",

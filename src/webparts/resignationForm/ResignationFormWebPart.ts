@@ -9,20 +9,30 @@ import {
 
 import * as strings from 'ResignationFormWebPartStrings';
 import ResignationForm from './components/ResignationForm';
-import { IResignationFormProps } from './components/IResignationFormProps';
-
+import { sp } from "@pnp/sp";
 export interface IResignationFormWebPartProps {
-  description: string;
+  wpContext: any;
 }
 
 export default class ResignationFormWebPart extends BaseClientSideWebPart<IResignationFormWebPartProps> {
-
+  public wpContext: any;
+  public onInit(): Promise<void> {
+    return super.onInit().then(_ => {
+      sp.setup({
+        spfxContext: this.context
+      });
+    });
+  }
   public render(): void {
-    const element: React.ReactElement<IResignationFormProps > = React.createElement(
-      ResignationForm
+    
+    const element: React.ReactElement<IResignationFormWebPartProps> = React.createElement(
+      ResignationForm,
+      {
+        wpContext : this.context
+      } 
     );
 
-    ReactDom.render(element, this.domElement);
+    ReactDom.render(element, this.domElement, this.wpContext);
   }
 
   protected onDispose(): void {
