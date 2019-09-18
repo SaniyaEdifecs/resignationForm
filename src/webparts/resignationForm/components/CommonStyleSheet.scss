@@ -26,13 +26,16 @@
         }
     }
 }
-
+.MuiAppBar-positionStatic{
+    margin-bottom: 25px;
+}
 #people{
     position: relative;
     margin-top: 16px;
     label{
         position: absolute;
-        background: transparent;
+        background: #fff;
+        padding: 4px 6px;
         transform: translate(3px,-15px) scale(.75);
     }
     .ms-BasePicker-text{
@@ -49,4 +52,12 @@
         border: 1px solid rgba(0,0,0,0.23);
         padding: 18.5px 14px;
     }
+}
+
+.root{
+    width: '100%';
+}
+.tableWrapper {
+    max-height: 407;
+    overflow: auto;
 }

@@ -1,14 +1,9 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
-import {
-  BaseClientSideWebPart,
-  IPropertyPaneConfiguration,
-  PropertyPaneTextField
-} from '@microsoft/sp-webpart-base';
-
+import { BaseClientSideWebPart, IPropertyPaneConfiguration, PropertyPaneTextField } from '@microsoft/sp-webpart-base';
 import * as strings from 'ResignationFormWebPartStrings';
-import ResignationForm from './components/ResignationForm';
+import ResignationDashboard from './components/ResignationDashboard';
 import { sp } from "@pnp/sp";
 export interface IResignationFormWebPartProps {
   wpContext: any;
@@ -26,7 +21,7 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
   public render(): void {
     
     const element: React.ReactElement<IResignationFormWebPartProps> = React.createElement(
-      ResignationForm,
+      ResignationDashboard,
       {
         wpContext : this.context
       } 

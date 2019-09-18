@@ -34,7 +34,7 @@ const useForm = ({ initialValues, onSubmit, validate }) => {
   };
 
   const _getPeoplePickerItems = (items: any[]) => {
-    console.log(items);
+    console.log("items",items);
     let peoplePickerValue = items[0];
     let fullName = peoplePickerValue.text.split(' ');
     let mFirstName = fullName[0];
@@ -71,7 +71,7 @@ const addListItem = (elements) => {
   sp.web.lists.getByTitle("ResignationList").items.add(elements).then((response: ItemAddResult): void => {
     const item = response.data as string;
     if (item) {
-      console.log('submitted', item)
+      console.log('submitted', item);
     }
   }, (error: any): void => {
     console.log('Error while creating the item: ' + error);
@@ -119,11 +119,12 @@ const ResignationForm = (props) => {
         'JobTitle': employeeDetails.JobTitle,
         'WorkEmail': employeeDetails.WorkEmail,
         'PersonalEmail': employeeDetails.PersonalEmail,
+        'ManagerName': employeeDetails.FirstName+ " "+ employeeDetails.LastName,
         'ManagerEmail': employeeDetails.ManagerEmail,
-        'ResignationReason': employeeDetails.ManagerEmail,
+        'ResignationReason': employeeDetails.ResignationReason,
         'OtherReason': employeeDetails.OtherReason,
         'ResignationSummary': employeeDetails.ResignationSummary,
-        // 'LastWorkingDate': inputs.LastWorkingDate
+       // 'LastWorkingDate': inputs.LastWorkingDate
       }];
       console.log("value---------", inputs);
       addListItem(elements[0]);
@@ -141,11 +142,12 @@ const ResignationForm = (props) => {
 
   return <div>
     <Container component="main" maxWidth="xs">
+ 
       <CssBaseline />
       <div>
-        <Typography component="h1" variant="h5">
+        {/* <Typography component="h1" variant="h5">
           Resignation Application
-          </Typography>
+          </Typography> */}
         <Typography component="h3" className={styles.marginVertical16}>
           Employee Details
           </Typography>
@@ -156,6 +158,8 @@ const ResignationForm = (props) => {
 
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
+            {/* <PeoplePicker context={props.context} ensureUser={true} titleText="First Name" personSelectionLimit={1} showtooltip={true} isRequired={true} disabled={false} selectedItems={_getPeoplePickerItems} showHiddenInUI={false}
+                principalTypes={[PrincipalType.User]} resolveDelay={1000} /> */}
               <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={inputs.FirstName} onChange={handleInputChange} name="FirstName" autoComplete="FirstName" />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -181,8 +185,8 @@ const ResignationForm = (props) => {
           </MuiPickersUtilsProvider>
           <Grid container spacing={2}>
             <Grid item sm={12}>
-              <PeoplePicker context={props.wpContext} titleText="Manager Name" personSelectionLimit={1} showtooltip={true} isRequired={true} disabled={false} selectedItems={_getPeoplePickerItems} showHiddenInUI={false}
-                principalTypes={[PrincipalType.User]} resolveDelay={1000} />
+              <PeoplePicker context={props.context} ensureUser={true} titleText="Manager Name" personSelectionLimit={1} showtooltip={true} disabled={false} selectedItems={_getPeoplePickerItems} showHiddenInUI={false}
+                principalTypes={[PrincipalType.User]} isRequired ={true} resolveDelay={1000} />
             </Grid>
             <Grid item xs={12} sm={6}>
               <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={inputs.managerFirstName} name="managerFirstName" onChange={handleInputChange} />
