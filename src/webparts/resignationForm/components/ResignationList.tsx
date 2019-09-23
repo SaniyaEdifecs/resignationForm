@@ -39,7 +39,7 @@ const getResignationList = () => {
     // get all the items from a list
     sp.web.lists.getByTitle("ResignationList").items.get().then((items: any[]) => {
         EmployeeDetails = items;
-        console.log(EmployeeDetails)
+        console.log("Employee list",EmployeeDetails)
     });
 };
 const ResignationList = () => {

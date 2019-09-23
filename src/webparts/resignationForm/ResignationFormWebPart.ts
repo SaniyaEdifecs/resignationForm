@@ -6,11 +6,11 @@ import * as strings from 'ResignationFormWebPartStrings';
 import ResignationDashboard from './components/ResignationDashboard';
 import { sp } from "@pnp/sp";
 export interface IResignationFormWebPartProps {
-  wpContext: any;
+  description: string;
 }
 
 export default class ResignationFormWebPart extends BaseClientSideWebPart<IResignationFormWebPartProps> {
-  public wpContext: any;
+  public cntext: any;
   public onInit(): Promise<void> {
     return super.onInit().then(_ => {
       sp.setup({
@@ -23,11 +23,11 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
     const element: React.ReactElement<IResignationFormWebPartProps> = React.createElement(
       ResignationDashboard,
       {
-        wpContext : this.context
+        context : this.context
       } 
     );
 
-    ReactDom.render(element, this.domElement, this.wpContext);
+    ReactDom.render(element, this.domElement);
   }
 
   protected onDispose(): void {

@@ -1,5 +1,4 @@
-@import '~office-ui-fabric-react/dist/sass/References.scss';
-
+@import "~office-ui-fabric-react/dist/sass/References.scss";
 
 .resignationForm {
   .container {
@@ -37,12 +36,12 @@
     @include ms-font-l;
     @include ms-fontColor-white;
   }
-  .marginVertical16{
+  .marginVertical16 {
     margin: 16px 0;
   }
-  .fullWidth{
-    width:100%;
-    .MuiFormControl-root{
+  .fullWidth {
+    width: 100%;
+    .MuiFormControl-root {
       width: 100%;
     }
   }
@@ -60,7 +59,8 @@
     // Basic Button
     outline: transparent;
     position: relative;
-    font-family: "Segoe UI WestEuropean","Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",sans-serif;
+    font-family: "Segoe UI WestEuropean", "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue",
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     font-size: $ms-font-size-m;
     font-weight: $ms-font-weight-regular;
@@ -80,4 +80,10 @@
       display: inline-block;
     }
   }
+  
+}
+.danger {
+  color: #ff0000;
+  margin: 0;
+  font-size: 12px;
 }

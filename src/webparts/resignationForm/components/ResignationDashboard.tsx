@@ -4,18 +4,18 @@ import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import ResignationForm from './ResignationForm';
+import ResignationForm from './ResignationFormComponent/ResignationForm';
 import ResignationList from './ResignationList';
 
-interface TabPanelProps {
+interface ITabPanelProps {
     children?: React.ReactNode;
     index: any;
     value: any;
 }
 
-function TabPanel(props: TabPanelProps) {
+function TabPanel(props: ITabPanelProps) {
     const { children, value, index, ...other } = props;
-
+    
     return (
         <Typography
             component="div"
@@ -30,7 +30,8 @@ function TabPanel(props: TabPanelProps) {
     );
 }
 
-function a11yProps(index: any) {
+function tabProps(index: any) {
+    
     return {
         id: `scrollable-auto-tab-${index}`,
         'aria-controls': `scrollable-auto-tabpanel-${index}`,
@@ -40,7 +41,6 @@ function a11yProps(index: any) {
 
 const ResignationDashboard = (props) => {
     const [value, setValue] = React.useState(0);
-
     function handleChange(event: React.ChangeEvent<{}>, newValue: number) {
         setValue(newValue);
     }
@@ -48,22 +48,15 @@ const ResignationDashboard = (props) => {
     return (
         <div>
             <AppBar position="static" color="default">
-                <Tabs
-                    value={value}
-                    onChange={handleChange}
-                    indicatorColor="primary"
-                    textColor="primary"
-                    variant="scrollable"
-                    scrollButtons="auto"
-                    aria-label="scrollable auto tabs example"
-                >
-                    <Tab label="Resignation Form" {...a11yProps(0)} />
-                    <Tab label="Resignations " {...a11yProps(1)} />
+                <Tabs value={value} onChange={handleChange} indicatorColor="primary" textColor="primary"
+                    variant="scrollable" scrollButtons="auto" aria-label="scrollable auto tabs example">
+                    <Tab label="Resignation Form" {...tabProps(0)} />
+                    <Tab label="Resignations " {...tabProps(1)} />
 
                 </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <ResignationForm context={props.wpContext} />
+                <ResignationForm context={props.context} />
             </TabPanel>
             <TabPanel value={value} index={1}>
                 <ResignationList />

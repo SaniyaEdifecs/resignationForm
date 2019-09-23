@@ -1,3 +1,3 @@
 export interface IResignationFormProps {
-  wpContext: any;
+  context: any;
 }
