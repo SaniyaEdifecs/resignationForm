@@ -1,5 +1,5 @@
 const validateFormValues = (inputs) => {
-  console.log("iiiii",inputs)
+  console.log("validate values",inputs);
   let errors = {};
   // Employee code 
   if (!inputs.EmployeeCode) {
@@ -21,6 +21,6 @@ const validateFormValues = (inputs) => {
   }
   return errors;
 
-}
+};
 
 export default validateFormValues;

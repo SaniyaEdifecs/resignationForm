@@ -1,18 +1,22 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { sp, ItemAddResult, EmailProperties } from '@pnp/sp';
+import MailtoManager from './ManagerApprovalForm';
 
-// const content = MailtoManager;
-// console.log("mail", content);
-const emailProps: EmailProperties = {
-    To: ["saniya.salaria@aristocraticlemmings.onmicrosoft.com"],
-    CC: [""],
-    Subject: "Resignation email",
-    Body: "Lorem ipsum dolor emet",
-    From: "testuser01@aristocraticlemmings.onmicrosoft.com",
-};
+const content = MailtoManager;
+//console.log("mail", content);
+// let userDetails: any;
+// const emailProps: EmailProperties = {
+//     To: ["saniya.salaria@aristocraticlemmings.onmicrosoft.com"],
+//     CC: [""],
+//     Subject: "Resignation email",
+//     Body: JSON.stringify(content),
+//     From: "testuser01@aristocraticlemmings.onmicrosoft.com",
+// };
+
+
 const useForm = (initialValues, validate) => {
-    const [inputs, setInputs] = useState(initialValues || {});
+    const [inputs, setInputs] = useState(initialValues);
     const [LastWorkingDate, setDate] = useState();
     const [errors, setErrors] = useState({});
     const [isSubmitting, setSubmitting] = useState(false);
@@ -23,15 +27,22 @@ const useForm = (initialValues, validate) => {
         const name = target.name;
         setInputs(inputs => ({ ...inputs, [name]: target.value }));
     };
+
+
+
+
     const clearState = () => {
         setInputs({ ...initialValues });
+        setDate(" ");
     };
     const handleDateChange = event => {
         console.log(event);
         setDate(event);
     };
 
+
     const getPeoplePickerItems = (items: any[]) => {
+        console.log(items)
         let peoplePickerValue = items[0];
         let fullName = peoplePickerValue.text.split(' ');
         let mFirstName = fullName[0];
@@ -40,7 +51,6 @@ const useForm = (initialValues, validate) => {
         setInputs(inputs => ({ ...inputs, ManagerFirstName: mFirstName, ManagerLastName: mLastName, ManagerEmail: mEmail }));
 
     };
-
     useEffect(() => {
         if (isSubmitting) {
             const noErrors = Object.keys(errors).length === 0;
@@ -51,11 +61,11 @@ const useForm = (initialValues, validate) => {
                 setSubmitting(false);
             }
         }
-    }, [errors])
+    }, [errors]);
     const handleBlur = () => {
         const ValidationErrors = validate(inputs);
         setErrors(ValidationErrors);
-    }
+    };
     const handleSubmit = (event) => {
         event.preventDefault();
         const ValidationErrors = validate(inputs);
@@ -74,9 +84,7 @@ const useForm = (initialValues, validate) => {
         clearState();
     };
 
-  
-   
-      
+
     // sp.utility.getCurrentUserEmailAddresses().then((addressString: string) => {
     //     console.log(addressString);
     // });
@@ -87,9 +95,9 @@ const useForm = (initialValues, validate) => {
                 console.log('submitted', item);
 
                 //send email 
-                sp.utility.sendEmail(emailProps).then(response => {
-                    console.log("Email Sent!", response);
-                });
+                // sp.utility.sendEmail(emailProps).then(response => {
+                //     console.log("Email Sent!", response);
+                // });
             }
         }, (error: any): void => {
             console.log('Error while creating the item: ' + error);
@@ -105,8 +113,6 @@ const useForm = (initialValues, validate) => {
         handleSubmit,
         handleBlur,
         isSubmitting,
-        
-
     };
 };
 export default useForm;

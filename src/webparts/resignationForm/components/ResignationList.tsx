@@ -9,6 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { sp } from '@pnp/sp';
 import './CommonStyleSheet.scss';
+import { Button } from '@material-ui/core';
 
 
 let EmployeeDetails: any = [];
@@ -39,7 +40,7 @@ const getResignationList = () => {
     // get all the items from a list
     sp.web.lists.getByTitle("ResignationList").items.get().then((items: any[]) => {
         EmployeeDetails = items;
-        console.log("Employee list",EmployeeDetails)
+        console.log("Employee list",EmployeeDetails);
     });
 };
 const ResignationList = () => {
@@ -51,6 +52,7 @@ const ResignationList = () => {
     return (
         <Paper className="root">
             <div className="tableWrapper">
+                <div className ="editButton"><a>Edit</a></div>
                 <Table >
                     <TableHead>
                         <TableRow>
@@ -67,6 +69,7 @@ const ResignationList = () => {
                             <StyledTableCell >Manager Name</StyledTableCell>
                             <StyledTableCell >Manager Email</StyledTableCell>
                             <StyledTableCell >Resignation Summary</StyledTableCell>
+                            <StyledTableCell >Status</StyledTableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -87,6 +90,7 @@ const ResignationList = () => {
                                 <StyledTableCell >{EmployeeDetail.ManagerName}</StyledTableCell>
                                 <StyledTableCell >{EmployeeDetail.ManagerEmail}</StyledTableCell>
                                 <StyledTableCell >{EmployeeDetail.ResignationSummary}</StyledTableCell>
+                                <StyledTableCell ><Button type="submit" fullWidth className="marginTop16" variant="contained"  color="primary">Check Status</Button></StyledTableCell>
                             </StyledTableRow>
                         ))}
                     </TableBody>

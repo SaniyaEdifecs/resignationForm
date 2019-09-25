@@ -6,16 +6,19 @@ import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
 import ResignationForm from './ResignationFormComponent/ResignationForm';
 import ResignationList from './ResignationList';
+import { sp } from '@pnp/sp';
+import ManagerApprovalForm from './ResignationFormComponent/ManagerApprovalForm';
 
 interface ITabPanelProps {
     children?: React.ReactNode;
     index: any;
     value: any;
+
 }
 
 function TabPanel(props: ITabPanelProps) {
     const { children, value, index, ...other } = props;
-    
+
     return (
         <Typography
             component="div"
@@ -31,7 +34,7 @@ function TabPanel(props: ITabPanelProps) {
 }
 
 function tabProps(index: any) {
-    
+
     return {
         id: `scrollable-auto-tab-${index}`,
         'aria-controls': `scrollable-auto-tabpanel-${index}`,
@@ -52,7 +55,7 @@ const ResignationDashboard = (props) => {
                     variant="scrollable" scrollButtons="auto" aria-label="scrollable auto tabs example">
                     <Tab label="Resignation Form" {...tabProps(0)} />
                     <Tab label="Resignations " {...tabProps(1)} />
-
+                    <Tab label="Manager's Approval " {...tabProps(2)} />
                 </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
@@ -61,7 +64,9 @@ const ResignationDashboard = (props) => {
             <TabPanel value={value} index={1}>
                 <ResignationList />
             </TabPanel>
-
+            <TabPanel value={value} index={2}>
+                <ManagerApprovalForm />
+            </TabPanel>
         </div>
     );
 };
