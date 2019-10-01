@@ -15,30 +15,23 @@ const content = MailtoManager;
 // };
 
 
-const useForm = (initialValues, validate) => {
+const useForm = (initialValues, validate, validateFields) => {
     const [inputs, setInputs] = useState(initialValues);
     const [LastWorkingDate, setDate] = useState();
     const [errors, setErrors] = useState({});
     const [isSubmitting, setSubmitting] = useState(false);
 
     const handleInputChange = event => {
-        console.log(event);
         const target = event.target;
         const name = target.name;
         setInputs(inputs => ({ ...inputs, [name]: target.value }));
     };
 
-
-
-
     const clearState = () => {
         setInputs({ ...initialValues });
         setDate(" ");
     };
-    const handleDateChange = event => {
-        console.log(event);
-        setDate(event);
-    };
+   
 
 
     const getPeoplePickerItems = (items: any[]) => {
@@ -62,13 +55,14 @@ const useForm = (initialValues, validate) => {
             }
         }
     }, [errors]);
-    const handleBlur = () => {
-        const ValidationErrors = validate(inputs);
+    const handleBlur = (event) => {
+        const ValidationErrors = validate(inputs, event.target.name, validateFields);
+        console.log("ValidationErrors = ", ValidationErrors)
         setErrors(ValidationErrors);
     };
     const handleSubmit = (event) => {
         event.preventDefault();
-        const ValidationErrors = validate(inputs);
+        const ValidationErrors = validate(inputs, undefined, validateFields);
         setErrors(ValidationErrors);
         setSubmitting(true);
         const elements = [{

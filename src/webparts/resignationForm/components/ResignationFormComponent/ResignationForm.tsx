@@ -19,6 +19,24 @@ let initialValues = {
 const ResignationForm = (props) => {
 
   const resignationReasonList = ['Personal', 'Health', 'Better Oppertunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
+  
+const validateFields =[
+  "EmployeeCode",
+  "FirstName",
+  "LastName",
+  "WorkEmail",
+  "PersonalEmail",
+  "ResignationReason",
+  "OtherReason",
+  "Department",
+  "JobTitle",
+  "LastWorkingDate",
+  "ManagerFirstName",
+  "ManagerLastName",
+  "ManagerEmail",
+  "ResignationSummary"
+]
+
   const {
     inputs,
     errors,
@@ -28,9 +46,7 @@ const ResignationForm = (props) => {
     handleInputChange,
     handleSubmit,
     handleBlur,
-    isSubmitting, } = useForm(initialValues, validateFormValues);
-
-
+    isSubmitting, } = useForm(initialValues, validateFormValues, validateFields);
 
   return <div>
     <Container component="main" maxWidth="xs">
@@ -43,13 +59,16 @@ const ResignationForm = (props) => {
 
         <form noValidate onSubmit={handleSubmit}>
           {/* defaultValue={userDetails.EmployeeCode} */}
-          <TextField variant="outlined" margin="normal" autoFocus required fullWidth label="Employee Code" value={inputs.EmployeeCode || ''} name="EmployeeCode" autoComplete="EmployeeCode" onChange={handleInputChange} onBlur={handleBlur} helperText="Please write code as written on play slip" />
+          <TextField variant="outlined" margin="normal" autoFocus required fullWidth label="Employee Code"
+           value={inputs.EmployeeCode || ''} name="EmployeeCode" autoComplete="EmployeeCode"
+            onChange={handleInputChange} onBlur={handleBlur} helperText="Please write code as written on play slip" />
           {errors[inputs.EmployeeCode] && <p className={styles.danger}>{errors[inputs.EmployeeCode]}</p>}
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               {/* <PeoplePicker context={props.context} ensureUser={true} titleText="First Name" personSelectionLimit={1} showtooltip={true} isRequired={true} disabled={false} selectedItems={_getPeoplePickerItems} showHiddenInUI={false}
                 principalTypes={[PrincipalType.User]} resolveDelay={1000} /> */}
-              <TextField variant="outlined" margin="normal" onBlur={handleBlur} required fullWidth label="First Name" value={inputs.FirstName || ''} onChange={handleInputChange} name="FirstName" autoComplete="FirstName" />
+              <TextField variant="outlined" margin="normal" onBlur={handleBlur} required fullWidth
+               label="First Name" value={inputs.FirstName || ''} onChange={handleInputChange} name="FirstName" autoComplete="FirstName" />
               {errors[inputs.FirstName] && <p className={styles.danger}>{errors[inputs.FirstName]}</p>}
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -72,9 +91,7 @@ const ResignationForm = (props) => {
           <TextField variant="outlined" margin="normal" required fullWidth label="Department" value={inputs.Department || '' } name="Department" onChange={handleInputChange} onBlur={handleBlur} />
           <TextField variant="outlined" margin="normal" required fullWidth label="Title" value={inputs.JobTitle} name="JobTitle" onChange={handleInputChange} onBlur={handleBlur} />
 
-          <MuiPickersUtilsProvider utils={DateFnsUtils} >
-            <DatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy" value={LastWorkingDate || ''} name="LastWorkingDate" required onChange={handleDateChange} onBlur={handleBlur} />
-          </MuiPickersUtilsProvider>
+          
           <Grid container spacing={2}>
             <Grid item sm={12}>
               <PeoplePicker context={props.context} ensureUser={true} titleText="Manager Name" personSelectionLimit={1} showtooltip={true} disabled={false} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
