@@ -7,22 +7,22 @@ import ExpansionPanel from '@material-ui/core/ExpansionPanel';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { sp } from '@pnp/sp';
 const ManagerApprovalForm = () => {
     const [value, setValue] = useState();
     const [LastWorkingDate, setDate] = useState(null);
-
+    const [expanded, setExpanded] = React.useState();
 
     let userDetails: any = {};
-    const handleChange = event => {
-        setValue(event.target.value);
-    };
+    const handleChange = event => { setValue(event.target.value); };
 
+    const handlePanelChange = panel => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
 
     const handleDateChange = (event) => {
         setDate(event);
-    }
+    };
     // current user email id
     sp.web.currentUser.get().then((response) => {
         // console.log("Current user details", response)
@@ -70,53 +70,66 @@ const ManagerApprovalForm = () => {
                     </tbody>
                 </table>
                 <p>Please have a conversation with the associate and guide for the next step.</p>
-                <Container>
-                    <form className="mWrapper">
-                        <FormControl component="fieldset" >
+
+                <form className="mWrapper">
+                    <FormControl component="fieldset" >
                         <RadioGroup aria-label="Accept" name="Accept" value={value} onChange={handleChange}>
-                            <ExpansionPanel>
-                                <ExpansionPanelSummary
-                                    expandIcon={<ExpandMoreIcon />}
-                                    aria-controls="panel1a-content"
-                                    id="panel1a-header" >
+                            <ExpansionPanel expanded={expanded === 'panel1'} onChange={handlePanelChange('panel1')}>
+                                <ExpansionPanelSummary aria-controls="panel1bh-content" id="panel1bh-header">
                                     <Typography >
-                                      
                                         <FormControlLabel value="Accept"
                                             control={<Radio color="primary" />}
                                             label="Accept"
                                             labelPlacement="start"
                                         />
-                                            
+
                                     </Typography>
                                 </ExpansionPanelSummary>
-                                    <ExpansionPanelDetails>
-                                        <Typography>
-                                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
-                                                <DatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
-                                                    value={LastWorkingDate} name="LastWorkingDate" required onChange={handleDateChange} />
-                                            </MuiPickersUtilsProvider>
-                                        </Typography>
-                                    </ExpansionPanelDetails>
+                                <ExpansionPanelDetails>
+                                    <Typography>
+                                        <MuiPickersUtilsProvider utils={DateFnsUtils} >
+                                            <DatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
+                                                value={LastWorkingDate} name="LastWorkingDate" required onChange={handleDateChange} />
+                                        </MuiPickersUtilsProvider>
+                                    </Typography>
+                                </ExpansionPanelDetails>
                             </ExpansionPanel>
 
-                                <FormControlLabel
-                                    value="Reject"
-                                    control={<Radio color="primary" />}
-                                    label="Reject"
-                                    labelPlacement="start"
-                                />
-
-                                <FormControlLabel
-                                    value="other"
-                                    control={<Radio color="primary" />}
-                                    label="I want to put the Resignation On Hold"
-                                    labelPlacement="start"
-                                />
+                            <ExpansionPanel expanded={expanded == 'panel2'} onChange={handlePanelChange('panel2')}>
+                                <ExpansionPanelSummary aria-controls="panel2bh-content" id="panel2bh-header">
+                                    <Typography >
+                                        <FormControlLabel
+                                            value="Reject"
+                                            control={<Radio color="primary" />}
+                                            label="Reject"
+                                            labelPlacement="start"
+                                        />
+                                    </Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails>
+                                    <Typography>
+                                        <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Response to Associate" name="ResponsetoAssociate" />
+                                        {/* {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>} */}
+                                        <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Reason" name="Reason" helperText="For Internal Use To HR Partner" />
+                                    </Typography>
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                            <ExpansionPanel expanded={expanded == 'panel3'} onChange={handlePanelChange('panel3')}>
+                                <ExpansionPanelSummary aria-controls="panel3bh-content" id="panel3bh-header">
+                                    <Typography >
+                                        <FormControlLabel
+                                            value="other"
+                                            control={<Radio color="primary" />}
+                                            label="I want to put the Resignation On Hold"
+                                            labelPlacement="start"
+                                        /></Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails></ExpansionPanelDetails>
+                            </ExpansionPanel>
                         </RadioGroup>
-                        </FormControl>
-                        <Button type="submit" fullWidth className="marginTop16" variant="contained" color="primary">Submit</Button>
-                    </form>
-                </Container>
+                    </FormControl>
+                    <Button type="submit" fullWidth className="marginTop16 maxWidth" variant="contained" color="primary">Submit</Button>
+                </form>
             </section>
         </div>);
 

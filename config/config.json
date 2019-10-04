@@ -9,11 +9,56 @@
           "manifest": "./src/webparts/resignationForm/ResignationFormWebPart.manifest.json"
         }
       ]
+    },
+    "it-clearance-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/itClearance/ItClearanceWebPart.js",
+          "manifest": "./src/webparts/itClearance/ItClearanceWebPart.manifest.json"
+        }
+      ]
+    },
+    "hub-spot-sales-form-clearance-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/hubSpotSalesFormClearance/HubSpotSalesFormClearanceWebPart.js",
+          "manifest": "./src/webparts/hubSpotSalesFormClearance/HubSpotSalesFormClearanceWebPart.manifest.json"
+        }
+      ]
+    },
+    "finance-clearance-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/financeClearance/FinanceClearanceWebPart.js",
+          "manifest": "./src/webparts/financeClearance/FinanceClearanceWebPart.manifest.json"
+        }
+      ]
+    },
+    "hr-clearance-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/hrClearance/HrClearanceWebPart.js",
+          "manifest": "./src/webparts/hrClearance/HrClearanceWebPart.manifest.json"
+        }
+      ]
+    },
+    "ops-admin-clearance-web-part": {
+      "components": [
+        {
+          "entrypoint": "./lib/webparts/opsAdminClearance/OpsAdminClearanceWebPart.js",
+          "manifest": "./src/webparts/opsAdminClearance/OpsAdminClearanceWebPart.manifest.json"
+        }
+      ]
     }
   },
   "externals": {},
   "localizedResources": {
     "ResignationFormWebPartStrings": "lib/webparts/resignationForm/loc/{locale}.js",
-    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js"
+    "ControlStrings": "node_modules/@pnp/spfx-controls-react/lib/loc/{locale}.js",
+    "ItClearanceWebPartStrings": "lib/webparts/itClearance/loc/{locale}.js",
+    "HubSpotSalesFormClearanceWebPartStrings": "lib/webparts/hubSpotSalesFormClearance/loc/{locale}.js",
+    "FinanceClearanceWebPartStrings": "lib/webparts/financeClearance/loc/{locale}.js",
+    "HrClearanceWebPartStrings": "lib/webparts/hrClearance/loc/{locale}.js",
+    "OpsAdminClearanceWebPartStrings": "lib/webparts/opsAdminClearance/loc/{locale}.js"
   }
 }

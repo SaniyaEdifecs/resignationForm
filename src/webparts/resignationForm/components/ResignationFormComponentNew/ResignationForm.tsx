@@ -48,10 +48,8 @@ const ResignationForm = (props) => {
              state[key] = state[key] .value;
         }
         console.log(state);
-
         addListItem(state);
-        // clearState();
-    };
+    }
 
     const addListItem = (elements) => {
         sp.web.lists.getByTitle("ResignationList").items.add(elements).then((response: ItemAddResult): void => {

@@ -5,6 +5,7 @@
     border: 1px solid rgba(0, 0, 0, 0.23);
     border-radius: 4px;
     padding: 0 14px 6px;
+    box-sizing: border-box;
     .MuiInputLabel-formControl {
       padding: 0 6px 0;
       margin-left: -6px;
@@ -87,8 +88,43 @@ table {
 }
 .mWrapper {
   .MuiTypography-body1 {
-        box-shadow: none;
-        padding: 5px;
-      }
+    box-shadow: none;
+    padding: 5px;
+  }
+  .MuiPaper-elevation1 {
+    box-shadow: none;
+  }
+  .MuiIconButton-edgeEnd {
+    display: none;
+  }
+  .MuiExpansionPanelSummary-content {
+    margin: 0;
+    &.Mui-expanded {
+      margin: 0;
     }
-
+  }
+  .MuiExpansionPanelSummary-root {
+    padding: 0;
+    &.Mui-expanded {
+      margin: 0;
+    }
+  }
+  .MuiExpansionPanelDetails-root {
+    padding: 0 24px;
+    .MuiFormControl-marginNormal {
+      margin-top: 0;
+    }
+  }
+  .MuiExpansionPanel-root {
+    &:before {
+      height: 0;
+    }
+  }
+  .MuiFormControlLabel-labelPlacementStart {
+    justify-content: flex-end;
+  }
+}
+.maxWidth {
+  max-width: 250px;
+  width: 100%;
+}

@@ -92,7 +92,7 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
       setState(prevState => (
         
         {...prevState, ManagerFirstName: mFirstName, ManagerLastName: mLastName, ManagerEmail: mEmail }));
-      console.log(state)
+      console.log(state);
     }
   },[state]);
 
@@ -112,6 +112,6 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
   );
 
   return { state, disable, handleOnChange, handleOnBlur, handleOnSubmit, getPeoplePickerItems, };
-}
+};
 
 export default useForm;
