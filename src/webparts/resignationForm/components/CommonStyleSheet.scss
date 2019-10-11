@@ -87,6 +87,11 @@ table {
   }
 }
 .mWrapper {
+  display: flex;
+  flex-direction: column;
+  button{
+    margin: 5px 0 5px 25px;
+  }
   .MuiTypography-body1 {
     box-shadow: none;
     padding: 5px;
@@ -119,6 +124,9 @@ table {
     &:before {
       height: 0;
     }
+    &.Mui-expanded{
+      margin:0
+    }
   }
   .MuiFormControlLabel-labelPlacementStart {
     justify-content: flex-end;
@@ -127,4 +135,25 @@ table {
 .maxWidth {
   max-width: 250px;
   width: 100%;
+}
+.menu {
+  a {
+    color: #fff;
+    text-decoration: none;
+    margin: 5px;
+  }
+}
+
+.clearanceForm{
+  table{
+    thead{
+      background:lightgray;
+      th{
+        padding: 5px;
+      }
+    }
+  }
+  button{
+    margin: 3px 5px;
+  }
 }

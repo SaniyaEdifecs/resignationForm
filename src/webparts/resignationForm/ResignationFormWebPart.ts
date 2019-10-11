@@ -1,18 +1,15 @@
 import * as React from 'react';
 import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
-import { BaseClientSideWebPart, IPropertyPaneConfiguration, PropertyPaneTextField, PropertyPaneDropdown } from '@microsoft/sp-webpart-base';
+import { BaseClientSideWebPart, IPropertyPaneConfiguration, IWebPartContext, IPropertyPaneDropdownOption, PropertyPaneTextField, PropertyPaneDropdown } from '@microsoft/sp-webpart-base';
 import * as strings from 'ResignationFormWebPartStrings';
-import ResignationDashboard from './components/ResignationDashboard';
+import NavigationItem from './components/Navigation';
 import { sp } from "@pnp/sp";
-export interface IResignationFormWebPartProps {
-  description: string;
-  test2: string;
- 
-}
+import { update, get } from '@microsoft/sp-lodash-subset';
+import { IResignationFormProps } from './components/Resignations/IResignationFormProps';
 
-export default class ResignationFormWebPart extends BaseClientSideWebPart<IResignationFormWebPartProps> {
-  public cntext: any;
+export default class ResignationFormWebPart extends BaseClientSideWebPart<IResignationFormProps> {
+
   public onInit(): Promise<void> {
     return super.onInit().then(_ => {
       sp.setup({
@@ -21,12 +18,11 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
     });
   }
   public render(): void {
-    
-    const element: React.ReactElement<IResignationFormWebPartProps> = React.createElement(
-      ResignationDashboard,
+    const element: React.ReactElement<IResignationFormProps> = React.createElement(
+      NavigationItem,
       {
-        context : this.context
-      } 
+        context: this.context
+      }
     );
 
     ReactDom.render(element, this.domElement);
@@ -54,17 +50,6 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
                 }),
-             
-                PropertyPaneDropdown('test2', {
-                  label: 'Dropdown',
-                  options: [
-                    { key: '1', text: 'One' },
-                    { key: '2', text: 'Two' },
-                    { key: '3', text: 'Three' },
-                    { key: '4', text: 'Four' }
-                  ]}
-                ),
-               
               ]
             }
           ]
