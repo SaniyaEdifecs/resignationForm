@@ -1,19 +1,17 @@
 import * as React from 'react';
 import { Typography, TextField, Button } from '@material-ui/core';
-
+// import useForm from '../UseForm';
 
 const HrClearance = (props) => {
     console.log("ITclearace");
-    const submitITClearance = (e) => {
-        e.preventDefault();
-        console.log("event");
-    };
+
+ 
     return (
         <div>
             <Typography variant="h5" component="h5">
                 HR Clearance
             </Typography>
-            <form onSubmit={submitITClearance} className="clearanceForm">
+            <form className="clearanceForm">
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
                         <tr>

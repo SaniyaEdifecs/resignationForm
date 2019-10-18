@@ -1,12 +1,12 @@
 import * as React from 'react';
-import useForm from './useForm';
+import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
 import { sp, ItemAddResult } from '@pnp/sp';
 
 
 const ResignationForm = (props) => {
-    const resignationReasonList = ['Personal', 'Health', 'Better Oppertunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
+    const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
 
     // Define your state schema
     const formFields = [
@@ -26,7 +26,7 @@ const ResignationForm = (props) => {
 
     ];
 
-    
+
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -132,8 +132,6 @@ const ResignationForm = (props) => {
                         value={state.JobTitle.value} name="JobTitle" onChange={handleOnChange} onBlur={handleOnBlur} />
                     {state.JobTitle.error && <p style={errorStyle}>{state.JobTitle.error}</p>}
 
-
-
                     <Grid container spacing={2}>
                         <Grid item sm={12}>
                             <PeoplePicker context={props.context} ensureUser={true} titleText="Manager Name" personSelectionLimit={1} showtooltip={true} disabled={false} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
@@ -159,7 +157,6 @@ const ResignationForm = (props) => {
                     {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>}
 
                     <Button type="submit" fullWidth className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
-
                 </form>
             </div>
         </Container>

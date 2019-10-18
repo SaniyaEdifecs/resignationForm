@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { setDate } from 'date-fns';
+import { sp, ItemAddResult } from '@pnp/sp';
+
 
 const useForm =(stateSchema, validationSchema = {}, callback) =>{
   const [state, setState] = useState(stateSchema);
@@ -26,7 +27,6 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
       const isInputFieldRequired = validationSchema[key].required;
       const stateValue = state[key].value; // state value
       const stateError = state[key].error; // state error
-
       return (isInputFieldRequired && !stateValue) || stateError;
     });
 
@@ -106,8 +106,35 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
     },
     [state]
   );
-
-  return { state, disable, handleOnChange, handleOnBlur, handleOnSubmit, getPeoplePickerItems};
+  let userID: any;
+  let userExists: boolean = false;
+  const saveForm = useCallback(
+    event => {
+      // event.preventDefault();
+      // console.log("saved click");
+      // for (const key in state) {
+      //   state[key] = state[key].value;
+      // }
+      // if(userExists){
+      //   let list = sp.web.lists.getByTitle("ItClearance");
+      //   list.items.getById(userID).update(state).then(i => {
+      //     console.log("save option", i);
+      //   });
+      // }else{
+      //   console.log("create user");
+      //   sp.web.lists.getByTitle("ItClearance").items.add(state).then((response: ItemAddResult): void => {
+      //     const item = response.data as string;
+      //     if (item) {
+      //       console.log('submitted new user', item);
+      //     }
+      //   }, (error: any): void => {
+      //     console.log('Error while creating the item:88 ' + error);
+      //   });
+      // }
+    },
+    [state]
+  );
+  return { state, disable,saveForm, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems};
 };
 
 export default useForm;
