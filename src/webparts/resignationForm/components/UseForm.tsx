@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { sp, ItemAddResult } from '@pnp/sp';
 
 
-const useForm =(stateSchema, validationSchema = {}, callback) =>{
+const useForm = (stateSchema, validationSchema = {}, callback) => {
   const [state, setState] = useState(stateSchema);
   // const [LastWorkingDate, setDate] = useState();
   const [disable, setDisable] = useState(true);
@@ -12,16 +12,6 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
   useEffect(() => {
     setDisable(true);
   }, []);
-
-  // For every changed in our state this will be fired
-  // To be able to disable the button
-  useEffect(() => {
-    if (isDirty) {
-      setDisable(validateState());
-    }
-  }, [state, isDirty]);
-
-
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
       const isInputFieldRequired = validationSchema[key].required;
@@ -32,6 +22,13 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
 
     return hasErrorInState;
   }, [state, validationSchema]);
+  // For every changed in our state this will be fired
+  // To be able to disable the button
+  useEffect(() => {
+    if (isDirty) {
+      setDisable(validateState());
+    }
+  }, [state, isDirty]);
 
   const handleOnBlur = useCallback(
     event => {
@@ -53,7 +50,7 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
       //     error = validationSchema[name].validator.error;
       //   }
       // }
-       setState(prevState => ({
+      setState(prevState => ({
         ...prevState,
         [name]: { value, error },
       }));
@@ -74,7 +71,7 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
         }
       }
 
-     setState(prevState => ({
+      setState(prevState => ({
         ...prevState,
         [name]: { value, error },
       }));
@@ -82,20 +79,22 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
     [validationSchema]
   );
   const getPeoplePickerItems = useCallback(items => {
-  
-  // const getPeoplePickerItems = (items: any[]) => {
-    console.log(items);
-    if(items){
+    console.log("people picker", items);
+    // const getPeoplePickerItems = (items: any[]) => {
+    if (items) {
+
       let peoplePickerValue = items[0];
       let fullName = peoplePickerValue.text.split(' ');
       let mFirstName = fullName[0];
       let mLastName = fullName[fullName.length - 1];
       let mEmail = peoplePickerValue.secondaryText;
-      console.log(mEmail,mLastName, mFirstName);
-      setState(prevState => ({...prevState, ManagerFirstName: mFirstName, ManagerLastName: mLastName, ManagerEmail: mEmail }));
-      console.log(state);
+      console.log(mEmail, mLastName, mFirstName);
+
+      setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({value:mFirstName, error:" "}), ['ManagerLastName']: ({value:mLastName, error:""}), ['ManagerEmail']: ({value:mEmail, error:""}) }));
     }
-  },[state]);
+
+  }, [state]);
+
 
   const handleOnSubmit = useCallback(
     event => {
@@ -106,8 +105,7 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
     },
     [state]
   );
-  let userID: any;
-  let userExists: boolean = false;
+
   const saveForm = useCallback(
     event => {
       // event.preventDefault();
@@ -134,7 +132,7 @@ const useForm =(stateSchema, validationSchema = {}, callback) =>{
     },
     [state]
   );
-  return { state, disable,saveForm, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems};
+  return { state, disable, saveForm, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems };
 };
 
 export default useForm;

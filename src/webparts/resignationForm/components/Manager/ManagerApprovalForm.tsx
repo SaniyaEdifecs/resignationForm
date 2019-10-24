@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Radio, RadioGroup, Button, FormControlLabel, FormControl,  TextField } from '@material-ui/core/';
+import { Radio, RadioGroup, Button, FormControlLabel, FormControl, TextField } from '@material-ui/core/';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import ExpansionPanel from '@material-ui/core/ExpansionPanel';
@@ -8,13 +8,10 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import { sp, ItemAddResult } from '@pnp/sp';
-import useForm from '../UseForm';
+import useForm from '../Manager/ManagersUseForm';
 
 const ManagerApprovalForm = () => {
-    this.state= {
-        LastWorkingDate: null
-    }
-    // const [LastWorkingDate, setDate] = useState(null);
+    const [LastWorkingDate, setDate] = useState(null);
     // Define your state schema
     const formFields = [
         "Status",
@@ -46,22 +43,22 @@ const ManagerApprovalForm = () => {
     };
 
     const handleDateChange = (event) => {
-        this.setState({LastWorkingDate:event});
-    
-            console.log("=======",this.state.LastWorkingDate);
-   
+        // this.setState({LastWorkingDate:event});
+        setDate(event);
+        console.log("=======", LastWorkingDate);
+
     };
 
     sp.web.lists.getByTitle("ManagersResponse").items.get().then((items: any) => {
     });
-    
+
     const onSubmitForm = (value) => {
         for (const key in value) {
             value[key] = value[key].value;
         }
         sp.web.currentUser.get().then((response) => {
             let userId = response.Id;
-            value = { ...value,  'ID': userId };
+            value = { ...value, 'ID': userId, 'LastWorkingDate': LastWorkingDate };
             console.log("onsubmit", value);
             sp.web.lists.getByTitle("ManagersResponse").items.add(value).then((response: ItemAddResult): void => {
                 const item = response.data as string;
@@ -118,7 +115,7 @@ const ManagerApprovalForm = () => {
                                     <Typography >
                                         <FormControlLabel value="Accepted"
                                             control={<Radio color="primary" />}
-                                            label="Accept"
+                                            label="Accept" 
                                             labelPlacement="start" onChange={handleOnChange} />
                                     </Typography>
                                 </ExpansionPanelSummary>
@@ -126,7 +123,7 @@ const ManagerApprovalForm = () => {
                                     <Typography>
                                         <MuiPickersUtilsProvider utils={DateFnsUtils} >
                                             <DatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
-                                                value={this.state.LastWorkingDate} name="LastWorkingDate" onChange={handleDateChange} />
+                                                value={LastWorkingDate} name="LastWorkingDate" onChange={handleDateChange} />
                                         </MuiPickersUtilsProvider>
                                     </Typography>
                                 </ExpansionPanelDetails>

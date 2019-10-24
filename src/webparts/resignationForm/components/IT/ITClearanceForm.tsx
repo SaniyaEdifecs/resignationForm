@@ -5,50 +5,50 @@ import { Link } from 'react-router-dom';
 import useForm from '../UseForm';
 
 const ItClearance = (props) => {
-        const formFields = [
-            "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices","peripheralDevicesComments", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments", 
-        ];
-    
-        var stateSchema = {
+    const formFields = [
+        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "peripheralDevicesComments", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments",
+    ];
+
+    var stateSchema = {
+    };
+
+    var validationStateSchema = {};
+    formFields.forEach(formField => {
+        stateSchema[formField] = {};
+        stateSchema[formField].value = "";
+        stateSchema[formField].error = "";
+        validationStateSchema[formField] = {};
+        validationStateSchema[formField].required = true;
+        validationStateSchema[formField].validator = {
+            regex: '',
+            error: ''
         };
-    
-        var validationStateSchema = {};
-        formFields.forEach(formField => {
-            stateSchema[formField] = {};
-            stateSchema[formField].value = "";
-            stateSchema[formField].error = "";
-            validationStateSchema[formField] = {};
-            validationStateSchema[formField].required = true;
-            validationStateSchema[formField].validator = {
-                regex: '',
-                error: ''
-            };
-    
-        });
-    
-        let userID: any;
-        sp.web.currentUser.get().then((response) => {
-            userID = response.Id;
-            // sp.web.lists.getByTitle("ItClearance").items.getById(userID).get().then((item: any) => {
-            //     if (item) {
-            //         console.log("savedData", item);
-            //         formFields.forEach(formField => {
-            //             stateSchema[formField] = {
-            //                 value: item[formField],
-            //                 error: ""
-            //             };
-            //         });
-            //         console.log("setState",stateSchema);
-            //         setState(stateSchema);
-            //         console.log("done");
-            //     }
-            // });
-        });
-        console.log("calling useForm"); 
-        //  Fetch list data
-        sp.web.lists.getByTitle("ItClearance").items.get().then((items: any) => {
-           console.log("List response", items);
-        });
+
+    });
+
+    let userID: any;
+    sp.web.currentUser.get().then((response) => {
+        userID = response.Id;
+        // sp.web.lists.getByTitle("ItClearance").items.getById(userID).get().then((item: any) => {
+        //     if (item) {
+        //         console.log("savedData", item);
+        //         formFields.forEach(formField => {
+        //             stateSchema[formField] = {
+        //                 value: item[formField],
+        //                 error: ""
+        //             };
+        //         });
+        //         console.log("setState",stateSchema);
+        //         setState(stateSchema);
+        //         console.log("done");
+        //     }
+        // });
+    });
+    console.log("calling useForm");
+    //  Fetch list data
+    sp.web.lists.getByTitle("ItClearance").items.get().then((items: any) => {
+        console.log("List response", items);
+    });
 
     const onSubmitForm = (value) => {
         for (const key in value) {
@@ -71,7 +71,7 @@ const ItClearance = (props) => {
         });
     }
 
-    const { state, setState, disable, handleOnChange, handleOnBlur,  handleOnSubmit, saveForm } = useForm(
+    const { state, setState, disable, handleOnChange, handleOnBlur, handleOnSubmit, saveForm } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
@@ -85,7 +85,7 @@ const ItClearance = (props) => {
     };
     return (
         <div>
-             <Link to="/itClearanceDashboard">Dashboard</Link>  
+            <p><Link to="/itClearanceDashboard">Dashboard</Link>  </p>
             <Typography variant="h5" component="h5">
                 IT Clearance
             </Typography>
@@ -102,7 +102,7 @@ const ItClearance = (props) => {
                         <tr>
                             <td>Mailbox and important data back-up</td>
                             <td>
-                                <TextField margin="normal" name="DataBackup" required onBlur={handleOnBlur}  onChange={handleOnChange} value={state.DataBackup.value} />
+                                <TextField margin="normal" name="DataBackup" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataBackup.value} />
                                 {state.DataBackup.error && <p style={errorStyle}>{state.DataBackup.error}</p>}
                             </td>
                             <td>
@@ -117,9 +117,9 @@ const ItClearance = (props) => {
                                 {state.AccessRemoval.error && <p style={errorStyle}>{state.AccessRemoval.error}</p>}
                             </td>
                             <td>
-                                <TextField margin="normal" name="AccessRemovalComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessRemovalComments.value}/>
+                                <TextField margin="normal" name="AccessRemovalComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessRemovalComments.value} />
                                 {state.AccessRemovalComments.error && <p style={errorStyle}>{state.AccessRemovalComments.error}</p>}
-                                </td>
+                            </td>
                         </tr>
                         <tr>
                             <td>Phone & SIM/Data card</td>
@@ -128,7 +128,7 @@ const ItClearance = (props) => {
                                 {state.DataCard.error && <p style={errorStyle}>{state.DataCard.error}</p>}
                             </td>
                             <td>
-                                <TextField margin="normal" name="DataCardComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataCardComments.value}/>
+                                <TextField margin="normal" name="DataCardComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataCardComments.value} />
                                 {state.DataCardComments.error && <p style={errorStyle}>{state.DataCardComments.error}</p>}
                             </td>
                         </tr>
@@ -139,8 +139,8 @@ const ItClearance = (props) => {
                                 {state.Laptop_x002f_Desktop.error && <p style={errorStyle}>{state.Laptop_x002f_Desktop.error}</p>}
                             </td>
                             <td>
-                                <TextField margin="normal" name="DesktopComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DesktopComments.value}/>
-                                {state.DesktopComments.error && <p style={errorStyle}>{state.DesktopComments.error}</p>}    
+                                <TextField margin="normal" name="DesktopComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DesktopComments.value} />
+                                {state.DesktopComments.error && <p style={errorStyle}>{state.DesktopComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
@@ -149,7 +149,7 @@ const ItClearance = (props) => {
                                 <TextField margin="normal" name="AccessCard" required onBlur={handleOnBlur} onChange={handleOnChange} />
                                 {state.AccessCard.error && <p style={errorStyle}>{state.AccessCard.error}</p>}</td>
                             <td>
-                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="AccessCardComments" value={state.AccessCardComments.value}/>
+                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="AccessCardComments" value={state.AccessCardComments.value} />
                                 {state.AccessCardComments.error && <p style={errorStyle}>{state.AccessCardComments.error}</p>}
                             </td>
                         </tr>
@@ -160,8 +160,8 @@ const ItClearance = (props) => {
                                 {state.IDCard.error && <p style={errorStyle}>{state.IDCard.error}</p>}
                             </td>
                             <td>
-                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="IDCardComments" value={state.IDCardComments.value}/>
-                                {state.IDCardComments.error && <p style={errorStyle}>{state.IDCardComments.error}</p>}    
+                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="IDCardComments" value={state.IDCardComments.value} />
+                                {state.IDCardComments.error && <p style={errorStyle}>{state.IDCardComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
@@ -171,17 +171,18 @@ const ItClearance = (props) => {
                                 {state.PeripheralDevices.error && <p style={errorStyle}>{state.PeripheralDevices.error}</p>}
                             </td>
                             <td>
-                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="peripheralDevicesComments" value={state.peripheralDevicesComments.value}/>
+                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="peripheralDevicesComments" value={state.peripheralDevicesComments.value} />
                                 {state.peripheralDevicesComments.error && <p style={errorStyle}>{state.peripheralDevicesComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
                             <td colSpan={3} >
                                 <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
-                                <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
-                                <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
+                                {disable == true ? <div className="inlineBlock">
+                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
+                                </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>
-
                         </tr>
                     </tbody>
                 </table>

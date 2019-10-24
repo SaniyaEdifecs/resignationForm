@@ -98,6 +98,6 @@ const HrClearance = (props) => {
             </form>
         </div>
     );
-}
+};
 
 export default HrClearance;

@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Typography, TextField, Button } from '@material-ui/core';
 import useForm from '../UseForm';
 import { sp, ItemAddResult } from '@pnp/sp';
+import { Link } from 'react-router-dom';
 
 const SalesForceClearance = (props) => {
     console.log("SF props", props )
@@ -63,6 +64,7 @@ const SalesForceClearance = (props) => {
 
     return (
         <div>
+            <p><Link to="/salesForceDashboard">Dashboard</Link></p>
             <Typography variant="h5" component="h5">
                 SalesForce Clearance
             </Typography>

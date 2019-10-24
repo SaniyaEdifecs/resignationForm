@@ -35,6 +35,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
 
   const handleOnChange = useCallback(
     event => {
+
       console.log(event);
       setIsDirty(true);
       const name = event.target.name;

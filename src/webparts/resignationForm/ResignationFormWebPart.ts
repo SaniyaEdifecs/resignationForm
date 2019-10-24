@@ -13,9 +13,11 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
   public onInit(): Promise<void> {
     return super.onInit().then(_ => {
       sp.setup({
-        spfxContext: this.context
+        spfxContext: this.context,
+        
       });
     });
+
   }
   public render(): void {
     const element: React.ReactElement<IResignationFormProps> = React.createElement(

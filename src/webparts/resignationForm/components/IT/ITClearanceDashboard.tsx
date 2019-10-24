@@ -57,7 +57,6 @@ const getItClearanceList = () => {
     });
 };
 const ITClearanceDashboard = () => {
-
     useEffect(() => {
         getItClearanceList();
     });

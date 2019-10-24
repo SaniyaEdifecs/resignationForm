@@ -145,7 +145,7 @@ const OperationsAdminClearance = (props) => {
                         <tr>
                             <td>Biometric Access</td>
                             <td>
-                                <TextField margin="normal" onChange={handleOnChange} onBlur={handleOnBlur} required  name="BiometricAccess" value={state.BiometricAccess.value} />
+                                <TextField margin="normal" onChange={handleOnChange} onBlur={handleOnBlur} required name="BiometricAccess" value={state.BiometricAccess.value} />
                                 {state.BiometricAccess.error && <p style={errorStyle}>{state.BiometricAccess.error}</p>}
                             </td>
                             <td>
@@ -167,8 +167,10 @@ const OperationsAdminClearance = (props) => {
                         <tr>
                             <td colSpan={3} >
                                 <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
-                                <Button type="submit" className="marginTop16" variant="contained" color="secondary">Save</Button>
-                                <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
+                                {disable == true ? <div className="inlineBlock">
+                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" >Save</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
+                                </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>
 
                         </tr>
@@ -177,6 +179,6 @@ const OperationsAdminClearance = (props) => {
             </form>
         </div>
     );
-}
+};
 
 export default OperationsAdminClearance;

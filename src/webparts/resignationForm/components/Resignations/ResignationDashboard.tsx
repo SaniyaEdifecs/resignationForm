@@ -47,7 +47,7 @@ function tabProps(index: any) {
 
 
 const ResignationDashboard = (props) => {
-    console.log("props", props);
+    console.log("\n\n\n props ==================", props);
     const [value, setValue] = React.useState(0);
     function handleChange(event: React.ChangeEvent<{}>, newValue: number) {
         setValue(newValue);
@@ -57,12 +57,13 @@ const ResignationDashboard = (props) => {
         <div>
               <AppBar position="static">
                 <Toolbar className="menu">
-                    <Link to="/managerApproval">Manager Approval</Link>  
-                    <Link to="/itClearance">It Clearance</Link>  
-                    <Link to="/operationsClearance">Operations Clearance </Link>  
-                    <Link to="/financeClearance">Finance Clearance </Link>  
-                    <Link to="/salesForceClearance">SalesForce Clearance</Link>  
-                    <Link to="/hrClearance">Hr Clearance</Link>  
+                    <Link to="/managerApproval/:id">Manager Approval</Link>  
+                    <Link to="/managerClearance/:id">Manager Clearance</Link>  
+                    <Link to="/itClearance/:id">It Clearance</Link>  
+                    <Link to="/operationsClearance/:id">Operations Clearance </Link>  
+                    <Link to="/financeClearance/:id">Finance Clearance </Link>  
+                    <Link to="/salesForceClearance/:id">SalesForce Clearance</Link>  
+                    <Link to="/hrClearance/:id">Hr Clearance</Link>  
                 </Toolbar>
             </AppBar>
             <AppBar position="static" color="default">
@@ -73,10 +74,10 @@ const ResignationDashboard = (props) => {
                 </Tabs>
             </AppBar>
             <TabPanel value={value} index={0}>
-                <ResignationForm context={props.context} />
+                <ResignationForm context={props.context}  params={props.match.params} />
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <ResignationList />
+                <ResignationList props={props}/>
             </TabPanel>
       
 
