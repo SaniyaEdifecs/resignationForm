@@ -1,11 +1,25 @@
 import * as React from 'react';
 import { Typography, TextField, Button } from '@material-ui/core';
 import { sp, ItemAddResult, Item } from '@pnp/sp';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useForm from '../UseForm';
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
 import '../CommonStyleSheet.scss';  
 
+const useStyles = makeStyles((theme: Theme) =>
+    createStyles({
+        root: {
+            padding: theme.spacing(3, 2),
+        },
+    }),
+);
 const ManagerClearance = (props) => {
+    const classes = useStyles(0);
+    let userID = props.match.params.ID;
+    const [isUserExist, setUserExistence] = useState(false);
+    const [formView, setView] = useState(false);
     const formFields = [
         "AccessRemoval", "AccessRemovalComments", "DataBackup", "DataBackupComments", "EmailBackup", "EmailBackupComments", "EmailRe_x002d_routing", "EmailRe_x002d_routingComments", "HandoverComplete", "HandoverCompleteComments", "NoticeWaiver", "NoticeWaiverComments", "OtherComments", "Others_x0028_specify_x0029_",
     ];
@@ -27,50 +41,62 @@ const ManagerClearance = (props) => {
 
     });
 
-    let userID: any;
-    sp.web.currentUser.get().then((response) => {
-        userID = response.Id;
-        // sp.web.lists.getByTitle("ItClearance").items.getById(userID).get().then((item: any) => {
-        //     if (item) {
-        //         console.log("savedData", item);
-        //         formFields.forEach(formField => {
-        //             stateSchema[formField] = {
-        //                 value: item[formField],
-        //                 error: ""
-        //             };
-        //         });
-        //         console.log("setState",stateSchema);
-        //         setState(stateSchema);
-        //         console.log("done");
-        //     }
-        // });
-    });
-    console.log("calling useForm");
+    const getEmployeeResignationDetails = (employeeID) => {
+        sp.web.lists.getByTitle("ManagersClearance").items.getById(employeeID).get().then((detail: any) => {
+            setUserExistence(true);
+            console.log("isUserExists", isUserExist);
+            console.log("\n\n\nemployee Clearance saved details - \n\n\n", detail);
+            formFields.forEach(formField => {
+                stateSchema[formField].value = detail[formField] + "";
+            });
+            setState(prevState => ({ ...prevState, stateSchema }));
+            console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
+        });
+    }
+
+    useEffect(() => {
+        if (userID) {
+            getEmployeeResignationDetails(userID);
+        }
+    }, []);
+
     //  Fetch list data
     sp.web.lists.getByTitle("ManagersClearance").items.get().then((items: any) => {
         console.log("ManagersList response", items);
     });
-
     const onSubmitForm = (value) => {
+        console.log("isUserExists", isUserExist);
         for (const key in value) {
             value[key] = value[key].value;
         }
-        sp.web.currentUser.get().then((response) => {
-            let ID = response.Id;
-            value = { ...value, ID };
-            console.log("onsubmit", value);
-
-            sp.web.lists.getByTitle("ManagersClearance").items.add(value).then((response: ItemAddResult): void => {
-                const item = response.data as string;
-                if (item) {
-                    console.log('submitted', item);
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
+        if (isUserExist) {
+            console.log("isUserExists", isUserExist);
+            let list = sp.web.lists.getByTitle("ManagersClearance");
+            list.items.getById(userID).update(state).then(i => {
+                console.log("save option", i);
+                setView(true);
+                // setState(stateSchema);
             });
+        } else {
+            sp.web.currentUser.get().then((response) => {
+                let ID = response.Id;
+                value = { ...value, ID };
+                console.log("onsubmit", value);
 
-        });
-    };
+                sp.web.lists.getByTitle("ManagersClearance").items.add(value).then((response: ItemAddResult): void => {
+                    const item = response.data as string;
+                    if (item) {
+                        console.log('submitted', item);
+                        setView(true);
+                        // setState(stateSchema);
+                    }
+                }, (error: any): void => {
+                    console.log('Error while creating the item: ' + error);
+                });
+            });
+        }
+    }
+
 
     const { state, setState, disable, handleOnChange, handleOnBlur, handleOnSubmit, saveForm } = useForm(
         stateSchema,
@@ -86,6 +112,12 @@ const ManagerClearance = (props) => {
     };
     return (
         <div>
+            {
+                formView ?<Paper className={classes.root}>
+                        <Typography variant="h5" component="h3">
+                            Clearance submitted
+                         </Typography>
+                    </Paper> : <div>
             <p><Link to="/itManagerDashboard:/">Dashboard</Link>  </p>
             <Typography variant="h5" component="h5">
                 Manager Clearance
@@ -188,6 +220,8 @@ const ManagerClearance = (props) => {
                     </tbody>
                 </table>
             </form>
+        </div>
+            }
         </div>
     );
 };

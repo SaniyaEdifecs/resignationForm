@@ -65,7 +65,6 @@ const ResignationForm = (props) => {
     }
     useEffect(() => {
         if (props.params.ID) {
-
             getEmployeeResignationDetails(props.params.ID);
         }
     }, []);
@@ -77,12 +76,14 @@ const ResignationForm = (props) => {
         if (userId) {
             list.items.getById(userId).update(elements).then(response => {
                 console.log("updated", response);
+                setState(stateSchema);
             });
         } else {
             list.items.add(elements).then((response: ItemAddResult): void => {
                 const item = response.data as string;
                 if (item) {
                     console.log("added");
+                    setState(stateSchema);
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
@@ -147,8 +148,9 @@ const ResignationForm = (props) => {
 
                     <Grid container spacing={2}>
                         <Grid item sm={12}>
-                            <PeoplePicker context={props.context} defaultSelectedUsers={[state.ManagerEmail.value]} ensureUser={true} titleText="Manager Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} disabled={false} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
+                            <PeoplePicker context={props.context} disabled={isdisable} defaultSelectedUsers={[state.ManagerEmail.value]} ensureUser={true} titleText="Manager Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
                                 principalTypes={[PrincipalType.User]} resolveDelay={1000} />
+                            
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={state.ManagerFirstName.value} disabled={isdisable} name="ManagerFirstName" onChange={handleOnChange} onBlur={handleOnBlur} />

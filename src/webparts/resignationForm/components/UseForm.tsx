@@ -90,7 +90,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       let mEmail = peoplePickerValue.secondaryText;
       console.log(mEmail, mLastName, mFirstName);
 
-      setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({value:mFirstName, error:" "}), ['ManagerLastName']: ({value:mLastName, error:""}), ['ManagerEmail']: ({value:mEmail, error:""}) }));
+      setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: " " }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
     }
 
   }, [state]);
@@ -106,29 +106,12 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     [state]
   );
 
+
   const saveForm = useCallback(
     event => {
-      // event.preventDefault();
-      // console.log("saved click");
-      // for (const key in state) {
-      //   state[key] = state[key].value;
-      // }
-      // if(userExists){
-      //   let list = sp.web.lists.getByTitle("ItClearance");
-      //   list.items.getById(userID).update(state).then(i => {
-      //     console.log("save option", i);
-      //   });
-      // }else{
-      //   console.log("create user");
-      //   sp.web.lists.getByTitle("ItClearance").items.add(state).then((response: ItemAddResult): void => {
-      //     const item = response.data as string;
-      //     if (item) {
-      //       console.log('submitted new user', item);
-      //     }
-      //   }, (error: any): void => {
-      //     console.log('Error while creating the item:88 ' + error);
-      //   });
-      // }
+      event.preventDefault();
+      console.log("save is clicked");
+        callback(state);
     },
     [state]
   );
