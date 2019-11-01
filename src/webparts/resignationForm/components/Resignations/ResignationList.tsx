@@ -46,7 +46,7 @@ const getResignationList = (userDetails) => {
             });
         }
         else {
-            sp.web.lists.getByTitle("ResignationList").items.getById(userDetails.userId).get().then((items: any) => {
+            sp.web.lists.getByTitle("ResignationList").items.getById(15).get().then((items: any) => {
                 EmployeeDetails = items;
             });
         }
@@ -56,8 +56,8 @@ const getResignationList = (userDetails) => {
 const ResignationList = (props) => {
     console.log("list", props);
     let userDetails = {
-        userId : props.props.match.params.ID,
-        IsSiteAdmin : props.props.IsSiteAdmin
+        userId : props.props,
+        // IsSiteAdmin : props.props.IsSiteAdmin
     };
     useEffect(() => {
         getResignationList(userDetails);
@@ -100,7 +100,7 @@ const ResignationList = (props) => {
                                 <StyledTableCell >{EmployeeDetail.ManagerFirstName} {EmployeeDetail.ManagerLastName}</StyledTableCell>
                                 <StyledTableCell >{EmployeeDetail.ManagerEmail}</StyledTableCell>
                                 <StyledTableCell >{EmployeeDetail.ResignationSummary}</StyledTableCell>
-                                <StyledTableCell ><Link to={{pathname:'/clearanceDashboard/' + EmployeeDetail.ID}}>Check Status</Link></StyledTableCell>
+                                {/* <StyledTableCell ><Link to={{pathname:'/clearanceDashboard/' + EmployeeDetail.ID}}>Check Status</Link></StyledTableCell> */}
                             </StyledTableRow>
                         )) : <StyledTableRow key={EmployeeDetails.EditorId}>
                                 <StyledTableCell component="th" scope="row">{EmployeeDetails.ID}</StyledTableCell>
@@ -115,7 +115,7 @@ const ResignationList = (props) => {
                                 <StyledTableCell >{EmployeeDetails.ManagerFirstName} {EmployeeDetails.ManagerLastName}</StyledTableCell>
                                 <StyledTableCell >{EmployeeDetails.ManagerEmail}</StyledTableCell>
                                 <StyledTableCell >{EmployeeDetails.ResignationSummary}</StyledTableCell>
-                                <StyledTableCell ><Link to={{pathname:'/clearanceDashboard/' + EmployeeDetails.ID}}>Check Status</Link></StyledTableCell>
+                                {/* <StyledTableCell ><Link to={{pathname:'/clearanceDashboard/' + EmployeeDetails.ID}}>Check Status</Link></StyledTableCell> */}
                                     
                             </StyledTableRow>}
                     </TableBody>

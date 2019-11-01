@@ -18,18 +18,21 @@ const useStyles = makeStyles((theme: Theme) =>
 const ClearanceDashboard = (props) => {
     console.log("clearancedashboard", props);
     const classes = useStyles(0);
-    userID = props.match.params.ID;
+    userID = props.props;
+    if (userID) {
         sp.web.lists.getByTitle("ItClearance").items.getById(userID).get().then((items: any) => {
             ItClearanceDetails = items || [];
-            console.log("dddd",ItClearanceDetails);
+            console.log("dddd", ItClearanceDetails);
         });
+    }
+
 
     return (
         <Grid container spacing={3}>
             <Grid item xs={6}>
                 <Paper className={classes.root}>
                     <Typography variant="h5" component="h3">
-                     Clearance Status
+                        Clearance Status
                      </Typography>
                     <Typography component="div">
                         <Grid container>
@@ -55,7 +58,7 @@ const ClearanceDashboard = (props) => {
                     </Typography>
                 </Paper>
             </Grid>
-           
+
         </Grid>
     );
 };

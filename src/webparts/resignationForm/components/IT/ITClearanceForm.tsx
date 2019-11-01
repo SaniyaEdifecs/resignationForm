@@ -18,13 +18,13 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const ItClearance = (props) => {
     const classes = useStyles(0);
-    let userID = props.match.params.ID;
+    let userID = props.props;
     const [isUserExist, setUserExistence] = useState(false);
     const [formView, setView] = useState(false);
     const formFields = [
-        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "peripheralDevicesComments", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments",
+        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments"
     ];
-
+    let list = sp.web.lists.getByTitle("ItClearance");
     var stateSchema = {
     };
 
@@ -42,55 +42,48 @@ const ItClearance = (props) => {
 
     });
 
-    const getEmployeeResignationDetails = (employeeID) => {
-        sp.web.lists.getByTitle("ItClearance").items.getById(employeeID).get().then((detail: any) => {
+    const getEmployeeClearanceDetails = (employeeID) => {
+        list.items.getById(employeeID).get().then((detail: any) => {
             setUserExistence(true);
-            console.log("isUserExists", isUserExist);
             console.log("\n\n\nemployee Clearance saved details - \n\n\n", detail);
             formFields.forEach(formField => {
                 stateSchema[formField].value = detail[formField] + "";
             });
             setState(prevState => ({ ...prevState, stateSchema }));
-            console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
         });
     }
 
     useEffect(() => {
         if (userID) {
-            getEmployeeResignationDetails(userID);
+            getEmployeeClearanceDetails(userID);
         }
     }, []);
 
     const onSubmitForm = (value) => {
-        console.log("isUserExists", isUserExist);
         for (const key in value) {
             value[key] = value[key].value;
         }
+        console.log("value", value);
         if (isUserExist) {
-            console.log("isUserExists", isUserExist);
-            let list = sp.web.lists.getByTitle("ItClearance");
-            list.items.getById(userID).update(state).then(i => {
-                console.log("save option", i);
-                setView(true);
+            list.items.getById(userID).update(value).then(i => {
+                console.log("updated", value);
+                // setView(true);
                 // setState(stateSchema);
             });
         } else {
-            sp.web.currentUser.get().then((response) => {
-                let ID = response.Id;
+                let ID = userID;
                 value = { ...value, ID };
                 console.log("onsubmit", value);
-
-                sp.web.lists.getByTitle("ItClearance").items.add(value).then((response: ItemAddResult): void => {
+                list.items.add(value).then((response: ItemAddResult): void => {
                     const item = response.data as string;
                     if (item) {
                         console.log('submitted', item);
-                        setView(true);
+                        // setView(true);
                         // setState(stateSchema);
                     }
                 }, (error: any): void => {
                     console.log('Error while creating the item: ' + error);
                 });
-            });
         }
     }
 
@@ -114,7 +107,7 @@ const ItClearance = (props) => {
                             Clearance submitted
                          </Typography>
                     </Paper> : <div>
-                        <p><Link to="/itClearanceDashboard">Dashboard</Link></p>
+                        {/* <p><Link to="/itClearanceDashboard">Dashboard</Link></p> */}
                         <Typography variant="h5" component="h5">
                             IT Clearance
                         </Typography>
@@ -200,8 +193,8 @@ const ItClearance = (props) => {
                                             {state.PeripheralDevices.error && <p style={errorStyle}>{state.PeripheralDevices.error}</p>}
                                         </td>
                                         <td>
-                                            <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="peripheralDevicesComments" value={state.peripheralDevicesComments.value} />
-                                            {state.peripheralDevicesComments.error && <p style={errorStyle}>{state.peripheralDevicesComments.error}</p>}
+                                            <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="PeripheralDevicesComments0" value={state.PeripheralDevicesComments0.value} />
+                                            {state.PeripheralDevicesComments0.error && <p style={errorStyle}>{state.PeripheralDevicesComments0.error}</p>}
                                         </td>
                                     </tr>
                                     <tr>

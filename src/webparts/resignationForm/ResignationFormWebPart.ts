@@ -52,6 +52,9 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
                 PropertyPaneTextField('description', {
                   label: strings.DescriptionFieldLabel
                 }),
+                PropertyPaneTextField('name', {
+                  label: "Title"
+                }),
               ]
             }
           ]

@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 const ManagerClearance = (props) => {
     const classes = useStyles(0);
-    let userID = props.match.params.ID;
+    let userID = props.props;
     const [isUserExist, setUserExistence] = useState(false);
     const [formView, setView] = useState(false);
     const formFields = [
@@ -41,45 +41,35 @@ const ManagerClearance = (props) => {
 
     });
 
-    const getEmployeeResignationDetails = (employeeID) => {
+    const getEmployeeClearanceDetails = (employeeID) => {
         sp.web.lists.getByTitle("ManagersClearance").items.getById(employeeID).get().then((detail: any) => {
             setUserExistence(true);
-            console.log("isUserExists", isUserExist);
-            console.log("\n\n\nemployee Clearance saved details - \n\n\n", detail);
             formFields.forEach(formField => {
                 stateSchema[formField].value = detail[formField] + "";
             });
             setState(prevState => ({ ...prevState, stateSchema }));
-            console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
         });
     }
 
     useEffect(() => {
         if (userID) {
-            getEmployeeResignationDetails(userID);
+            getEmployeeClearanceDetails(userID);
         }
     }, []);
 
-    //  Fetch list data
-    sp.web.lists.getByTitle("ManagersClearance").items.get().then((items: any) => {
-        console.log("ManagersList response", items);
-    });
+
     const onSubmitForm = (value) => {
-        console.log("isUserExists", isUserExist);
         for (const key in value) {
             value[key] = value[key].value;
         }
         if (isUserExist) {
-            console.log("isUserExists", isUserExist);
             let list = sp.web.lists.getByTitle("ManagersClearance");
             list.items.getById(userID).update(state).then(i => {
-                console.log("save option", i);
-                setView(true);
+                // setView(true);
                 // setState(stateSchema);
             });
         } else {
-            sp.web.currentUser.get().then((response) => {
-                let ID = response.Id;
+                let ID = userID;
                 value = { ...value, ID };
                 console.log("onsubmit", value);
 
@@ -87,13 +77,12 @@ const ManagerClearance = (props) => {
                     const item = response.data as string;
                     if (item) {
                         console.log('submitted', item);
-                        setView(true);
+                        // setView(true);
                         // setState(stateSchema);
                     }
                 }, (error: any): void => {
                     console.log('Error while creating the item: ' + error);
                 });
-            });
         }
     }
 
@@ -118,7 +107,7 @@ const ManagerClearance = (props) => {
                             Clearance submitted
                          </Typography>
                     </Paper> : <div>
-            <p><Link to="/itManagerDashboard:/">Dashboard</Link>  </p>
+            {/* <p><Link to="/itManagerDashboard:/">Dashboard</Link>  </p> */}
             <Typography variant="h5" component="h5">
                 Manager Clearance
             </Typography>
@@ -146,7 +135,7 @@ const ManagerClearance = (props) => {
                         <tr>
                             <td>Data Backup</td>
                             <td>
-                                <TextField margin="normal" name="DataBackup" required onBlur={handleOnBlur} onChange={handleOnChange} />
+                                <TextField margin="normal" name="DataBackup" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataBackup.value}/>
                                 {state.DataBackup.error && <p style={errorStyle}>{state.DataBackup.error}</p>}
                             </td>
                             <td>
@@ -157,7 +146,7 @@ const ManagerClearance = (props) => {
                         <tr>
                             <td>Email Backup</td>
                             <td>
-                                <TextField margin="normal" name="EmailBackup" required onBlur={handleOnBlur} onChange={handleOnChange} />
+                                <TextField margin="normal" name="EmailBackup" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.EmailBackup.value}/>
                                 {state.EmailBackup.error && <p style={errorStyle}>{state.EmailBackup.error}</p>}
                             </td>
                             <td>
@@ -168,7 +157,7 @@ const ManagerClearance = (props) => {
                         <tr>
                             <td>Notice Waiver(No. of days)</td>
                             <td>
-                                <TextField margin="normal" name="NoticeWaiver" required onBlur={handleOnBlur} onChange={handleOnChange} />
+                                <TextField margin="normal" name="NoticeWaiver" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.NoticeWaiver.value}/>
                                 {state.NoticeWaiver.error && <p style={errorStyle}>{state.NoticeWaiver.error}</p>}
                             </td>
                             <td>
@@ -179,7 +168,7 @@ const ManagerClearance = (props) => {
                         <tr>
                             <td>Access Removal(All Applications)</td>
                             <td>
-                                <TextField margin="normal" name="AccessRemoval" required onBlur={handleOnBlur} onChange={handleOnChange} />
+                                <TextField margin="normal" name="AccessRemoval" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessRemoval.value}/>
                                 {state.AccessRemoval.error && <p style={errorStyle}>{state.AccessRemoval.error}</p>}</td>
                             <td>
                                 <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemovalComments" value={state.AccessRemovalComments.value} />
@@ -189,7 +178,7 @@ const ManagerClearance = (props) => {
                         <tr>
                             <td>Email Re-routing</td>
                             <td>
-                                <TextField margin="normal" name="EmailRe_x002d_routing" required onBlur={handleOnBlur} onChange={handleOnChange} />
+                                <TextField margin="normal" name="EmailRe_x002d_routing" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.EmailRe_x002d_routing.value} />
                                 {state.EmailRe_x002d_routing.error && <p style={errorStyle}>{state.EmailRe_x002d_routing.error}</p>}
                             </td>
                             <td>
@@ -204,7 +193,7 @@ const ManagerClearance = (props) => {
                                 {state.Others_x0028_specify_x0029_.error && <p style={errorStyle}>{state.Others_x0028_specify_x0029_.error}</p>}
                             </td>
                             <td>
-                                <TextField margin="normal" name="OtherComments" required onBlur={handleOnBlur} onChange={handleOnChange} />
+                                <TextField margin="normal" name="OtherComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.OtherComments.value}/>
                                 {state.OtherComments.error && <p style={errorStyle}>{state.OtherComments.error}</p>}
                             </td>
                         </tr>

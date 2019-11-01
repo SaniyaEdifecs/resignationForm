@@ -13,37 +13,63 @@ import SalesForceDashboard from './SalesForce/SalesForceDashboard';
 import ManagerClearance from './Manager/ManagerClearanceForm';
 import ClearanceDashboard from './ClearanceDashboard';
 import { sp } from '@pnp/sp';
+import ResignationForm from './Resignations/ResignationForm';
 
 const NavigationItem = (props) => {
     let ID: any;
     let context = props.context;
-    let IsSiteAdmin: boolean;
-    
-    sp.web.currentUser.get().then((response) => {
-        ID = response.Id;
-        IsSiteAdmin = response.IsSiteAdmin;
-        console.log("IsSiteAdmin", IsSiteAdmin);
-    });
+
+    // sp.web.currentUser.get().then((response) => {
+    //     ID = response.Id;
+    //     IsSiteAdmin = response.IsSiteAdmin;
+    //     console.log("IsSiteAdmin", IsSiteAdmin);
+    // });
+
+    // let params = window.location.search;
+    let getParams = function (url) {
+        var params = {};
+        var parser = document.createElement('a');
+        parser.href = url;
+        var query = parser.search.substring(1);
+        var vars = query.split('&');
+        for (var i = 0; i < vars.length; i++) {
+            var pair = vars[i].split('=');
+            params[pair[0]] = decodeURIComponent(pair[1]);
+        }
+        return params;
+    };
+
+    let paramvalues = getParams(window.location.search);
+    const renderChilds = () => {
+        switch (paramvalues['component']) {
+            case "ItClearance":
+                return <ItClearance props={paramvalues['Id']} />;
+            case "managerApproval":
+                return <ManagerApprovalForm />;
+            case "managerClearance":
+                return <ManagerClearance props={paramvalues['Id']} />;
+            case "operationsAdminDashboard":
+                return <OperationsAdminDashboard />;
+            case "operationsClearance":
+                return <OperationsAdminClearance props={paramvalues['Id']} />;
+            case "financeClearance":
+                return <FinanceClearance props={paramvalues['Id']} />;
+            case "salesForceClearance":
+                return <SalesForceDashboard />;
+            case "hrClearance":
+                return <HrClearance props={paramvalues['Id']} />;
+            case "itClearanceDashboard":
+                return <ITClearanceDashboard />;
+            case "ResignationForm":
+                return <ResignationForm context={context} props={paramvalues['Id']}/>;
+            default:
+                return <ResignationForm  context={context} />;
+
+        }
+    };
+
     return (
-        <HashRouter>
-            <Switch>
-                <Route path="/itClearance/:ID" render={(props) => <ItClearance {...props} ID={ID} />} />
-                <Route path="/managerApproval/:ID" render={(props) => <ManagerApprovalForm {...props} ID={ID} />} />
-                <Route path="/managerClearance/:ID" render={(props) => <ManagerClearance {...props} ID={ID} />} />
-                <Route path="/operationsAdminDashboard" render={(props) => <OperationsAdminDashboard {...props} ID={ID} />} />
-                <Route path="/operationsClearance/:ID" render={(props) => <OperationsAdminClearance {...props} ID={ID} />} />
-                <Route path="/financeClearance/:ID" render={(props) => <FinanceClearance {...props} ID={ID} />} />
-                <Route path="/salesForceClearance/:ID" render={(props) => <SalesForceClearance {...props} ID={ID} />} />
-                <Route path="/salesForceDashboard/:ID" render={(props) => <SalesForceDashboard {...props} ID={ID} />} />
-                <Route path="/hrClearance/:ID" render={(props) => <HrClearance {...props} ID={ID} />} />
-                <Route path="/itClearanceDashboard" exact render={(props) => <ITClearanceDashboard {...props} />} />
-                <Route path="/" exact render={(props) => <ResignationDashboard {...props} context={context} IsSiteAdmin={IsSiteAdmin} />} />
-                <Route path="/:ID" exact render={(props) => <ResignationDashboard {...props} context={context} IsSiteAdmin={IsSiteAdmin} />} />
-                {/* <Route path="/id=:ID" exact render={(props) => <ResignationDashboard {...props} context={context} IsSiteAdmin={IsSiteAdmin} />} /> */}
-                <Route path="/clearanceDashboard/:ID" component={ClearanceDashboard}></Route>
-                <Route render={() => <h1>Page Not found</h1>} />
-            </Switch>
-        </HashRouter>
+        <div>{renderChilds()}</div >
     );
 };
 

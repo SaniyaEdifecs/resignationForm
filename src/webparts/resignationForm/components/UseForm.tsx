@@ -91,31 +91,55 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       console.log(mEmail, mLastName, mFirstName);
 
       setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: " " }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
+
+    }
+  }, [validationSchema]);
+
+  const _getPeoplePickerItems = useCallback(items => {
+    console.log("people picker", items);
+    // const getPeoplePickerItems = (items: any[]) => {
+    if (items) {
+
+      let peoplePickerValue = items[0];
+      let fullName = peoplePickerValue.text.split(' ');
+      let eFirstName = fullName[0];
+      let eLastName = fullName[fullName.length - 1];
+      let eEmail = peoplePickerValue.secondaryText;
+      console.log(eEmail, eLastName, eFirstName);
+
+      setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: " " }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
     }
 
-  }, [state]);
-
-
-  const handleOnSubmit = useCallback(
-    event => {
-      event.preventDefault();
-      if (!validateState()) {
-        callback(state);
-      }
-    },
-    [state]
-  );
-
+  }, [validationSchema]);
 
   const saveForm = useCallback(
     event => {
       event.preventDefault();
       console.log("save is clicked");
+      // setState(prevState => ({ ...prevState, ["Status"]: ({ value: "Pending", error: " " }) }));
+      // setTimeout(() => {
+        console.log("saved state", state);
         callback(state);
+      // }, 100);
+
     },
     [state]
   );
-  return { state, disable, saveForm, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems };
+  const handleOnSubmit = useCallback(
+    event => {
+      event.preventDefault();
+      if (!validateState()) {
+        // setState(prevState => ({ ...prevState, ["Status"]: ({ value: "Approved", error: " " }) }));
+        // setTimeout(() => {
+          console.log("submit state", state);
+          callback(state);
+        // }, 100);
+        
+      }
+    },
+    [state]
+  );
+  return { state, disable, saveForm, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems, _getPeoplePickerItems };
 };
 
 export default useForm;

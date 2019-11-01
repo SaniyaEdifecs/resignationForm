@@ -21,7 +21,8 @@
     "description": { "default": "ResignationForm description" },
     "officeFabricIconFontName": "Page",
     "properties": {
-      "description": "ResignationForm"
+      "description": "ResignationForm",
+      "name": "hello"
     }
   }]
 }

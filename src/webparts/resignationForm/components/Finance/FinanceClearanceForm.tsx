@@ -1,10 +1,18 @@
 import * as React from 'react';
 import { Typography, TextField, Button } from '@material-ui/core';
 import { sp, ItemAddResult, Item } from '@pnp/sp';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import useForm from '../UseForm';
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
+import Paper from '@material-ui/core/Paper';
+import '../CommonStyleSheet.scss';  
 
 const FinanceClearance = (props) => {
+    // const classes = useStyles(0);
+    let userID = props.props;
+    const [isUserExist, setUserExistence] = useState(false);
+    const [formView, setView] = useState(false);
     const formFields = [
         "ConfidentialInfoComments", "ConfidentialInformation", "HouseRentReceipts", "HouseRentReceiptsComments", "HousingLoan", "HousingLoanComments", "Investment80C", "Investment80cComments", "InvestmentProofs", "InvestmentProofsComments", "Loan_x002f_ImprestBalance", "Loan_x002f_ImprestBalanceComment", "TalentozAccess", "TalentozAccessComments", "TelephoneReimbursement", "TelephoneReimbursementComments", "TravelAdvance_x002f_Expenses", "TravelAdvance_x002f_ExpensesComm"
     ];
@@ -25,37 +33,55 @@ const FinanceClearance = (props) => {
         };
 
     });
-    //  Fetch list data
-    sp.web.lists.getByTitle("Finance%20Clearance").items.get().then((items: any) => {
-        console.log("FinanceList response", items);
-    });
+    const getEmployeeClearanceDetails = (employeeID) => {
+        sp.web.lists.getByTitle("Finance%20Clearance").items.getById(employeeID).get().then((detail: any) => {
+            setUserExistence(true);
+            formFields.forEach(formField => {
+                stateSchema[formField].value = detail[formField] + "";
+            });
+            setState(prevState => ({ ...prevState, stateSchema }));
+        });
+    }
+
+    useEffect(() => {
+        if (userID) {
+            getEmployeeClearanceDetails(userID);
+        }
+    }, []);
+  
 
     const onSubmitForm = (value) => {
         for (const key in value) {
             value[key] = value[key].value;
         }
-        sp.web.currentUser.get().then((response) => {
-            let ID = response.Id;
-            value = { ...value, ID };
-            console.log("onsubmit", value);
-
-            sp.web.lists.getByTitle("Finance%20Clearance").items.add(value).then((response: ItemAddResult): void => {
-                const item = response.data as string;
-                if (item) {
-                    console.log('submitted', item);
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
+        if (isUserExist) {
+            let list = sp.web.lists.getByTitle("Finance%20Clearance");
+            list.items.getById(userID).update(state).then(i => {
+                // setView(true);
+                // setState(stateSchema);
             });
+        } else {
+                let ID = userID;
+                value = { ...value, ID };
+                console.log("onsubmit", value);
 
-        });
+                sp.web.lists.getByTitle("Finance%20Clearance").items.add(value).then((response: ItemAddResult): void => {
+                    const item = response.data as string;
+                    if (item) {
+                        console.log('submitted', item);
+                        // setView(true);
+                        // setState(stateSchema);
+                    }
+                }, (error: any): void => {
+                    console.log('Error while creating the item: ' + error);
+                });
+        }
     }
 
     const { state, setState, disable, handleOnChange, handleOnBlur, handleOnSubmit, saveForm } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
-
     );
 
     const errorStyle = {

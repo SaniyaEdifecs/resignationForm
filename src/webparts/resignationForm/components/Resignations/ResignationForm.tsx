@@ -1,7 +1,7 @@
 import * as React from 'react';
 import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel } from '@material-ui/core';
+import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 
@@ -24,9 +24,8 @@ const ResignationForm = (props) => {
         "ManagerLastName",
         "ManagerEmail",
         "ResignationSummary",
-
+        "ID"
     ];
-
 
     var stateSchema = {};
     var validationStateSchema = {};
@@ -48,6 +47,7 @@ const ResignationForm = (props) => {
         for (const key in state) {
             state[key] = state[key].value;
         }
+        console.log(state);
         addListItem(state);
     }
 
@@ -64,16 +64,18 @@ const ResignationForm = (props) => {
         });
     }
     useEffect(() => {
-        if (props.params.ID) {
-            getEmployeeResignationDetails(props.params.ID);
+        if (props.props) {
+            getEmployeeResignationDetails(props.props);
         }
     }, []);
+
     const addListItem = (elements) => {
-        let userId = props.params.ID
-        elements = { ...elements, 'ID': userId };
+        let userId = props.props;
+        elements = {...elements, EmployeeName:state.WorkEmail, ManagerName: state.ManagerEmail };
         let list = sp.web.lists.getByTitle("ResignationList");
         // console.log("elemets====", elements);
         if (userId) {
+            elements = { ...elements, 'ID': userId };
             list.items.getById(userId).update(elements).then(response => {
                 console.log("updated", response);
                 setState(stateSchema);
@@ -82,7 +84,7 @@ const ResignationForm = (props) => {
             list.items.add(elements).then((response: ItemAddResult): void => {
                 const item = response.data as string;
                 if (item) {
-                    console.log("added");
+                    console.log("added", elements);
                     setState(stateSchema);
                 }
             }, (error: any): void => {
@@ -90,7 +92,7 @@ const ResignationForm = (props) => {
             });
         }
     };
-    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, getPeoplePickerItems } = useForm(
+    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, getPeoplePickerItems, _getPeoplePickerItems } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
@@ -102,11 +104,18 @@ const ResignationForm = (props) => {
     };
     return (
         <Container component="main" maxWidth="xs">
+            <Typography variant="h5" component="h3">
+                Resignation Form
+            </Typography>
             <div>
                 <form onSubmit={handleOnSubmit}>
                     <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on play slip" />
                     {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
-
+                    <Grid container spacing={2}>
+                        <Grid item sm={12}>
+                        <PeoplePicker context={props.context} defaultSelectedUsers={[state.WorkEmail.value]} ensureUser={true} titleText="Employee Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={_getPeoplePickerItems} showHiddenInUI={false} principalTypes={[PrincipalType.User]} resolveDelay={100} />
+                        </Grid>
+                    </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable}
@@ -119,6 +128,7 @@ const ResignationForm = (props) => {
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
+                    <TextField variant="outlined" margin="normal" fullWidth label="ID" value={state.ID.value} name="ID" onBlur={handleOnBlur} onChange={handleOnChange} />
                     <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
                         value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onBlur={handleOnBlur} onChange={handleOnChange} />
                     {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
@@ -135,7 +145,7 @@ const ResignationForm = (props) => {
                     </FormControl>
 
                     <TextField variant="outlined" margin="normal" fullWidth label="Specify(If other is selected)" disabled={isdisable}
-                        value={state.OtherReason.value || ''} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
+                        value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
                     {state.OtherReason.error && <p style={errorStyle}>{state.OtherReason.error}</p>}
 
                     <TextField variant="outlined" margin="normal" required fullWidth label="Department" disabled={isdisable}
@@ -149,8 +159,7 @@ const ResignationForm = (props) => {
                     <Grid container spacing={2}>
                         <Grid item sm={12}>
                             <PeoplePicker context={props.context} disabled={isdisable} defaultSelectedUsers={[state.ManagerEmail.value]} ensureUser={true} titleText="Manager Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
-                                principalTypes={[PrincipalType.User]} resolveDelay={1000} />
-                            
+                                principalTypes={[PrincipalType.User]} resolveDelay={100} />
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={state.ManagerFirstName.value} disabled={isdisable} name="ManagerFirstName" onChange={handleOnChange} onBlur={handleOnBlur} />
