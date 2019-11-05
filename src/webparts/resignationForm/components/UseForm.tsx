@@ -4,14 +4,13 @@ import { sp, ItemAddResult } from '@pnp/sp';
 
 const useForm = (stateSchema, validationSchema = {}, callback) => {
   const [state, setState] = useState(stateSchema);
-  // const [LastWorkingDate, setDate] = useState();
+  const [Status, setStatus] = useState("Pending");
   const [disable, setDisable] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
 
   // Disable button in initial render.
-  useEffect(() => {
-    setDisable(true);
-  }, []);
+  useEffect(() => {setDisable(true);}, []);
+
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
       const isInputFieldRequired = validationSchema[key].required;
@@ -22,6 +21,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
 
     return hasErrorInState;
   }, [state, validationSchema]);
+
   // For every changed in our state this will be fired
   // To be able to disable the button
   useEffect(() => {
@@ -30,17 +30,23 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     }
   }, [state, isDirty]);
 
-  const handleOnBlur = useCallback(
-    event => {
-      setIsDirty(true);
-      const name = event.target.name;
-      const value = event.target.value;
+  // Set the status property based on validation
+  useEffect(() => {
+    if (validateState()) {
+      setStatus("Pending");
+    } else {
+      setStatus("Approved");
+    }
+  }, [state]);
 
-      let error = '';
-      if (validationSchema[name].required) {
-        if (!value) {
-          error = 'This is required field.';
-        }
+  const checkValidation = (event) => {
+    setIsDirty(true);
+    const name = event.target.name;
+    const value = event.target.value;
+    let error = '';
+    if (validationSchema[name].required) {
+      if (!value) {
+        error = 'This is required field.';
       }
       // if (
       //   validationSchema[name].validator !== null &&
@@ -50,48 +56,40 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       //     error = validationSchema[name].validator.error;
       //   }
       // }
-      setState(prevState => ({
-        ...prevState,
-        [name]: { value, error },
-      }));
-    },
-    [validationSchema]
-  );
+    }
+    setState(prevState => ({
+      ...prevState,
+      [name]: { value, error },
+    }));
+  }
 
   // Used to handle every changes in every input
-  const handleOnChange = useCallback(
+  const handleOnBlur = useCallback(
     event => {
       setIsDirty(true);
-      const name = event.target.name;
-      const value = event.target.value;
-      let error = '';
-      if (validationSchema[name].required) {
-        if (!value) {
-          error = 'This is required field.';
-        }
-      }
-
-      setState(prevState => ({
-        ...prevState,
-        [name]: { value, error },
-      }));
+      checkValidation(event);
     },
     [validationSchema]
   );
+
+  const handleOnChange = useCallback(
+    event => {
+      checkValidation(event);
+    },
+    [validationSchema]
+  );
+
   const getPeoplePickerItems = useCallback(items => {
     console.log("people picker", items);
     // const getPeoplePickerItems = (items: any[]) => {
     if (items) {
-
       let peoplePickerValue = items[0];
       let fullName = peoplePickerValue.text.split(' ');
       let mFirstName = fullName[0];
       let mLastName = fullName[fullName.length - 1];
       let mEmail = peoplePickerValue.secondaryText;
       console.log(mEmail, mLastName, mFirstName);
-
       setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: " " }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
-
     }
   }, [validationSchema]);
 
@@ -106,40 +104,28 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       let eLastName = fullName[fullName.length - 1];
       let eEmail = peoplePickerValue.secondaryText;
       console.log(eEmail, eLastName, eFirstName);
-
       setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: " " }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
     }
-
   }, [validationSchema]);
 
   const saveForm = useCallback(
     event => {
       event.preventDefault();
-      console.log("save is clicked");
-      // setState(prevState => ({ ...prevState, ["Status"]: ({ value: "Pending", error: " " }) }));
-      // setTimeout(() => {
-        console.log("saved state", state);
-        callback(state);
-      // }, 100);
-
+      callback(state);
     },
     [state]
   );
+
   const handleOnSubmit = useCallback(
-    event => {
+    (event) => {
       event.preventDefault();
       if (!validateState()) {
-        // setState(prevState => ({ ...prevState, ["Status"]: ({ value: "Approved", error: " " }) }));
-        // setTimeout(() => {
-          console.log("submit state", state);
-          callback(state);
-        // }, 100);
-        
+        callback(state);
       }
     },
     [state]
   );
-  return { state, disable, saveForm, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems, _getPeoplePickerItems };
+  return { state, disable, saveForm, Status, setStatus, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems, _getPeoplePickerItems };
 };
 
 export default useForm;

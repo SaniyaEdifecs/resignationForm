@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Radio, RadioGroup, Button, FormControlLabel, FormControl, TextField } from '@material-ui/core/';
 import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
@@ -9,18 +9,18 @@ import ExpansionPanelDetails from '@material-ui/core/ExpansionPanelDetails';
 import Typography from '@material-ui/core/Typography';
 import { sp, ItemAddResult } from '@pnp/sp';
 import useForm from '../Manager/ManagersUseForm';
+import moment from 'moment';
 
-const ManagerApprovalForm = () => {
+const ManagerApprovalForm = (props) => {
+    let ID = props.props;
+    let list = sp.web.lists;
     const [LastWorkingDate, setDate] = useState(null);
+    const [employeeDetail, setData] = useState();
+    const [expanded, setExpanded] = useState();
+   
     // Define your state schema
-    const formFields = [
-        "Status",
-        "ResponsetoAssociate",
-        "Reason",
-    ];
-
-    var stateSchema = {
-    };
+    const formFields = ["Status","ResponsetoAssociate","Reason" ];
+    var stateSchema =  {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
         stateSchema[formField] = {};
@@ -32,33 +32,42 @@ const ManagerApprovalForm = () => {
             regex: '',
             error: ''
         };
-
     });
-
-    const [expanded, setExpanded] = React.useState();
-    let userDetails: any = {};
-
     const handlePanelChange = panel => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
+        setState(stateSchema);
+        setDate(null);
+        console.log("panel===");
     };
-
     const handleDateChange = (event) => {
-        // this.setState({LastWorkingDate:event});
         setDate(event);
         console.log("=======", LastWorkingDate);
-
     };
 
-    sp.web.lists.getByTitle("ManagersResponse").items.get().then((items: any) => {
-    });
+    const getUserResigationdata = (ID) => {
+        sp.web.lists.getByTitle("ManagersResponse").items.get().then((response:any)=>{
+            console.log("response", response);
+        })
+
+        sp.web.lists.getByTitle("ResignationList").items.getById(ID).get().then((response: any) => {
+            console.log(response);
+            setData(response);
+        },
+        error => {
+            console.log(error);
+        });
+    }
+    useEffect(() => {
+        if (ID) {
+            getUserResigationdata(ID);
+        }
+    }, []);
 
     const onSubmitForm = (value) => {
         for (const key in value) {
             value[key] = value[key].value;
         }
-        sp.web.currentUser.get().then((response) => {
-            let userId = response.Id;
-            value = { ...value, 'ID': userId, 'LastWorkingDate': LastWorkingDate };
+            value = { ...value, 'ID': ID, 'LastWorkingDate': LastWorkingDate, "EmployeeName":  employeeDetail['FirstName'] + " " + employeeDetail['LastName'], 'EmployeeCode': employeeDetail.EmployeeCode};
             console.log("onsubmit", value);
             sp.web.lists.getByTitle("ManagersResponse").items.add(value).then((response: ItemAddResult): void => {
                 const item = response.data as string;
@@ -69,9 +78,8 @@ const ManagerApprovalForm = () => {
                 console.log('Error while creating the item: ' + error);
             });
 
-        });
     }
-    const { state, disable, handleOnChange, handleOnSubmit } = useForm(
+    const { state, disable, setState,handleOnChange, handleOnSubmit } = useForm(
         stateSchema, {}, onSubmitForm
     );
     return (
@@ -80,31 +88,33 @@ const ManagerApprovalForm = () => {
                 Hello
              </header>
             <section>
-                This is to inform you that Mr/Mrs XYZ having employee Code #### has submitted a request for resignation from the post of 'Title'. The resignation details provided by the employee are as below:
+                {employeeDetail ? <div>
+                    This is to inform you that Mr/Mrs {employeeDetail['FirstName'] + " " + employeeDetail['LastName']} having employee Code {employeeDetail.EmployeeCode} has submitted a request for resignation from the post of '{employeeDetail.JobTitle}'. The resignation details provided by the employee are as below:
                 <table cellPadding="0" cellSpacing="0">
-                    <tbody>
-                        <tr>
-                            <th>Reason For resignation</th>
-                            <td>{userDetails.ResignationReason}</td>
-                        </tr>
-                        <tr>
-                            <th>Department</th>
-                            <td>{userDetails.Title}</td>
-                        </tr>
-                        <tr>
-                            <th>Resignation Date</th>
-                            <td>{userDetails.Created}</td>
-                        </tr>
-                        <tr>
-                            <th>Resignation Details</th>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <th>Personal Email</th>
-                            <td></td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <tbody>
+                            <tr>
+                                <th>Reason For resignation</th>
+                                <td>{employeeDetail.ResignationReason}</td>
+                            </tr>
+                            <tr>
+                                <th>Department</th>
+                                <td>{employeeDetail.JobTitle}</td>
+                            </tr>
+                            <tr>
+                                <th>Resignation Date</th>
+                                <td>{moment(employeeDetail.Created).format("MMM Do YYYY")}</td>
+                            </tr>
+                            <tr>
+                                <th>Resignation Details</th>
+                                <td>{employeeDetail.ResignationSummary}</td>
+                            </tr>
+                            <tr>
+                                <th>Personal Email</th>
+                                <td>{employeeDetail.PersonalEmail}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div> : <div>No data</div>}
                 <p>Please have a conversation with the associate and guide for the next step.</p>
 
                 <form className="mWrapper" onSubmit={handleOnSubmit}>
@@ -115,7 +125,7 @@ const ManagerApprovalForm = () => {
                                     <Typography >
                                         <FormControlLabel value="Accepted"
                                             control={<Radio color="primary" />}
-                                            label="Accept" 
+                                            label="Accept"
                                             labelPlacement="start" onChange={handleOnChange} />
                                     </Typography>
                                 </ExpansionPanelSummary>
@@ -142,9 +152,9 @@ const ManagerApprovalForm = () => {
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
                                     <Typography>
-                                        <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Response to Associate" name="ResponsetoAssociate" onChange={handleOnChange} />
+                                        <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Response to Associate" name="ResponsetoAssociate" value={state.ResponsetoAssociate.value} onChange={handleOnChange} />
                                         {/* {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>} */}
-                                        <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Reason" name="Reason" helperText="For Internal Use To HR Partner" onChange={handleOnChange} />
+                                        <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Reason" name="Reason" helperText="For Internal Use To HR Partner" value={state.Reason.value} onChange={handleOnChange} />
                                     </Typography>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>

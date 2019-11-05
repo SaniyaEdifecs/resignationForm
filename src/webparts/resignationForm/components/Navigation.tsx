@@ -45,7 +45,7 @@ const NavigationItem = (props) => {
             case "ItClearance":
                 return <ItClearance props={paramvalues['Id']} />;
             case "managerApproval":
-                return <ManagerApprovalForm />;
+                return <ManagerApprovalForm props={paramvalues['Id']} />;
             case "managerClearance":
                 return <ManagerClearance props={paramvalues['Id']} />;
             case "operationsAdminDashboard":
@@ -55,6 +55,8 @@ const NavigationItem = (props) => {
             case "financeClearance":
                 return <FinanceClearance props={paramvalues['Id']} />;
             case "salesForceClearance":
+                return <SalesForceClearance props={paramvalues['Id']} />;
+            case "salesForceDashboard":
                 return <SalesForceDashboard />;
             case "hrClearance":
                 return <HrClearance props={paramvalues['Id']} />;
