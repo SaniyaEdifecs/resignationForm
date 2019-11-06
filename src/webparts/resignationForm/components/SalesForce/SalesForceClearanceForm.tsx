@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 const SalesForceClearance = (props) => {
     const classes = useStyles(0);
-    let userID = props.props;
+    let ID = props.props;
     let detail: any;
     let list = sp.web.lists.getByTitle("SalesForce%20Clearance");
     const [isUserExist, setUserExistence] = useState(false);
@@ -36,6 +36,40 @@ const SalesForceClearance = (props) => {
         };
     });
 
+    const onSubmitForm = (value) => {
+        for (const key in value) {
+            value[key] = value[key].value;
+        }
+        value = { ...value, 'Status': status };
+        if (isUserExist) {
+            list.items.getById(ID).update(value).then(i => {
+                getEmployeeClearanceDetails(ID);
+            }, (error: any): void => {
+                console.log('Error while creating the item: ' + error);
+            });
+        } else {
+            value = { ...value, ID };
+            list.items.add(value).then((response: ItemAddResult): void => {
+                const item = response.data as string;
+                if (item) {
+                    getEmployeeClearanceDetails(ID);
+                }
+            }, (error: any): void => {
+                console.log('Error while creating the item: ' + error);
+            });
+        }
+    };
+
+    const { state, disable, status, setStatus, handleOnChange, handleOnBlur, handleOnSubmit, setState, saveForm } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
+    const errorStyle = {
+        color: 'red',
+        fontSize: '13px',
+        margin: '0',
+    };
 
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((detail: any) => {
@@ -59,53 +93,16 @@ const SalesForceClearance = (props) => {
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
-            console.log('Error while creating the item===: ' + error);
+            console.log('Error while creating the item: ' + error);
         });
-    }
+    };
 
     useEffect(() => {
-        if (userID) {
-            getEmployeeClearanceDetails(userID);
+        if (ID) {
+            getEmployeeClearanceDetails(ID);
         }
     }, []);
 
-
-    const onSubmitForm = (value) => {
-        for (const key in value) {
-            value[key] = value[key].value;
-        }
-        value = { ...value, 'Status': Status };
-        if (isUserExist) {
-            list.items.getById(userID).update(value).then(i => {
-                getEmployeeClearanceDetails(userID);
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        } else {
-            let ID = userID;
-            value = { ...value, ID };
-            list.items.add(value).then((response: ItemAddResult): void => {
-                const item = response.data as string;
-                if (item) {
-                    getEmployeeClearanceDetails(ID);
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        }
-    }
-
-
-    const { state, disable, Status, setStatus, handleOnChange, handleOnBlur, handleOnSubmit, setState, saveForm } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm
-    );
-    const errorStyle = {
-        color: 'red',
-        fontSize: '13px',
-        margin: '0',
-    };
 
     return (
         <div>
@@ -144,6 +141,6 @@ const SalesForceClearance = (props) => {
             </form>
         </div>
     );
-}
+};
 
 export default SalesForceClearance;

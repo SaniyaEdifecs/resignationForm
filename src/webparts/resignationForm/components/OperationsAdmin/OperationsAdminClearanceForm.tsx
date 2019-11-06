@@ -2,11 +2,10 @@ import * as React from 'react';
 import { Typography, TextField, Button } from '@material-ui/core';
 import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import useForm from '../UseForm';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
-import '../CommonStyleSheet.scss';  
+import CircularProgress from '@material-ui/core/CircularProgress';
+import '../CommonStyleSheet.scss';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -18,15 +17,17 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const OperationsAdminClearance = (props) => {
     const classes = useStyles(0);
-    let userID = props.props;
+    let ID = props.props;
+    let detail: any;
+    let list = sp.web.lists.getByTitle("OperationsClearance");
     const [isUserExist, setUserExistence] = useState(false);
-    const [formView, setView] = useState(false);
+    const [hideButton, setButtonVisibility] = useState();
+    const[loader, showLoader] = useState(false);
     const formFields = [
-        "BiometricAccess", "BiometricAccessComments", "KuoniConcurAccess", "KuoniConcurAccessComments", "LibraryBooks", "LibraryBooksComments", "Others", "OthersComments", "PedestalKeys", "PedestalKeysComments", "SimCard", "SimCardComments", "StickerComments", "Stickers", "VisitingCards", "VisitingCardsComments"
+        "BiometricAccess", "BiometricAccessComments", "KuoniConcurAccess", "KuoniConcurAccessComments", "LibraryBooks", "LibraryBooksComments", "Others", "OthersComments", "PedestalKeys", "PedestalKeysComments", "SimCard", "SimCardComments", "StickerComments", "Stickers", "VisitingCards", "VisitingCardsComments", 
     ];
 
-    var stateSchema = {
-    };
+    var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
         stateSchema[formField] = {};
@@ -40,59 +41,33 @@ const OperationsAdminClearance = (props) => {
         };
 
     });
-
-    const getEmployeeResignationDetails = (employeeID) => {
-        sp.web.lists.getByTitle("OperationsClearance").items.getById(employeeID).get().then((detail: any) => {
-            setUserExistence(true);
-            console.log("isUserExists", isUserExist);
-            console.log("\n\n\nemployee Clearance saved details - \n\n\n", detail);
-            formFields.forEach(formField => {
-                stateSchema[formField].value = detail[formField] + "";
-            });
-            setState(prevState => ({ ...prevState, stateSchema }));
-            console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
-        });
-    }
-
-    useEffect(() => {
-        if (userID) {
-            getEmployeeResignationDetails(userID);
-        }
-    }, []);
-
-
+    
     const onSubmitForm = (value) => {
+        showLoader(true);
         for (const key in value) {
             value[key] = value[key].value;
         }
+        value = { ...value, 'Status': status };
         if (isUserExist) {
-            console.log("isUserExists", isUserExist);
-            let list = sp.web.lists.getByTitle("OperationsClearance");
-            list.items.getById(userID).update(state).then(i => {
-                // setView(true);
-                setState(stateSchema);
+            list.items.getById(ID).update(value).then(i => {
+                getEmployeeClearanceDetails(ID);
+                showLoader(false);
+            }, (error: any): void => {
+                console.log('Error while creating the item: ' + error);
             });
         } else {
-            sp.web.currentUser.get().then((response) => {
-                let ID = response.Id;
-                value = { ...value, ID };
-                console.log("onsubmit", value);
+            value = { ...value, ID };
+            list.items.add(value).then((response: ItemAddResult): void => {
+                const item = response.data as string;
+                showLoader(false);
+                getEmployeeClearanceDetails(ID);
 
-                sp.web.lists.getByTitle("OperationsClearance").items.add(value).then((response: ItemAddResult): void => {
-                    const item = response.data as string;
-                    if (item) {
-                        console.log('submitted', item);
-                        // setView(true);
-                        setState(stateSchema);
-                    }
-                }, (error: any): void => {
-                    console.log('Error while creating the item: ' + error);
-                });
+            }, (error: any): void => {
+                console.log('Error while creating the item: ' + error);
             });
         }
-    }
-
-    const { state, disable, setState, saveForm, handleOnChange, handleOnBlur, handleOnSubmit, } = useForm(
+    };
+    const { state, disable, status, setStatus, setState, saveForm, handleOnChange, handleOnBlur, handleOnSubmit, } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
@@ -102,8 +77,48 @@ const OperationsAdminClearance = (props) => {
         fontSize: '13px',
         margin: '0',
     };
+
+    const getEmployeeClearanceDetails = (employeeID) => {
+        list.items.getById(employeeID).get().then((response: any) => {
+            detail = response;
+            if (detail.Status == null) {
+                setButtonVisibility(true);
+                setStatus("Pending"); // setting default value if it is null
+            } else if (detail.Status == "Pending") {
+                setButtonVisibility(true);
+            } else {
+                setButtonVisibility(false);
+            }
+            setUserExistence(true);
+            formFields.forEach(formField => {
+                if (detail[formField] == null) {
+                    stateSchema[formField].value = "";
+                    stateSchema[formField].error = "";
+                } else {
+                    stateSchema[formField].value = detail[formField] + "";
+                    stateSchema[formField].error = "";
+                }
+            });
+            setState(prevState => ({ ...prevState, stateSchema }));
+        }, (error: any): void => {
+            setButtonVisibility(true);
+            console.log('Error while creating the item: ' + error);
+        });
+    }
+
+    useEffect(() => {
+        if (ID) {
+            getEmployeeClearanceDetails(ID);
+        }
+    }, []);
+
+
+   
+
+ 
     return (
         <div>
+            {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             {/* <p><Link to="/operationsAdminDashboard">Dashboards</Link></p> */}
             <Typography variant="h5" component="h5">
                 Operations Clearance
@@ -133,7 +148,7 @@ const OperationsAdminClearance = (props) => {
                         <tr>
                             <td>Car/Bikes Stickers</td>
                             <td>
-                                <TextField margin="normal" name="Stickers" onChange={handleOnChange} required onBlur={handleOnBlur}  value={state.Stickers.value} />
+                                <TextField margin="normal" name="Stickers" onChange={handleOnChange} required onBlur={handleOnBlur} value={state.Stickers.value} />
                                 {state.Stickers.error && <p style={errorStyle}>{state.Stickers.error}</p>}
                             </td>
                             <td>
@@ -207,16 +222,15 @@ const OperationsAdminClearance = (props) => {
                                 {state.OthersComments.error && <p style={errorStyle}>{state.OthersComments.error}</p>}
                             </td>
                         </tr>
-                        <tr>
+                        {hideButton ? <tr>
                             <td colSpan={3} >
                                 <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
                                 {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="button" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
                                 </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>
-
-                        </tr>
+                        </tr> : null}
                     </tbody>
                 </table>
             </form>

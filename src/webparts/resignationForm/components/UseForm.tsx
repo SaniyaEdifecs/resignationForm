@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import { sp, ItemAddResult } from '@pnp/sp';
-
 
 const useForm = (stateSchema, validationSchema = {}, callback) => {
   const [state, setState] = useState(stateSchema);
-  const [Status, setStatus] = useState("Pending");
+  const [status, setStatus] = useState("Pending");
   const [disable, setDisable] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
 
   // Disable button in initial render.
-  useEffect(() => {setDisable(true);}, []);
+  useEffect(() => { setDisable(true); }, []);
+  // For every changed in our state this will be fired
+  // To be able to disable the button
 
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
@@ -22,8 +22,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     return hasErrorInState;
   }, [state, validationSchema]);
 
-  // For every changed in our state this will be fired
-  // To be able to disable the button
+
   useEffect(() => {
     if (isDirty) {
       setDisable(validateState());
@@ -33,6 +32,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   // Set the status property based on validation
   useEffect(() => {
     if (validateState()) {
+
       setStatus("Pending");
     } else {
       setStatus("Approved");
@@ -56,17 +56,19 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       //     error = validationSchema[name].validator.error;
       //   }
       // }
+     } 
+     if (value.toLowerCase() == "no") {
+      error = "Dues Pending";
     }
     setState(prevState => ({
       ...prevState,
       [name]: { value, error },
     }));
-  }
+  };
 
   // Used to handle every changes in every input
   const handleOnBlur = useCallback(
     event => {
-      setIsDirty(true);
       checkValidation(event);
     },
     [validationSchema]
@@ -125,7 +127,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     },
     [state]
   );
-  return { state, disable, saveForm, Status, setStatus, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems, _getPeoplePickerItems };
+  return { state, disable, saveForm,status, setStatus, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems, _getPeoplePickerItems };
 };
 
 export default useForm;

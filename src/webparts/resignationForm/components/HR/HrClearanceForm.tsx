@@ -36,24 +36,6 @@ const HrClearance = (props) => {
 
     });
 
-    const getEmployeeClearanceDetails = (employeeID) => {
-        list.items.getById(employeeID).get().then((detail: any) => {
-            setUserExistence(true);
-            console.log("\n\n\nemployee Clearance saved details - \n\n\n", detail);
-            formFields.forEach(formField => {
-                stateSchema[formField].value = detail[formField] + "";
-            });
-            setState(prevState => ({ ...prevState, stateSchema }));
-            console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
-        });
-    }
-
-    useEffect(() => {
-        if (userID) {
-            getEmployeeClearanceDetails(userID);
-        }
-    }, []);
-
     const onSubmitForm = (value) => {
         for (const key in value) {
             value[key] = value[key].value;
@@ -79,7 +61,7 @@ const HrClearance = (props) => {
                 console.log('Error while creating the item: ' + error);
             });
         }
-    }
+    };
 
     const { state, setState, disable, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
@@ -94,6 +76,26 @@ const HrClearance = (props) => {
         margin: '0',
     };
 
+
+    const getEmployeeClearanceDetails = (employeeID) => {
+        list.items.getById(employeeID).get().then((detail: any) => {
+            setUserExistence(true);
+            console.log("\n\n\nemployee Clearance saved details - \n\n\n", detail);
+            formFields.forEach(formField => {
+                stateSchema[formField].value = detail[formField] + "";
+            });
+            setState(prevState => ({ ...prevState, stateSchema }));
+            console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
+        });
+    };
+
+    useEffect(() => {
+        if (userID) {
+            getEmployeeClearanceDetails(userID);
+        }
+    }, []);
+
+  
     return (
         <div>
             <Typography variant="h5" component="h5">

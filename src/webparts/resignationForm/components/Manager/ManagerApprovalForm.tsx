@@ -33,36 +33,6 @@ const ManagerApprovalForm = (props) => {
             error: ''
         };
     });
-    const handlePanelChange = panel => (event, isExpanded) => {
-        setExpanded(isExpanded ? panel : false);
-        setState(stateSchema);
-        setDate(null);
-        console.log("panel===");
-    };
-    const handleDateChange = (event) => {
-        setDate(event);
-        console.log("=======", LastWorkingDate);
-    };
-
-    const getUserResigationdata = (ID) => {
-        sp.web.lists.getByTitle("ManagersResponse").items.get().then((response:any)=>{
-            console.log("response", response);
-        })
-
-        sp.web.lists.getByTitle("ResignationList").items.getById(ID).get().then((response: any) => {
-            console.log(response);
-            setData(response);
-        },
-        error => {
-            console.log(error);
-        });
-    }
-    useEffect(() => {
-        if (ID) {
-            getUserResigationdata(ID);
-        }
-    }, []);
-
     const onSubmitForm = (value) => {
         for (const key in value) {
             value[key] = value[key].value;
@@ -78,10 +48,43 @@ const ManagerApprovalForm = (props) => {
                 console.log('Error while creating the item: ' + error);
             });
 
-    }
+    };
     const { state, disable, setState,handleOnChange, handleOnSubmit } = useForm(
         stateSchema, {}, onSubmitForm
     );
+
+    const handlePanelChange = panel => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+        setState(stateSchema);
+        setDate(null);
+        console.log("panel===");
+    };
+    const handleDateChange = (event) => {
+        setDate(event);
+        console.log("=======", LastWorkingDate);
+    };
+
+    const getUserResigationdata = (ID) => {
+        sp.web.lists.getByTitle("ManagersResponse").items.get().then((response:any)=>{
+            console.log("response", response);
+        });
+
+        sp.web.lists.getByTitle("ResignationList").items.getById(ID).get().then((response: any) => {
+            console.log(response);
+            setData(response);
+        },
+        error => {
+            console.log(error);
+        });
+    };
+    useEffect(() => {
+        if (ID) {
+            getUserResigationdata(ID);
+        }
+    }, []);
+
+  
+
     return (
         <div >
             <header>

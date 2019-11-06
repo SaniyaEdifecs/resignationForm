@@ -18,15 +18,16 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const ItClearance = (props) => {
     const classes = useStyles(0);
-    let userID = props.props;
+    let ID = props.props;
     let detail: any;
     let list = sp.web.lists.getByTitle("ItClearance");
     const [isUserExist, setUserExistence] = useState(false);
     const [hideButton, setButtonVisibility] = useState();
+    const[loader, showLoader] = useState(false);
     const formFields = [
-        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments", "Status"
+        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments", 
     ];
-    
+
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -42,9 +43,16 @@ const ItClearance = (props) => {
 
     });
 
+
+    useEffect(() => {
+        if (ID) {
+            getEmployeeClearanceDetails(ID);
+        }
+    }, []);
     const getEmployeeClearanceDetails = (employeeID) => {
-        list.items.getById(employeeID).get().then((detail: any) => {
-            detail = detail;
+        list.items.getById(employeeID).get().then((response: any) => {
+            detail = response;
+            console.log(detail)
             if (detail.Status == null) {
                 setButtonVisibility(true);
                 setStatus("Pending"); // setting default value if it is null
@@ -55,51 +63,48 @@ const ItClearance = (props) => {
             }
             setUserExistence(true);
             formFields.forEach(formField => {
-                if(detail[formField] == null){
+                if (detail[formField] == null) {
                     stateSchema[formField].value = "";
-                }else{
+                } else {
                     stateSchema[formField].value = detail[formField] + "";
                 }
             });
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
-            console.log('Error while creating the item===: ' + error);
+            console.log('Error while creating the item: ' + error);
         });
-    }
-
-    useEffect(() => {
-        if (userID) {
-            getEmployeeClearanceDetails(userID);
-        }
-    }, []);
+    };
 
     const onSubmitForm = (value) => {
+        showLoader(true);
         for (const key in value) {
             value[key] = value[key].value;
         }
-        value = { ...value, 'Status': Status };
+        value = { ...value, 'Status': status };
         if (isUserExist) {
-            list.items.getById(userID).update(value).then(i => {
-                getEmployeeClearanceDetails(userID);
+            list.items.getById(ID).update(value).then(i => {
+                showLoader(false);
+                getEmployeeClearanceDetails(ID);
+
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
         } else {
-            let ID = userID;
             value = { ...value, ID };
             list.items.add(value).then((response: ItemAddResult): void => {
                 const item = response.data as string;
                 if (item) {
+                    showLoader(false);
                     getEmployeeClearanceDetails(ID);
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
         }
-    }
+    };
 
-    const { state, setState, disable, Status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+    const { state, setState, disable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
@@ -113,6 +118,7 @@ const ItClearance = (props) => {
     };
     return (
         <div>
+             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             {/* <p><Link to="/itClearanceDashboard">Dashboard</Link></p> */}
             <Typography variant="h5" component="h5">
                 IT Clearance
@@ -218,6 +224,6 @@ const ItClearance = (props) => {
             </form>
         </div>
     );
-}
+};
 
 export default ItClearance;

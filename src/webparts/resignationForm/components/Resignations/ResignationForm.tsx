@@ -4,7 +4,7 @@ import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/People
 import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
-
+import Hidden from '@material-ui/core/Hidden';
 
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
@@ -42,14 +42,16 @@ const ResignationForm = (props) => {
 
     });
 
-    function onSubmitForm(state) {
-
-        for (const key in state) {
-            state[key] = state[key].value;
-        }
-        console.log(state);
-        addListItem(state);
-    }
+    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, getPeoplePickerItems, _getPeoplePickerItems } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
+    const errorStyle = {
+        color: 'red',
+        fontSize: '13px',
+        margin: '0',
+    };
 
     const getEmployeeResignationDetails = (employeeID) => {
         sp.web.lists.getByTitle("ResignationList").items.getById(employeeID).get().then((detail: any) => {
@@ -62,7 +64,7 @@ const ResignationForm = (props) => {
             setDisable(true);
             console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
         });
-    }
+    };
     useEffect(() => {
         if (props.props) {
             getEmployeeResignationDetails(props.props);
@@ -71,7 +73,7 @@ const ResignationForm = (props) => {
 
     const addListItem = (elements) => {
         let userId = props.props;
-        elements = {...elements, EmployeeName:state.WorkEmail, ManagerName: state.ManagerEmail };
+        elements = { ...elements, EmployeeName: state.WorkEmail, ManagerName: state.ManagerEmail };
         let list = sp.web.lists.getByTitle("ResignationList");
         // console.log("elemets====", elements);
         if (userId) {
@@ -92,16 +94,15 @@ const ResignationForm = (props) => {
             });
         }
     };
-    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, getPeoplePickerItems, _getPeoplePickerItems } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm
-    );
-    const errorStyle = {
-        color: 'red',
-        fontSize: '13px',
-        margin: '0',
-    };
+
+    function onSubmitForm(state) {
+        for (const key in state) {
+            state[key] = state[key].value;
+        }
+        console.log(state);
+        addListItem(state);
+    }
+
     return (
         <Container component="main" maxWidth="xs">
             <Typography variant="h5" component="h3">
@@ -113,7 +114,7 @@ const ResignationForm = (props) => {
                     {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                     <Grid container spacing={2}>
                         <Grid item sm={12}>
-                        <PeoplePicker context={props.context} defaultSelectedUsers={[state.WorkEmail.value]} ensureUser={true} titleText="Employee Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={_getPeoplePickerItems} showHiddenInUI={false} principalTypes={[PrincipalType.User]} resolveDelay={100} />
+                            <PeoplePicker context={props.context} defaultSelectedUsers={[state.WorkEmail.value]} ensureUser={true} titleText="Employee Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={_getPeoplePickerItems} showHiddenInUI={false} principalTypes={[PrincipalType.User]} resolveDelay={100} />
                         </Grid>
                     </Grid>
                     <Grid container spacing={2}>
@@ -128,7 +129,10 @@ const ResignationForm = (props) => {
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
-                    <TextField variant="outlined" margin="normal" fullWidth label="ID" value={state.ID.value} name="ID" onBlur={handleOnBlur} onChange={handleOnChange} />
+                    <Hidden>
+                        <TextField variant="outlined" margin="normal" fullWidth label="ID" value={state.ID.value} name="ID" onBlur={handleOnBlur} onChange={handleOnChange} />
+                    </Hidden>
+
                     <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
                         value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onBlur={handleOnBlur} onChange={handleOnChange} />
                     {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
@@ -185,5 +189,5 @@ const ResignationForm = (props) => {
             </div>
         </Container>
     );
-}
+};
 export default ResignationForm;

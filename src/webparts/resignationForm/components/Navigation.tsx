@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { HashRouter, Switch, Route } from 'react-router-dom';
 import ItClearance from './IT/ITClearanceForm';
 import ResignationDashboard from './Resignations/ResignationDashboard';
 import ManagerApprovalForm from './Manager/ManagerApprovalForm';
@@ -26,7 +25,7 @@ const NavigationItem = (props) => {
     // });
 
     // let params = window.location.search;
-    let getParams = function (url) {
+    let getParams = (url) => {
         var params = {};
         var parser = document.createElement('a');
         parser.href = url;

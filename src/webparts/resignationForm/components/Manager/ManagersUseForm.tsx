@@ -12,13 +12,6 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     setDisable(true);
   }, []);
 
-  // For every changed in our state this will be fired
-  // To be able to disable the button
-  useEffect(() => {
-    if (isDirty) {
-      setDisable(validateState());
-    }
-  }, [state, isDirty]);
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
       const isInputFieldRequired = validationSchema[key].required;
@@ -30,6 +23,15 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
 
     return hasErrorInState;
   }, [state, validationSchema]);
+  // For every changed in our state this will be fired
+  // To be able to disable the button
+  useEffect(() => {
+    if (isDirty) {
+      setDisable(validateState());
+    }
+  }, [state, isDirty]);
+
+
 
  
 

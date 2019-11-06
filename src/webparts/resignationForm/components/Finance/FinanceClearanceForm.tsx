@@ -41,7 +41,7 @@ const FinanceClearance = (props) => {
             });
             setState(prevState => ({ ...prevState, stateSchema }));
         });
-    }
+    };
 
     useEffect(() => {
         if (userID) {
@@ -76,7 +76,7 @@ const FinanceClearance = (props) => {
                     console.log('Error while creating the item: ' + error);
                 });
         }
-    }
+    };
 
     const { state, setState, disable, handleOnChange, handleOnBlur, handleOnSubmit, saveForm } = useForm(
         stateSchema,
@@ -218,6 +218,6 @@ const FinanceClearance = (props) => {
             </form>
         </div>
     );
-}
+};
 
 export default FinanceClearance;
