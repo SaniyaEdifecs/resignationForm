@@ -57,7 +57,7 @@ const getOperationsClearanceList = () => {
 
     });
 };
-const OperationsAdminDashboard = () => {
+const OperationsAdminDashboard = (props) => {
 
     useEffect(() => {
         getOperationsClearanceList();

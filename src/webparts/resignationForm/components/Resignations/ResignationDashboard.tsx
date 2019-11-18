@@ -77,7 +77,7 @@ const ResignationDashboard = (props) => {
                 <ResignationForm context={props.context}   />
             </TabPanel>
             <TabPanel value={value} index={1}>
-                <ResignationList props={props}/>
+                <ResignationList />
             </TabPanel>
       
 

@@ -43,12 +43,12 @@ const getSalesForceClearanceList = () => {
         let userId = response.Id;
 
         if (userId && response.IsSiteAdmin) {
-            sp.web.lists.getByTitle("SalesForce%20Clearance").items.get().then((items: any) => {
+            sp.web.lists.getByTitle("SalesForceClearance").items.get().then((items: any) => {
                 EmployeeDetails = items;
             });
         }
         else {
-            sp.web.lists.getByTitle("SalesForce%20Clearance").items.getById(userId).get().then((items: any) => {
+            sp.web.lists.getByTitle("SalesForceClearance").items.getById(userId).get().then((items: any) => {
                 EmployeeDetails = items;
                 console.log("get a specific item by id", EmployeeDetails);
 

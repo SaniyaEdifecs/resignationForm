@@ -1,11 +1,10 @@
 import * as React from 'react';
-import { Typography, TextField, Button } from '@material-ui/core';
+import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox } from '@material-ui/core';
 import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import useForm from '../UseForm';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -17,15 +16,17 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const ItClearance = (props) => {
-    const classes = useStyles(0);
     let ID = props.props;
     let detail: any;
     let list = sp.web.lists.getByTitle("ItClearance");
     const [isUserExist, setUserExistence] = useState(false);
-    const [hideButton, setButtonVisibility] = useState();
-    const[loader, showLoader] = useState(false);
+    const [showButton, setButtonVisibility] = useState(true);
+    const [duesPending, setDuesPending] = useState();
+    const [isdisable, setDisable] = useState(false);
+    const [loader, showLoader] = useState(false);
+    const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments", 
+        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments",
     ];
 
     var stateSchema = {};
@@ -42,6 +43,9 @@ const ItClearance = (props) => {
         };
 
     });
+    const handleChange = (event) => {
+        setDuesPending({ ...state, ['duesPending']: event.target.checked });
+    };
 
 
     useEffect(() => {
@@ -49,26 +53,41 @@ const ItClearance = (props) => {
             getEmployeeClearanceDetails(ID);
         }
     }, []);
+
+    const getStatusdetails = (status) => {
+        switch (status) {
+            case "null" || "Not Started" || "Pending":
+                setButtonVisibility(true);
+                // setStatus("Pending");
+                break;
+            // case "Pending":
+            //     setButtonVisibility(true);
+            //     break;
+            case "Approved":
+                setDisable(true);
+                setButtonVisibility(false);
+                break;
+            default:
+                setButtonVisibility(true);
+                break;
+        }
+    };
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            console.log(detail)
-            if (detail.Status == null) {
-                setButtonVisibility(true);
-                setStatus("Pending"); // setting default value if it is null
-            } else if (detail.Status == "Pending") {
-                setButtonVisibility(true);
-            } else {
-                setButtonVisibility(false);
-            }
+            console.log(detail);
+            getStatusdetails(detail.Status);
             setUserExistence(true);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
+                    stateSchema[formField].error = "";
                 } else {
                     stateSchema[formField].value = detail[formField] + "";
+                    stateSchema[formField].error = "";
                 }
             });
+            console.log("getdetail", stateSchema);
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
@@ -104,6 +123,7 @@ const ItClearance = (props) => {
         }
     };
 
+
     const { state, setState, disable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
@@ -116,14 +136,17 @@ const ItClearance = (props) => {
         fontSize: '13px',
         margin: '0',
     };
+    console.log("showButton",showButton);
     return (
+        
         <div>
-             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
+            {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             {/* <p><Link to="/itClearanceDashboard">Dashboard</Link></p> */}
             <Typography variant="h5" component="h5">
                 IT Clearance
              </Typography>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
+
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
                         <tr>
@@ -136,82 +159,116 @@ const ItClearance = (props) => {
                         <tr>
                             <td>Mailbox and important data back-up</td>
                             <td>
-                                <TextField margin="normal" name="DataBackup" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataBackup.value} />
-                                {state.DataBackup.error && <p style={errorStyle}>{state.DataBackup.error}</p>}
+                                <FormControl>
+                                    <Select value={state.DataBackup.value} disabled={isdisable} id="DataBackup" onBlur={handleOnBlur} onChange={handleOnChange} name="DataBackup"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.DataBackup.error && <p style={errorStyle}>{state.DataBackup.error}</p>}
+                                </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="DataBackupComments" required value={state.DataBackupComments.value} onBlur={handleOnBlur} onChange={handleOnChange} />
+                                <TextField margin="normal" name="DataBackupComments" disabled={isdisable} required value={state.DataBackupComments.value} onBlur={handleOnBlur} onChange={handleOnChange} />
                                 {state.DataBackupComments.error && <p style={errorStyle}>{state.DataBackupComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
                             <td>Access Removal (Email, User Account, All applications)</td>
                             <td>
-                                <TextField margin="normal" name="AccessRemoval" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessRemoval.value} />
-                                {state.AccessRemoval.error && <p style={errorStyle}>{state.AccessRemoval.error}</p>}
+                                <FormControl>
+                                    <Select value={state.AccessRemoval.value} id="DataBackup" disabled={isdisable} onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemoval"  >
+                                        {options.map((option, index) => <MenuItem key={index} value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.AccessRemoval.error && <p style={errorStyle}>{state.AccessRemoval.error}</p>}
+                                </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="AccessRemovalComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessRemovalComments.value} />
+                                <TextField margin="normal" name="AccessRemovalComments" disabled={isdisable} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessRemovalComments.value} />
                                 {state.AccessRemovalComments.error && <p style={errorStyle}>{state.AccessRemovalComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
                             <td>Phone & SIM/Data card</td>
                             <td>
-                                <TextField margin="normal" name="DataCard" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataCard.value} />
-                                {state.DataCard.error && <p style={errorStyle}>{state.DataCard.error}</p>}
+                                <FormControl>
+                                    <Select value={state.DataCard.value} id="DataCard" disabled={isdisable} onBlur={handleOnBlur} onChange={handleOnChange} name="DataCard"  >
+                                        {options.map((option, index) => <MenuItem key={index} value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.DataCard.error && <p style={errorStyle}>{state.DataCard.error}</p>}
+                                </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="DataCardComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataCardComments.value} />
+                                <TextField margin="normal" name="DataCardComments" disabled={isdisable} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataCardComments.value} />
                                 {state.DataCardComments.error && <p style={errorStyle}>{state.DataCardComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
                             <td>Laptop/Desktop/Dock Station</td>
                             <td>
-                                <TextField margin="normal" name="Laptop_x002f_Desktop" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.Laptop_x002f_Desktop.value} />
-                                {state.Laptop_x002f_Desktop.error && <p style={errorStyle}>{state.Laptop_x002f_Desktop.error}</p>}
+                                <FormControl>
+                                    <Select value={state.Laptop_x002f_Desktop.value} disabled={isdisable} id="Laptop_x002f_Desktop" onBlur={handleOnBlur} onChange={handleOnChange} name="Laptop_x002f_Desktop"  >
+                                        {options.map((option, index) => <MenuItem key={index} value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.Laptop_x002f_Desktop.error && <p style={errorStyle}>{state.Laptop_x002f_Desktop.error}</p>}
+                                </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="DesktopComments" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DesktopComments.value} />
+                                <TextField margin="normal" name="DesktopComments" disabled={isdisable} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DesktopComments.value} />
                                 {state.DesktopComments.error && <p style={errorStyle}>{state.DesktopComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
                             <td>Access Card</td>
                             <td>
-                                <TextField margin="normal" name="AccessCard" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessCard.value} />
-                                {state.AccessCard.error && <p style={errorStyle}>{state.AccessCard.error}</p>}</td>
+                                <FormControl>
+                                    <Select value={state.AccessCard.value} disabled={isdisable} id="AccessCard" onBlur={handleOnBlur} onChange={handleOnChange} name="AccessCard"  >
+                                        {options.map((option, index) => <MenuItem key={index} value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.AccessCard.error && <p style={errorStyle}>{state.AccessCard.error}</p>}
+                                </FormControl>
+                            </td>
                             <td>
-                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="AccessCardComments" value={state.AccessCardComments.value} />
+                                <TextField margin="normal" disabled={isdisable} required onBlur={handleOnBlur} onChange={handleOnChange} name="AccessCardComments" value={state.AccessCardComments.value} />
                                 {state.AccessCardComments.error && <p style={errorStyle}>{state.AccessCardComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
                             <td>ID Card</td>
                             <td>
-                                <TextField margin="normal" name="IDCard" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.IDCard.value} />
-                                {state.IDCard.error && <p style={errorStyle}>{state.IDCard.error}</p>}
+                                <FormControl>
+                                    <Select value={state.IDCard.value} disabled={isdisable} id="IDCard" onBlur={handleOnBlur} onChange={handleOnChange} name="IDCard"  >
+                                        {options.map((option, index) => <MenuItem key={index} value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.IDCard.error && <p style={errorStyle}>{state.IDCard.error}</p>}
+                                </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="IDCardComments" value={state.IDCardComments.value} />
+                                <TextField margin="normal" required disabled={isdisable} onBlur={handleOnBlur} onChange={handleOnChange} name="IDCardComments" value={state.IDCardComments.value} />
                                 {state.IDCardComments.error && <p style={errorStyle}>{state.IDCardComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
                             <td>Others- Chargers, mouse, headphones etc</td>
                             <td>
-                                <TextField margin="normal" name="PeripheralDevices" required onBlur={handleOnBlur} onChange={handleOnChange} value={state.PeripheralDevices.value} />
-                                {state.PeripheralDevices.error && <p style={errorStyle}>{state.PeripheralDevices.error}</p>}
+                                <FormControl>
+                                    <Select value={state.PeripheralDevices.value} disabled={isdisable} required id="PeripheralDevices" onBlur={handleOnBlur} onChange={handleOnChange} name="PeripheralDevices"  >
+                                        {options.map((option, index) => <MenuItem key={index} value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.PeripheralDevices.error && <p style={errorStyle}>{state.PeripheralDevices.error}</p>}
+                                </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" required onBlur={handleOnBlur} onChange={handleOnChange} name="PeripheralDevicesComments0" value={state.PeripheralDevicesComments0.value} />
+                                <TextField margin="normal" required disabled={isdisable} onBlur={handleOnBlur} onChange={handleOnChange} name="PeripheralDevicesComments0" value={state.PeripheralDevicesComments0.value} />
                                 {state.PeripheralDevicesComments0.error && <p style={errorStyle}>{state.PeripheralDevicesComments0.error}</p>}
                             </td>
                         </tr>
-                        {hideButton ? <tr>
+                        {showButton ? <tr>
+                            <td colSpan={3}>
+                                <FormControlLabel control={<Checkbox name="DuesPending" checked={state.duesPending} onChange={handleChange} value={duesPending} />} label="Dues Pending" />
+                            </td>
+                        </tr> : null}
+                        {showButton ? <tr>
                             <td colSpan={3} >
-                                <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
+                                {/* <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button> */}
                                 {disable == true ? <div className="inlineBlock">
                                     <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
@@ -222,7 +279,7 @@ const ItClearance = (props) => {
                     </tbody>
                 </table>
             </form>
-        </div>
+        </div >
     );
 };
 

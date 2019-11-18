@@ -5,6 +5,7 @@ import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, Inpu
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import Hidden from '@material-ui/core/Hidden';
+import '../ClearanceDashboard';
 
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
@@ -24,11 +25,11 @@ const ResignationForm = (props) => {
         "ManagerLastName",
         "ManagerEmail",
         "ResignationSummary",
-        "ID"
     ];
 
     var stateSchema = {};
     var validationStateSchema = {};
+    let selectedOption = 0
     formFields.forEach(formField => {
         stateSchema[formField] = {};
         stateSchema[formField].value = "";
@@ -41,8 +42,31 @@ const ResignationForm = (props) => {
         };
 
     });
+    const getPeoplePickerItems = (items) => {
+        if (items) {
+          let peoplePickerValue = items[0];
+          let fullName = peoplePickerValue.text.split(' ');
+          let mFirstName = fullName[0];
+          let mLastName = fullName[fullName.length - 1];
+          let mEmail = peoplePickerValue.secondaryText;
+          console.log(mEmail, mLastName, mFirstName);
+          setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: " " }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
+        }
+      };
+    
+      const _getPeoplePickerItems = (items) => {
+        if (items) {
+          let peoplePickerValue = items[0];
+          let fullName = peoplePickerValue.text.split(' ');
+          let eFirstName = fullName[0];
+          let eLastName = fullName[fullName.length - 1];
+          let eEmail = peoplePickerValue.secondaryText;
+          console.log(eEmail, eLastName, eFirstName);
+          setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: " " }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
+        }
+      };
 
-    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, getPeoplePickerItems, _getPeoplePickerItems } = useForm(
+    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
@@ -55,14 +79,11 @@ const ResignationForm = (props) => {
 
     const getEmployeeResignationDetails = (employeeID) => {
         sp.web.lists.getByTitle("ResignationList").items.getById(employeeID).get().then((detail: any) => {
-            console.log("\n\n\nemployee regignation details - \n\n\n", detail);
             formFields.forEach(formField => {
                 stateSchema[formField].value = detail[formField] + "";
             });
             setState(prevState => ({ ...prevState, stateSchema }));
-
             setDisable(true);
-            console.log("\n\n\nstateSchema - \n\n\n", stateSchema);
         });
     };
     useEffect(() => {
@@ -72,21 +93,32 @@ const ResignationForm = (props) => {
     }, []);
 
     const addListItem = (elements) => {
-        let userId = props.props;
-        elements = { ...elements, EmployeeName: state.WorkEmail, ManagerName: state.ManagerEmail };
+        let ID = props.props;
+        elements = { ...elements, EmployeeName: state.FirstName + " " + state.LastName, ManagerName: state.ManagerFirstName + " " +state.ManagerLastName };
         let list = sp.web.lists.getByTitle("ResignationList");
-        // console.log("elemets====", elements);
-        if (userId) {
-            elements = { ...elements, 'ID': userId };
-            list.items.getById(userId).update(elements).then(response => {
+        if (ID) {
+            elements = { ...elements, 'ID': ID }; // remove ID
+            list.items.getById(ID).update(elements).then(response => {
                 console.log("updated", response);
                 setState(stateSchema);
+                //  redirect to dashboard
             });
         } else {
+            elements = {...elements, 'Status': 'In Progress'};
             list.items.add(elements).then((response: ItemAddResult): void => {
-                const item = response.data as string;
+                let item = response.data;
+                console.log("check here id value",item);
                 if (item) {
-                    console.log("added", elements);
+                    sp.web.lists.getByTitle("ItClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    });
+                    sp.web.lists.getByTitle("ManagersClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    });
+                    sp.web.lists.getByTitle("OperationsClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    });
+                    sp.web.lists.getByTitle("Finance%20Clearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    });
+                    sp.web.lists.getByTitle("SalesForceClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    });
                     setState(stateSchema);
                 }
             }, (error: any): void => {
@@ -99,24 +131,26 @@ const ResignationForm = (props) => {
         for (const key in state) {
             state[key] = state[key].value;
         }
-        console.log(state);
         addListItem(state);
     }
 
     return (
-        <Container component="main" maxWidth="xs">
-            <Typography variant="h5" component="h3">
-                Resignation Form
-            </Typography>
-            <div>
+        <Container component="main">
+            <div className="formView">
+                <Typography variant="h5" component="h3">
+                    Resignation Form
+                </Typography>
                 <form onSubmit={handleOnSubmit}>
-                    <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on play slip" />
-                    {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                     <Grid container spacing={2}>
-                        <Grid item sm={12}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on play slip" />
+                            {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
                             <PeoplePicker context={props.context} defaultSelectedUsers={[state.WorkEmail.value]} ensureUser={true} titleText="Employee Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={_getPeoplePickerItems} showHiddenInUI={false} principalTypes={[PrincipalType.User]} resolveDelay={100} />
                         </Grid>
                     </Grid>
+
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable}
@@ -129,49 +163,57 @@ const ResignationForm = (props) => {
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
-                    <Hidden>
+                    {/* <Hidden xsUp>
                         <TextField variant="outlined" margin="normal" fullWidth label="ID" value={state.ID.value} name="ID" onBlur={handleOnBlur} onChange={handleOnChange} />
-                    </Hidden>
-
-                    <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
-                        value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onBlur={handleOnBlur} onChange={handleOnChange} />
-                    {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
-
-                    <TextField variant="outlined" margin="normal" required fullWidth label="Personal Email" value={state.PersonalEmail.value} name="PersonalEmail" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} />
-                    {state.PersonalEmail.error && <p style={errorStyle}>{state.PersonalEmail.error}</p>}
-
-                    <FormControl variant="outlined" className="fullWidth">
-                        <InputLabel htmlFor="reason">Reason for Resignation</InputLabel>
-                        <Select value={state.ResignationReason.value} id="reason" onChange={handleOnChange} name="ResignationReason"  >
-                            {resignationReasonList.map((list, index) => <MenuItem key={index} value={list}>{list}</MenuItem>)}
-                        </Select>
-                        {state.ResignationReason.error && <p style={errorStyle}>{state.ResignationReason.error}</p>}
-                    </FormControl>
-
-                    <TextField variant="outlined" margin="normal" fullWidth label="Specify(If other is selected)" disabled={isdisable}
-                        value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
-                    {state.OtherReason.error && <p style={errorStyle}>{state.OtherReason.error}</p>}
-
-                    <TextField variant="outlined" margin="normal" required fullWidth label="Department" disabled={isdisable}
-                        value={state.Department.value} name="Department" onChange={handleOnChange} onBlur={handleOnBlur} />
-                    {state.Department.error && <p style={errorStyle}>{state.Department.error}</p>}
-
-                    <TextField variant="outlined" margin="normal" required fullWidth label="Title" disabled={isdisable}
-                        value={state.JobTitle.value} name="JobTitle" onChange={handleOnChange} onBlur={handleOnBlur} />
-                    {state.JobTitle.error && <p style={errorStyle}>{state.JobTitle.error}</p>}
-
+                    </Hidden> */}
                     <Grid container spacing={2}>
-                        <Grid item sm={12}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
+                                value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onBlur={handleOnBlur} onChange={handleOnChange} />
+                            {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Personal Email" value={state.PersonalEmail.value} name="PersonalEmail" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} />
+                            {state.PersonalEmail.error && <p style={errorStyle}>{state.PersonalEmail.error}</p>}
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <FormControl variant="outlined" className="fullWidth">
+                                <InputLabel htmlFor="reason">Reason for Resignation</InputLabel>
+                                <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} id="reason" onChange={handleOnChange} name="ResignationReason"  >
+                                    {resignationReasonList.map((list, index) => <MenuItem key={index} value={list}>{list}</MenuItem>)}
+                                </Select>
+                                {state.ResignationReason.error && <p style={errorStyle}>{state.ResignationReason.error}</p>}
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Specify(If other is selected)" disabled={isdisable} value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            {state.OtherReason.error && <p style={errorStyle}>{state.OtherReason.error}</p>}
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Department" disabled={isdisable}
+                                value={state.Department.value} name="Department" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            {state.Department.error && <p style={errorStyle}>{state.Department.error}</p>}
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Title" disabled={isdisable}
+                                value={state.JobTitle.value} name="JobTitle" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            {state.JobTitle.error && <p style={errorStyle}>{state.JobTitle.error}</p>}
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item sm={4}>
                             <PeoplePicker context={props.context} disabled={isdisable} defaultSelectedUsers={[state.ManagerEmail.value]} ensureUser={true} titleText="Manager Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
                                 principalTypes={[PrincipalType.User]} resolveDelay={100} />
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={4}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={state.ManagerFirstName.value} disabled={isdisable} name="ManagerFirstName" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.ManagerFirstName.error && <p style={errorStyle}>{state.ManagerFirstName.error}</p>}
-
                         </Grid>
-
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={4}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" disabled={isdisable} value={state.ManagerLastName.value} name="ManagerLastName" autoComplete="lastName" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.ManagerLastName.error && <p style={errorStyle}>{state.ManagerLastName.error}</p>}
 
@@ -181,10 +223,10 @@ const ResignationForm = (props) => {
                     <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} name="ManagerEmail" onChange={handleOnChange} onBlur={handleOnBlur} />
                     {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
 
-                    <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Resignation Summary" name="ResignationSummary" value={state.ResignationSummary.value} placeholder="Resignation Summary" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
+                    <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Resignation Summary" name="ResignationSummary" required value={state.ResignationSummary.value} placeholder="Resignation Summary" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
                     {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>}
 
-                    <Button type="submit" fullWidth className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
+                    <Button type="submit"  className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
                 </form>
             </div>
         </Container>

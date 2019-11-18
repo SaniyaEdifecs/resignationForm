@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Typography, TextField, Button } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, Checkbox } from '@material-ui/core';
 import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import useForm from '../UseForm';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
-import Paper from '@material-ui/core/Paper';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -15,13 +15,15 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 const SalesForceClearance = (props) => {
-    const classes = useStyles(0);
     let ID = props.props;
     let detail: any;
-    let list = sp.web.lists.getByTitle("SalesForce%20Clearance");
+    let list = sp.web.lists.getByTitle("SalesForceClearance");
     const [isUserExist, setUserExistence] = useState(false);
     const [hideButton, setButtonVisibility] = useState();
-    const formFields = ["LicenseTermination", "LicenseTerminationComment", "Status"];
+    const [isdisable, setDisable] = useState(false);
+    const [loader, showLoader] = useState(false);
+    const options = ['Yes', 'No', 'NA'];
+    const formFields = ["LicenseTermination", "LicenseTerminationComment"];
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -37,12 +39,14 @@ const SalesForceClearance = (props) => {
     });
 
     const onSubmitForm = (value) => {
+        showLoader(true);
         for (const key in value) {
             value[key] = value[key].value;
         }
         value = { ...value, 'Status': status };
         if (isUserExist) {
             list.items.getById(ID).update(value).then(i => {
+                showLoader(false);
                 getEmployeeClearanceDetails(ID);
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
@@ -52,6 +56,7 @@ const SalesForceClearance = (props) => {
             list.items.add(value).then((response: ItemAddResult): void => {
                 const item = response.data as string;
                 if (item) {
+                    showLoader(false);
                     getEmployeeClearanceDetails(ID);
                 }
             }, (error: any): void => {
@@ -70,23 +75,33 @@ const SalesForceClearance = (props) => {
         fontSize: '13px',
         margin: '0',
     };
+    const getStatusdetails = (status) => {
+        switch (status) {
+            case "null":
+                setButtonVisibility(true);
+                setStatus("Pending");
+                break;
+            case "Pending":
+                setButtonVisibility(true);
+                break;
+            case "Approved":
+                setDisable(true);
+                break;
+            default:
+                setButtonVisibility(false);
+                break;
+        }
+    };
 
     const getEmployeeClearanceDetails = (employeeID) => {
-        list.items.getById(employeeID).get().then((detail: any) => {
-            detail = detail;
-            if (detail.Status == null) {
-                setButtonVisibility(true);
-                setStatus("Pending"); // setting default value if it is null
-            } else if (detail.Status == "Pending") {
-                setButtonVisibility(true);
-            } else {
-                setButtonVisibility(false);
-            }
+        list.items.getById(employeeID).get().then((response: any) => {
+            detail = response;
+            getStatusdetails(detail.Status);
             setUserExistence(true);
             formFields.forEach(formField => {
-                if(detail[formField] == null){
+                if (detail[formField] == null) {
                     stateSchema[formField].value = "";
-                }else{
+                } else {
                     stateSchema[formField].value = detail[formField] + "";
                 }
             });
@@ -106,6 +121,7 @@ const SalesForceClearance = (props) => {
 
     return (
         <div>
+            {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             {/* <p><Link to="/salesForceDashboard">Dashboard</Link></p> */}
             <Typography variant="h5" component="h5">
                 SalesForce Clearance
@@ -122,9 +138,15 @@ const SalesForceClearance = (props) => {
                     <tbody>
                         <tr>
                             <td>SFDC License Termination: Kiranpreet Kaur</td>
-                            <td><TextField margin="normal" name="LicenseTermination" autoFocus required onChange={handleOnChange} onBlur={handleOnBlur} value={state.LicenseTermination.value} />
-                                {state.LicenseTermination.error && <p style={errorStyle}>{state.LicenseTermination.error}</p>}</td>
-                            <td><TextField margin="normal" name="LicenseTerminationComment" required onChange={handleOnChange} onBlur={handleOnBlur} value={state.LicenseTerminationComment.value} />
+                            <td>
+                                <FormControl>
+                                    <Select value={state.LicenseTermination.value} disabled={isdisable} id="LicenseTermination" onBlur={handleOnBlur} onChange={handleOnChange} name="LicenseTermination"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.LicenseTermination.error && <p style={errorStyle}>{state.LicenseTermination.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td><TextField margin="normal" disabled={isdisable} name="LicenseTerminationComment" required onChange={handleOnChange} onBlur={handleOnBlur} value={state.LicenseTerminationComment.value} />
                                 {state.LicenseTerminationComment.error && <p style={errorStyle}>{state.LicenseTerminationComment.error}</p>}</td>
                         </tr>
                         {hideButton ? <tr>

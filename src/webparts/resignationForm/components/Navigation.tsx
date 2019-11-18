@@ -1,7 +1,7 @@
 import * as React from 'react';
+import { useEffect } from 'react';
 import ItClearance from './IT/ITClearanceForm';
 import ResignationDashboard from './Resignations/ResignationDashboard';
-import ManagerApprovalForm from './Manager/ManagerApprovalForm';
 import OperationsAdminClearance from './OperationsAdmin/OperationsAdminClearanceForm';
 import FinanceClearance from './Finance/FinanceClearanceForm';
 import SalesForceClearance from './SalesForce/SalesForceClearanceForm';
@@ -10,21 +10,17 @@ import ITClearanceDashboard from './IT/ITClearanceDashboard';
 import OperationsAdminDashboard from './OperationsAdmin/OperationsAdminDashboard';
 import SalesForceDashboard from './SalesForce/SalesForceDashboard';
 import ManagerClearance from './Manager/ManagerClearanceForm';
+import ManagerClearanceDashboard from './Manager/ManagerClearanceDashboard';
+import ResignationDetail from './Resignations/ResignationDetail';
 import ClearanceDashboard from './ClearanceDashboard';
 import { sp } from '@pnp/sp';
 import ResignationForm from './Resignations/ResignationForm';
+import ResignationList from './Resignations/ResignationList';
 
 const NavigationItem = (props) => {
     let ID: any;
     let context = props.context;
-
-    // sp.web.currentUser.get().then((response) => {
-    //     ID = response.Id;
-    //     IsSiteAdmin = response.IsSiteAdmin;
-    //     console.log("IsSiteAdmin", IsSiteAdmin);
-    // });
-
-    // let params = window.location.search;
+    var employeeData: any = [];
     let getParams = (url) => {
         var params = {};
         var parser = document.createElement('a');
@@ -39,16 +35,27 @@ const NavigationItem = (props) => {
     };
 
     let paramvalues = getParams(window.location.search);
+    let data: any = [];
+
+    sp.web.currentUser.get().then((response) => {
+        // console.log("navigation", response);
+        data = response;
+    });
+
+
+
     const renderChilds = () => {
         switch (paramvalues['component']) {
-            case "ItClearance":
+            case "itClearance":
                 return <ItClearance props={paramvalues['Id']} />;
-            case "managerApproval":
-                return <ManagerApprovalForm props={paramvalues['Id']} />;
+            case "itClearanceDashboard":
+                return <ITClearanceDashboard props={paramvalues['Id']} />;
             case "managerClearance":
                 return <ManagerClearance props={paramvalues['Id']} />;
+            case "managerClearanceDashboard":
+                return <ManagerClearanceDashboard props={paramvalues['Id']} />;
             case "operationsAdminDashboard":
-                return <OperationsAdminDashboard />;
+                return <OperationsAdminDashboard props={paramvalues['Id']} />;
             case "operationsClearance":
                 return <OperationsAdminClearance props={paramvalues['Id']} />;
             case "financeClearance":
@@ -59,13 +66,15 @@ const NavigationItem = (props) => {
                 return <SalesForceDashboard />;
             case "hrClearance":
                 return <HrClearance props={paramvalues['Id']} />;
-            case "itClearanceDashboard":
-                return <ITClearanceDashboard />;
-            case "ResignationForm":
-                return <ResignationForm context={context} props={paramvalues['Id']}/>;
+            case "resignationDashboard":
+                return <ResignationList />;
+            case "resignationForm":
+                return <ResignationForm context={context} props={paramvalues['Id']} />;
+            case "resignationDetail":
+                return <ResignationDetail  props={paramvalues['Id']} />;
             default:
-                return <ResignationForm  context={context} />;
-
+                return <ResignationForm context={context} />;
+            // return <h1>No Page Found</h1>;
         }
     };
 

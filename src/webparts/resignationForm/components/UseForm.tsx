@@ -14,8 +14,10 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
       const isInputFieldRequired = validationSchema[key].required;
-      const stateValue = state[key].value; // state value
-      const stateError = state[key].error; // state error
+       const stateValue = state[key].value; // state value
+       const stateError = state[key].error;
+    
+      // state error
       return (isInputFieldRequired && !stateValue) || stateError;
     });
 
@@ -38,13 +40,21 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       setStatus("Approved");
     }
   }, [state]);
-
+  let name: any;
+  let value: any;
   const checkValidation = (event) => {
     setIsDirty(true);
-    const name = event.target.name;
-    const value = event.target.value;
+    console.log(event.target.type);
+    if (event.target.type == "checkbox") {
+      name = event.target.name;
+      value = event.target.checked;
+    } else {
+      name = event.target.name;
+      value = event.target.value;
+    }
+    // console.log(name, value);
     let error = '';
-    if (validationSchema[name].required) {
+    if (name != "DuesPending" && validationSchema[name].required) {
       if (!value) {
         error = 'This is required field.';
       }
@@ -56,8 +66,8 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       //     error = validationSchema[name].validator.error;
       //   }
       // }
-     } 
-     if (value.toLowerCase() == "no") {
+    }
+    if ((event.target.type != "text" && event.target.type != "textarea") && (name != "DuesPending" && value.toLowerCase() == "no" )) {
       error = "Dues Pending";
     }
     setState(prevState => ({
@@ -69,46 +79,17 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   // Used to handle every changes in every input
   const handleOnBlur = useCallback(
     event => {
-      checkValidation(event);
+        checkValidation(event);
     },
     [validationSchema]
   );
 
   const handleOnChange = useCallback(
     event => {
-      checkValidation(event);
+        checkValidation(event);
     },
     [validationSchema]
   );
-
-  const getPeoplePickerItems = useCallback(items => {
-    console.log("people picker", items);
-    // const getPeoplePickerItems = (items: any[]) => {
-    if (items) {
-      let peoplePickerValue = items[0];
-      let fullName = peoplePickerValue.text.split(' ');
-      let mFirstName = fullName[0];
-      let mLastName = fullName[fullName.length - 1];
-      let mEmail = peoplePickerValue.secondaryText;
-      console.log(mEmail, mLastName, mFirstName);
-      setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: " " }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
-    }
-  }, [validationSchema]);
-
-  const _getPeoplePickerItems = useCallback(items => {
-    console.log("people picker", items);
-    // const getPeoplePickerItems = (items: any[]) => {
-    if (items) {
-
-      let peoplePickerValue = items[0];
-      let fullName = peoplePickerValue.text.split(' ');
-      let eFirstName = fullName[0];
-      let eLastName = fullName[fullName.length - 1];
-      let eEmail = peoplePickerValue.secondaryText;
-      console.log(eEmail, eLastName, eFirstName);
-      setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: " " }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
-    }
-  }, [validationSchema]);
 
   const saveForm = useCallback(
     event => {
@@ -127,7 +108,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     },
     [state]
   );
-  return { state, disable, saveForm,status, setStatus, handleOnChange, setState, handleOnBlur, handleOnSubmit, getPeoplePickerItems, _getPeoplePickerItems };
+  return { state, disable, saveForm, status, setStatus, handleOnChange, setState, handleOnBlur, handleOnSubmit };
 };
 
 export default useForm;
