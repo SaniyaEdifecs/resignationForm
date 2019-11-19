@@ -108,7 +108,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     },
     [state]
   );
-  return { state, disable, saveForm, status, setStatus, handleOnChange, setState, handleOnBlur, handleOnSubmit };
+  return { state, disable, saveForm, status, setStatus, setIsDirty , handleOnChange, setState, handleOnBlur, handleOnSubmit };
 };
 
 export default useForm;

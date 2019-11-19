@@ -42,31 +42,40 @@ const ResignationForm = (props) => {
         };
 
     });
-    const getPeoplePickerItems = (items) => {
-        if (items) {
+  
+     const getPeoplePickerItems = (items) => {
+        if (items[0]) {
+            setIsDirty(true);
           let peoplePickerValue = items[0];
           let fullName = peoplePickerValue.text.split(' ');
           let mFirstName = fullName[0];
           let mLastName = fullName[fullName.length - 1];
           let mEmail = peoplePickerValue.secondaryText;
           console.log(mEmail, mLastName, mFirstName);
-          setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: " " }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
+          setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: "" }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
+        }
+        else{
+            setState(prevState => ({...prevState}));
         }
       };
     
       const _getPeoplePickerItems = (items) => {
-        if (items) {
+        if (items[0]) {
+            setIsDirty(true);
           let peoplePickerValue = items[0];
           let fullName = peoplePickerValue.text.split(' ');
           let eFirstName = fullName[0];
           let eLastName = fullName[fullName.length - 1];
           let eEmail = peoplePickerValue.secondaryText;
           console.log(eEmail, eLastName, eFirstName);
-          setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: " " }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
+          setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
+        }
+        else{
+            setState(prevState => ({ ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }), ['WorkEmail']: ({ value: "", error: "" }), ['ID']: ({ value: "", error: "" }) }));
         }
       };
 
-    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur } = useForm(
+    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
@@ -154,12 +163,11 @@ const ResignationForm = (props) => {
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable}
-                                label="First Name" value={state.FirstName.value} name="FirstName" autoComplete="off" onBlur={handleOnBlur} onChange={handleOnChange} />
+                                label="First Name" value={state.FirstName.value} name="FirstName" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.FirstName.error && <p style={errorStyle}>{state.FirstName.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" disabled={isdisable} margin="normal" required fullWidth label="Last Name" onBlur={handleOnBlur} value={state.LastName.value}
-                                name="LastName" autoComplete="off" onChange={handleOnChange} />
+                            <TextField variant="outlined" disabled={isdisable} margin="normal" required fullWidth label="Last Name"  value={state.LastName.value}  name="LastName" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
@@ -169,7 +177,7 @@ const ResignationForm = (props) => {
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
-                                value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onBlur={handleOnBlur} onChange={handleOnChange} />
+                                value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -181,7 +189,7 @@ const ResignationForm = (props) => {
                         <Grid item xs={12} sm={6}>
                             <FormControl variant="outlined" className="fullWidth">
                                 <InputLabel htmlFor="reason">Reason for Resignation</InputLabel>
-                                <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} id="reason" onChange={handleOnChange} name="ResignationReason"  >
+                                <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} id="reason" onChange={handleOnChange} onBlur={handleOnBlur} name="ResignationReason"  >
                                     {resignationReasonList.map((list, index) => <MenuItem key={index} value={list}>{list}</MenuItem>)}
                                 </Select>
                                 {state.ResignationReason.error && <p style={errorStyle}>{state.ResignationReason.error}</p>}
@@ -210,17 +218,17 @@ const ResignationForm = (props) => {
                                 principalTypes={[PrincipalType.User]} resolveDelay={100} />
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={state.ManagerFirstName.value} disabled={isdisable} name="ManagerFirstName" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={state.ManagerFirstName.value} onChange={handleOnChange} onBlur={handleOnBlur} disabled={isdisable} name="ManagerFirstName" />
                             {state.ManagerFirstName.error && <p style={errorStyle}>{state.ManagerFirstName.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" disabled={isdisable} value={state.ManagerLastName.value} name="ManagerLastName" autoComplete="lastName" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" disabled={isdisable} value={state.ManagerLastName.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerLastName" autoComplete="lastName"  />
                             {state.ManagerLastName.error && <p style={errorStyle}>{state.ManagerLastName.error}</p>}
 
                         </Grid>
                     </Grid>
 
-                    <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} name="ManagerEmail" onChange={handleOnChange} onBlur={handleOnBlur} />
+                    <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail"  />
                     {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
 
                     <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Resignation Summary" name="ResignationSummary" required value={state.ResignationSummary.value} placeholder="Resignation Summary" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
