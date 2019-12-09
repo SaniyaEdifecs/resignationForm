@@ -4,8 +4,6 @@ import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/People
 import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
-import Hidden from '@material-ui/core/Hidden';
-import '../ClearanceDashboard';
 
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
@@ -16,7 +14,7 @@ const ResignationForm = (props) => {
         "FirstName",
         "LastName",
         "WorkEmail",
-        "PersonalEmail",
+        // "PersonalEmail",
         "ResignationReason",
         "OtherReason",
         "Department",
@@ -29,7 +27,7 @@ const ResignationForm = (props) => {
 
     var stateSchema = {};
     var validationStateSchema = {};
-    let selectedOption = 0
+    let selectedOption = 0;
     formFields.forEach(formField => {
         stateSchema[formField] = {};
         stateSchema[formField].value = "";
@@ -120,13 +118,17 @@ const ResignationForm = (props) => {
                 if (item) {
                     sp.web.lists.getByTitle("ItClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("ManagersClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("ManagersClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started",ManagerEmail: elements.ManagerEmail}).then((response: ItemAddResult) => {
                     });
                     sp.web.lists.getByTitle("OperationsClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
                     });
                     sp.web.lists.getByTitle("Finance%20Clearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
                     });
                     sp.web.lists.getByTitle("SalesForceClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    });
+                    sp.web.lists.getByTitle("SalesForceClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    });
+                    sp.web.lists.getByTitle("Employee%20Details").items.add({EmployeeNameId: item.ID}).then((response: ItemAddResult) => {
                     });
                     setState(stateSchema);
                 }
@@ -147,12 +149,12 @@ const ResignationForm = (props) => {
         <Container component="main">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                    Resignation Form
+                    Clearance Form
                 </Typography>
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on play slip" />
+                            <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" />
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -175,15 +177,15 @@ const ResignationForm = (props) => {
                         <TextField variant="outlined" margin="normal" fullWidth label="ID" value={state.ID.value} name="ID" onBlur={handleOnBlur} onChange={handleOnChange} />
                     </Hidden> */}
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={12}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
                                 value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
                         </Grid>
-                        <Grid item xs={12} sm={6}>
+                        {/* <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Personal Email" value={state.PersonalEmail.value} name="PersonalEmail" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} />
                             {state.PersonalEmail.error && <p style={errorStyle}>{state.PersonalEmail.error}</p>}
-                        </Grid>
+                        </Grid> */}
                     </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>

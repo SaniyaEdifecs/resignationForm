@@ -3,17 +3,9 @@ import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Selec
 import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import useForm from '../UseForm';
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            padding: theme.spacing(3, 2),
-        },
-    }),
-);
 const ManagerClearance = (props) => {
     let ID = props.props;
     let detail: any;
@@ -29,7 +21,6 @@ const ManagerClearance = (props) => {
     ];
 
     var stateSchema = {};
-
     var validationStateSchema = {};
     formFields.forEach(formField => {
         stateSchema[formField] = {};
@@ -44,8 +35,10 @@ const ManagerClearance = (props) => {
 
     });
 
+    const handleChange = (event) => {
+        setDuesPending({ ...state, ['duesPending']: event.target.checked });
+    };
     useEffect(() => {
-   
         if (ID) {
             getEmployeeClearanceDetails(ID);
         }
@@ -101,8 +94,7 @@ const ManagerClearance = (props) => {
         if (isUserExist) {
             list.items.getById(ID).update(value).then(i => {
                 showLoader(false);
-                getEmployeeClearanceDetails(ID);
-
+                window.location.href = "?component=managerClearanceDashboard";
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
@@ -112,28 +104,23 @@ const ManagerClearance = (props) => {
                 const item = response.data as string;
                 if (item) {
                     showLoader(false);
-                    getEmployeeClearanceDetails(ID);
+                    window.location.href = "?component=managerClearanceDashboard";
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
         }
     };
-
-
     const { state, setState, disable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
-
-    );
-
+   );
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
         margin: '0',
     };
-
 
     return (
         <div>
@@ -261,7 +248,7 @@ const ManagerClearance = (props) => {
                             <td colSpan={3} >
                                 <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
                                 {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
                                 </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>

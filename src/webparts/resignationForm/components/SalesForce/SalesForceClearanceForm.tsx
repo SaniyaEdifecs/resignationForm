@@ -3,17 +3,9 @@ import { Typography, TextField, Button, MenuItem, FormControl, Select, FormContr
 import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import useForm from '../UseForm';
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            padding: theme.spacing(3, 2),
-        },
-    }),
-);
 const SalesForceClearance = (props) => {
     let ID = props.props;
     let detail: any;
@@ -47,7 +39,9 @@ const SalesForceClearance = (props) => {
         if (isUserExist) {
             list.items.getById(ID).update(value).then(i => {
                 showLoader(false);
-                getEmployeeClearanceDetails(ID);
+                // getEmployeeClearanceDetails(ID);
+                window.location.href = "?component=salesForceDashboard";
+
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
@@ -57,15 +51,56 @@ const SalesForceClearance = (props) => {
                 const item = response.data as string;
                 if (item) {
                     showLoader(false);
-                    getEmployeeClearanceDetails(ID);
+                    window.location.href = "?component=salesForceDashboard";
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
         }
     };
+    useEffect(() => {
+        if (ID) {
+            getEmployeeClearanceDetails(ID);
+        }
+    }, []);
 
-    const { state, disable, status, setStatus, handleOnChange, handleOnBlur, handleOnSubmit, setState, saveForm } = useForm(
+    const getStatusdetails = (status) => {
+        switch (status) {
+            case "null" || "Not Started" || "Pending":
+                setButtonVisibility(true);
+                break;
+            case "Approved":
+                setDisable(true);
+                setButtonVisibility(false);
+                break;
+            default:
+                setButtonVisibility(true);
+                break;
+        }
+    };
+    const getEmployeeClearanceDetails = (employeeID) => {
+        list.items.getById(employeeID).get().then((response: any) => {
+            detail = response;
+            getStatusdetails(detail.Status);
+            setUserExistence(true);
+            formFields.forEach(formField => {
+                if (detail[formField] == null) {
+                    stateSchema[formField].value = "";
+                    stateSchema[formField].error = "";
+                } else {
+                    stateSchema[formField].value = detail[formField] + "";
+                    stateSchema[formField].error = "";
+                }
+            });
+            console.log("getdetail", stateSchema);
+            setState(prevState => ({ ...prevState, stateSchema }));
+        }, (error: any): void => {
+            setButtonVisibility(true);
+            console.log('Error while creating the item: ' + error);
+        });
+    };
+
+    const { state, disable, status, handleOnChange, handleOnBlur, handleOnSubmit, setState, saveForm } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
@@ -75,50 +110,6 @@ const SalesForceClearance = (props) => {
         fontSize: '13px',
         margin: '0',
     };
-    const getStatusdetails = (status) => {
-        switch (status) {
-            case "null":
-                setButtonVisibility(true);
-                setStatus("Pending");
-                break;
-            case "Pending":
-                setButtonVisibility(true);
-                break;
-            case "Approved":
-                setDisable(true);
-                break;
-            default:
-                setButtonVisibility(false);
-                break;
-        }
-    };
-
-    const getEmployeeClearanceDetails = (employeeID) => {
-        list.items.getById(employeeID).get().then((response: any) => {
-            detail = response;
-            getStatusdetails(detail.Status);
-            setUserExistence(true);
-            formFields.forEach(formField => {
-                if (detail[formField] == null) {
-                    stateSchema[formField].value = "";
-                } else {
-                    stateSchema[formField].value = detail[formField] + "";
-                }
-            });
-            setState(prevState => ({ ...prevState, stateSchema }));
-        }, (error: any): void => {
-            setButtonVisibility(true);
-            console.log('Error while creating the item: ' + error);
-        });
-    };
-
-    useEffect(() => {
-        if (ID) {
-            getEmployeeClearanceDetails(ID);
-        }
-    }, []);
-
-
     return (
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
@@ -153,7 +144,7 @@ const SalesForceClearance = (props) => {
                             <td colSpan={3} >
                                 <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
                                 {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
                                 </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>

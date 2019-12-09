@@ -26,10 +26,11 @@ const StyledTableRow = withStyles((theme: Theme) =>
         },
     }),
 )(TableRow);
-const SalesForceDashboard = (props) => {
+
+const EmployeeDashboard = (props) => {
     const [employeeData, setEmployeeDetail] = useState();
     const getClearanceList = () => {
-        sp.web.lists.getByTitle("SalesForceClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
+        sp.web.lists.getByTitle("Employee%20Details").items.select('Id', 'Status', 'EmployeeName/Id', 'FirstName','LastName').expand("EmployeeName").get().then((items) => {
             if (items.length > 0) {
                 setEmployeeDetail(items);
             }
@@ -40,7 +41,7 @@ const SalesForceDashboard = (props) => {
     }, []);
 
     const handleClick = (event) => {
-        window.location.href = "?component=salesForceClearance&userId=" + event;
+        window.location.href = "?component=employeeDetails&userId=" + event;
     };
 
     return (
@@ -55,19 +56,21 @@ const SalesForceDashboard = (props) => {
                             <TableRow>
                                 <StyledTableCell>ID</StyledTableCell>
                                 <StyledTableCell >Employee Code</StyledTableCell>
-                                <StyledTableCell >Employee Name</StyledTableCell>
-                                <StyledTableCell >Manager name</StyledTableCell>
-                                <StyledTableCell >Status</StyledTableCell>
+                                <StyledTableCell >First Name</StyledTableCell>
+                                <StyledTableCell >Last name</StyledTableCell>
+                                <StyledTableCell >Personal Email</StyledTableCell>
+                                <StyledTableCell >Personal Phone</StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
                             {employeeData ? employeeData.map(EmployeeDetail => (
                                 <StyledTableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
                                     <StyledTableCell component="th" scope="row">{EmployeeDetail.Id}</StyledTableCell>
-                                    <StyledTableCell> {EmployeeDetail.EmployeeName.EmployeeCode}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetail.EmployeeName.EmployeeName}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetail.EmployeeName.ManagerName}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetail.Status}</StyledTableCell>
+                                    <StyledTableCell> {EmployeeDetail.EmployeeCode}</StyledTableCell>
+                                    <StyledTableCell >{EmployeeDetail.FirstName}</StyledTableCell>
+                                    <StyledTableCell >{EmployeeDetail.LastName}</StyledTableCell>
+                                    <StyledTableCell >{EmployeeDetail.PersonalEmail}</StyledTableCell>
+                                    <StyledTableCell >{EmployeeDetail.PersonalPhone}</StyledTableCell>
                                 </StyledTableRow>
                             )) : <StyledTableRow >
                                     <StyledTableCell colSpan={5} align="center" component="th" scope="row" >No Results found</StyledTableCell>
@@ -80,4 +83,4 @@ const SalesForceDashboard = (props) => {
     );
 };
 
-export default SalesForceDashboard;
+export default EmployeeDashboard;

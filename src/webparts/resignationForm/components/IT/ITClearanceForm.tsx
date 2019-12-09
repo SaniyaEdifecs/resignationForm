@@ -3,17 +3,8 @@ import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Selec
 import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import useForm from '../UseForm';
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            padding: theme.spacing(3, 2),
-        },
-    }),
-);
 
 const ItClearance = (props) => {
     let ID = props.props;
@@ -21,12 +12,11 @@ const ItClearance = (props) => {
     let list = sp.web.lists.getByTitle("ItClearance");
     const [isUserExist, setUserExistence] = useState(false);
     const [showButton, setButtonVisibility] = useState(true);
-    const [duesPending, setDuesPending] = useState();
     const [isdisable, setDisable] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments",
+        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments","DuesPending"
     ];
 
     var stateSchema = {};
@@ -43,11 +33,6 @@ const ItClearance = (props) => {
         };
 
     });
-    const handleChange = (event) => {
-        setDuesPending({ ...state, ['duesPending']: event.target.checked });
-    };
-
-
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
@@ -75,7 +60,6 @@ const ItClearance = (props) => {
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            console.log(detail);
             getStatusdetails(detail.Status);
             setUserExistence(true);
             formFields.forEach(formField => {
@@ -101,10 +85,12 @@ const ItClearance = (props) => {
             value[key] = value[key].value;
         }
         value = { ...value, 'Status': status };
+        console.log("save==========dues", value)
         if (isUserExist) {
             list.items.getById(ID).update(value).then(i => {
                 showLoader(false);
-                getEmployeeClearanceDetails(ID);
+                // getEmployeeClearanceDetails(ID);
+                // window.location.href = "?component=itClearanceDashboard";
 
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
@@ -115,30 +101,24 @@ const ItClearance = (props) => {
                 const item = response.data as string;
                 if (item) {
                     showLoader(false);
-                    getEmployeeClearanceDetails(ID);
+                    // window.location.href = "?component=itClearanceDashboard";
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
         }
     };
-
-
-    const { state, setState, disable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
-
     );
-
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
         margin: '0',
     };
-    console.log("showButton",showButton);
     return (
-        
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             {/* <p><Link to="/itClearanceDashboard">Dashboard</Link></p> */}
@@ -262,15 +242,15 @@ const ItClearance = (props) => {
                             </td>
                         </tr>
                         {showButton ? <tr>
-                            <td colSpan={3}>
-                                <FormControlLabel control={<Checkbox name="DuesPending" checked={state.duesPending} onChange={handleChange} value={duesPending} />} label="Dues Pending" />
+                            <td colSpan={3} className="noBoxShadow">
+                                <FormControlLabel control={<Checkbox name="DuesPending" required={false} defaultChecked={state.DuesPending.value} onChange={handleOnChange} value={state.DuesPending.value}/>} label="Dues Pending" />
                             </td>
                         </tr> : null}
                         {showButton ? <tr>
                             <td colSpan={3} >
                                 {/* <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button> */}
                                 {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
                                 </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>

@@ -26,11 +26,13 @@ const StyledTableRow = withStyles((theme: Theme) =>
         },
     }),
 )(TableRow);
-const SalesForceDashboard = (props) => {
+
+const HrClearanceDashboard = (props) => {
     const [employeeData, setEmployeeDetail] = useState();
     const getClearanceList = () => {
-        sp.web.lists.getByTitle("SalesForceClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
-            if (items.length > 0) {
+        sp.web.lists.getByTitle("HrClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
+            if (items.length>0) {
+                console.log("items", items);
                 setEmployeeDetail(items);
             }
         });
@@ -40,14 +42,13 @@ const SalesForceDashboard = (props) => {
     }, []);
 
     const handleClick = (event) => {
-        window.location.href = "?component=salesForceClearance&userId=" + event;
+        window.location.href = "?component=hrClearance&userId=" + event;
     };
-
     return (
         <Paper className="root">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                    IT Clearance Dashboard
+                    HR Clearance Dashboard
                 </Typography>
                 <div className="tableWrapper">
                     <Table >
@@ -80,4 +81,4 @@ const SalesForceDashboard = (props) => {
     );
 };
 
-export default SalesForceDashboard;
+export default HrClearanceDashboard;

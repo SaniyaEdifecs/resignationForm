@@ -3,7 +3,6 @@ import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Selec
 import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import useForm from '../UseForm';
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 
@@ -12,7 +11,7 @@ const FinanceClearance = (props) => {
     let detail: any;
     let list = sp.web.lists.getByTitle("Finance%20Clearance");
     const [isUserExist, setUserExistence] = useState(false);
-    const [hideButton, setButtonVisibility] = useState();
+    const [showButton, setButtonVisibility] = useState(true);
     const [duesPending, setDuesPending] = useState();
     const [isdisable, setDisable] = useState(false);
     const [loader, showLoader] = useState(false);
@@ -36,6 +35,9 @@ const FinanceClearance = (props) => {
 
     });
 
+    const handleChange = (event) => {
+        setDuesPending({ ...state, ['duesPending']: event.target.checked });
+    };
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
@@ -44,26 +46,21 @@ const FinanceClearance = (props) => {
 
     const getStatusdetails = (status) => {
         switch (status) {
-            case "null":
-                setButtonVisibility(true);
-                setStatus("Pending");
-                break;
-            case "Pending":
+            case "null" || "Not Started" || "Pending":
                 setButtonVisibility(true);
                 break;
             case "Approved":
                 setDisable(true);
+                setButtonVisibility(false);
                 break;
             default:
-                setButtonVisibility(false);
+                setButtonVisibility(true);
                 break;
         }
     };
-
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            console.log(detail)
             getStatusdetails(detail.Status);
             setUserExistence(true);
             formFields.forEach(formField => {
@@ -92,7 +89,7 @@ const FinanceClearance = (props) => {
         if (isUserExist) {
             list.items.getById(ID).update(value).then(i => {
                 showLoader(false);
-                getEmployeeClearanceDetails(ID);
+                window.location.href = "?component=financeDashboard";
 
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
@@ -103,7 +100,7 @@ const FinanceClearance = (props) => {
                 const item = response.data as string;
                 if (item) {
                     showLoader(false);
-                    getEmployeeClearanceDetails(ID);
+                    window.location.href = "?component=financeDashboard";
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
@@ -275,11 +272,11 @@ const FinanceClearance = (props) => {
                                 {state.HousingLoanComments.error && <p style={errorStyle}>{state.HousingLoanComments.error}</p>}
                             </td>
                         </tr>
-                        {hideButton ? <tr>
+                        {showButton ? <tr>
                             <td colSpan={3} >
                                 <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
                                 {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
                                 </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>

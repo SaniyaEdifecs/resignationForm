@@ -13,9 +13,9 @@ const HrClearance = (props) => {
     let detail: any;
     let list = sp.web.lists.getByTitle("HrClearance");
     const [isUserExist, setUserExistence] = useState(false);
-    const [hideButton, setButtonVisibility] = useState();
+    const [showButton, setButtonVisibility] = useState();
     const [duesPending, setDuesPending] = useState();
-    // const [hideButton, setButtonVisibility] = useState();
+    // const [showButton, setButtonVisibility] = useState();
     const [isDisable, setDisable] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
@@ -45,27 +45,21 @@ const HrClearance = (props) => {
 
     const getStatusdetails = (status) => {
         switch (status) {
-            case "null":
-                setButtonVisibility(true);
-                setStatus("Pending");
-                break;
-            case "Pending":
+            case "null" || "Not Started" || "Pending":
                 setButtonVisibility(true);
                 break;
             case "Approved":
                 setDisable(true);
+                setButtonVisibility(false);
                 break;
             default:
-                setButtonVisibility(false);
+                setButtonVisibility(true);
                 break;
         }
     };
-
-
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            console.log(detail)
             getStatusdetails(detail.Status);
             setUserExistence(true);
             formFields.forEach(formField => {
@@ -77,8 +71,8 @@ const HrClearance = (props) => {
                     stateSchema[formField].error = "";
                 }
             });
-            setState(prevState => ({ ...prevState, stateSchema }));
             console.log("getdetail", stateSchema);
+            setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
             console.log('Error while creating the item: ' + error);
@@ -91,11 +85,25 @@ const HrClearance = (props) => {
             value[key] = value[key].value;
         }
         value = { ...value, 'Status': status };
+        console.log("status", value);
         if (isUserExist) {
-            list.items.getById(ID).update(value).then(i => {
+            list.items.getById(ID).update(value).then(item => {
+                console.log("form check ID", item);
                 showLoader(false);
-                getEmployeeClearanceDetails(ID);
-
+                if (value.Status == "Approved") {
+                    sp.web.lists.getByTitle("HrClearance").items.getById(ID).select('Id', 'EmployeeNameId').get().then(data => {
+                        console.log("data after submission", data);
+                        if(data){
+                            sp.web.lists.getByTitle("ResignationList").items.getById(data.EmployeeNameId).update({Status: "Completed" }).then(response => {
+                                if(response){
+                                    console.log("Resiignation", response);
+                                    // window.location.href = "?component=hrClearanceDashboard";
+                                }
+                            });
+                        }
+                        
+                    });
+                }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
             });
@@ -105,7 +113,7 @@ const HrClearance = (props) => {
                 const item = response.data as string;
                 if (item) {
                     showLoader(false);
-                    getEmployeeClearanceDetails(ID);
+                    // window.location.href = "?component=hrClearanceDashboard";
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
@@ -113,13 +121,13 @@ const HrClearance = (props) => {
         }
     };
 
-    const { state, setState, disable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
 
     );
- 
+
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
@@ -168,7 +176,7 @@ const HrClearance = (props) => {
                                     {state.Relocation_x002f_ReferralBonus.error && <p style={errorStyle}>{state.Relocation_x002f_ReferralBonus.error}</p>}
                                 </FormControl>
                             </td>
-                            <td> 
+                            <td>
                                 <TextField margin="normal" name="Relocation_x002f_ReferralBonusCo" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Relocation_x002f_ReferralBonusCo.value} />
                                 {state.Relocation_x002f_ReferralBonusCo.error && <p style={errorStyle}>{state.Relocation_x002f_ReferralBonusCo.error}</p>}
                             </td>
@@ -338,10 +346,10 @@ const HrClearance = (props) => {
                                 {state.InsuranceComments.error && <p style={errorStyle}>{state.InsuranceComments.error}</p>}
                             </td>
                         </tr>
-                        {hideButton ? <tr>
+                        {showButton ? <tr>
                             <td colSpan={3} >
                                 {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button></div> :
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>}
                             </td>

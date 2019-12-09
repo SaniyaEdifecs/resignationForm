@@ -9,7 +9,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import { sp } from '@pnp/sp';
 import '../CommonStyleSheet.scss';
-import { Typography } from '@material-ui/core';
+import { Typography, List } from '@material-ui/core';
 
 const StyledTableCell = withStyles((theme: Theme) =>
     createStyles({
@@ -34,7 +34,8 @@ const StyledTableRow = withStyles((theme: Theme) =>
     }),
 )(TableRow);
 
-const ResignationList = () => {
+const ResignationList = (props) => {
+    console.log('List', props);
     const [employeeList, setEmployeeList] = useState();
     const getResignationList = () => {
         sp.web.lists.getByTitle("ResignationList").items.get().then((items: any) => {
@@ -50,7 +51,7 @@ const ResignationList = () => {
     }, []);
 
     const handleClick = (event) => {
-        window.location.href = "?component=resignationDetail&Id=" + event;
+        window.location.href = "?component=resignationDetail&userId=" + event;
     };
 
     return (
@@ -60,7 +61,7 @@ const ResignationList = () => {
                     Resignation Dashboard
                 </Typography>
                 <div className="tableWrapper">
-                    <Table >
+                    <Table stickyHeader aria-label="sticky table">
                         <TableHead>
                             <TableRow>
                                 <StyledTableCell >Employee Code</StyledTableCell>

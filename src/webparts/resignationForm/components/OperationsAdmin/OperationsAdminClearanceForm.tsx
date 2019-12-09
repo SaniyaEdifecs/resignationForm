@@ -7,16 +7,7 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            padding: theme.spacing(3, 2),
-        },
-    }),
-);
-
 const OperationsAdminClearance = (props) => {
-    const classes = useStyles(0);
     let ID = props.props;
     let detail: any;
     let list = sp.web.lists.getByTitle("OperationsClearance");
@@ -43,58 +34,27 @@ const OperationsAdminClearance = (props) => {
         };
 
     });
-
-    const onSubmitForm = (value) => {
-        showLoader(true);
-        for (const key in value) {
-            value[key] = value[key].value;
+    useEffect(() => {
+        if (ID) {
+            getEmployeeClearanceDetails(ID);
         }
-        value = { ...value, 'Status': status };
-        if (isUserExist) {
-            list.items.getById(ID).update(value).then(i => {
-                getEmployeeClearanceDetails(ID);
-                showLoader(false);
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        } else {
-            value = { ...value, ID };
-            list.items.add(value).then((response: ItemAddResult): void => {
-                const item = response.data as string;
-                if (item) {
-                    showLoader(false);
-                    getEmployeeClearanceDetails(ID);
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        }
-    };
-    const { state, disable, status, setStatus, setState, saveForm, handleOnChange, handleOnBlur, handleOnSubmit, } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm,
-    );
-    const errorStyle = {
-        color: 'red',
-        fontSize: '13px',
-        margin: '0',
-    };
+    }, []);
 
     const getStatusdetails = (status) => {
         switch (status) {
-            case "null":
+            case "null" || "Not Started" || "Pending":
                 setButtonVisibility(true);
-                setStatus("Pending");
+                // setStatus("Pending");
                 break;
-            case "Pending":
-                setButtonVisibility(true);
-                break;
+            // case "Pending":
+            //     setButtonVisibility(true);
+            //     break;
             case "Approved":
                 setDisable(true);
+                setButtonVisibility(false);
                 break;
             default:
-                setButtonVisibility(false);
+                setButtonVisibility(true);
                 break;
         }
     };
@@ -112,18 +72,52 @@ const OperationsAdminClearance = (props) => {
                     stateSchema[formField].error = "";
                 }
             });
+            console.log("getdetail", stateSchema);
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
             console.log('Error while creating the item: ' + error);
         });
-    }
-
-    useEffect(() => {
-        if (ID) {
-            getEmployeeClearanceDetails(ID);
+    };
+    const onSubmitForm = (value) => {
+        showLoader(true);
+        for (const key in value) {
+            value[key] = value[key].value;
         }
-    }, []);
+        value = { ...value, 'Status': status };
+        if (isUserExist) {
+            list.items.getById(ID).update(value).then(i => {
+                showLoader(false);
+                // getEmployeeClearanceDetails(ID);
+                window.location.href = "?component=operationsAdminDashboard";
+
+            }, (error: any): void => {
+                console.log('Error while creating the item: ' + error);
+            });
+        } else {
+            value = { ...value, ID };
+            list.items.add(value).then((response: ItemAddResult): void => {
+                const item = response.data as string;
+                if (item) {
+                    showLoader(false);
+                    window.location.href = "?component=operationsAdminDashboard";
+                }
+            }, (error: any): void => {
+                console.log('Error while creating the item: ' + error);
+            });
+        }
+    };
+
+    const { state, disable, status, setState, saveForm, handleOnChange, handleOnBlur, handleOnSubmit, } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm,
+    );
+    const errorStyle = {
+        color: 'red',
+        fontSize: '13px',
+        margin: '0',
+    };
 
     return (
         <div>
@@ -267,7 +261,7 @@ const OperationsAdminClearance = (props) => {
                             <td colSpan={3} >
                                 <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
                                 {disable == true ? <div className="inlineBlock">
-                                    <Button type="button" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save</Button>
+                                    <Button type="button" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
                                     <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
                                 </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>

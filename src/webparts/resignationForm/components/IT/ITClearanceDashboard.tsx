@@ -38,13 +38,13 @@ const ITClearanceDashboard = (props) => {
             }
             console.log("IT outside", items);
         });
-    }
+    };
     useEffect(() => {
         getClearanceList();
     }, []);
 
     const handleClick = (event) => {
-        window.location.href = "?component=itClearance&Id=" + event;
+        window.location.href = "?component=itClearance&userId=" + event;
     };
     return (
         <Paper className="root">

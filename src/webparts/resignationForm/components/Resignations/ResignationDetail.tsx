@@ -14,6 +14,7 @@ const ResignationDetail = (props) => {
     const [salesForceClearance, setSalesForceClearance] = useState();
     const [operationsClearance, setOperationsClearance] = useState();
     const [financeClearance, setFinanceClearance] = useState();
+    const [hrClearance, setHrClearance] = useState();
     const getEmployeeDetail = () => {
         sp.web.lists.getByTitle("ItClearance").items.select('Id', 'Status', 'EmployeeName', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeName', 'EmployeeName/EmployeeCode', 'EmployeeName/Department', 'EmployeeName/JobTitle').expand("EmployeeName").get().then((items) => {
             if (items) {
@@ -67,6 +68,17 @@ const ResignationDetail = (props) => {
                 });
             }
         });
+        sp.web.lists.getByTitle("HrClearance").items.select('Id', 'Status', 'EmployeeNameId').get().then((items) => {
+            if (items) {
+                console.log('SF clearance status', items);
+                items.forEach(item => {
+                    if (ID == item.EmployeeNameId) {
+                        console.log('HR clearance status', item);
+                        setHrClearance(item);
+                    }
+                });
+            }
+        });
     }
     useEffect(() => {
         getEmployeeDetail();
@@ -75,7 +87,7 @@ const ResignationDetail = (props) => {
     const handleClick = (url, ID) => {
         event.preventDefault();
         if (ID) {
-            window.location.href = "?component=" + url + "&Id=" + ID;
+            window.location.href = "?component=" + url + "&userId=" + ID;
         }
         else {
             window.location.href = "?component=" + url;
@@ -101,6 +113,9 @@ const ResignationDetail = (props) => {
                     {employeeDetail ? <table cellPadding="0" cellSpacing="0">
                         <tbody>
                             <tr>
+                                <th colSpan={2}><h3>Employee Details</h3></th>
+                            </tr>
+                            <tr>
                                 <th>Employee Code</th>
                                 <td>{employeeDetail.EmployeeName.EmployeeCode}</td>
                             </tr>
@@ -117,7 +132,7 @@ const ResignationDetail = (props) => {
                                 <td>{employeeDetail.EmployeeName.JobTitle}</td>
                             </tr>
                             <tr>
-                                <th colSpan={2}>Clearance Status</th>
+                                <th colSpan={2}><h3>Clearance Status</h3></th>
                             </tr>
                             <tr>
                                 <td>Manager Clearance</td>
@@ -150,13 +165,17 @@ const ResignationDetail = (props) => {
                             <tr>
                                 <td>Operations/Admin Clearance</td>
                                 <td>
-                                    {operationsClearance&&operationsClearance.Status != "Approved" ?
+                                    {operationsClearance && operationsClearance.Status != "Approved" ?
                                         <Link onClick={() => handleClick('operationsClearance', operationsClearance.ID)}>{operationsClearance.Status}</Link> : "Approved"}
                                 </td>
                             </tr>
                             <tr>
                                 <td>HR Clearance</td>
-                                <td></td>
+                                <td>
+                                    {hrClearance && hrClearance.Status != "Approved" ?
+                                        <Link onClick={() => handleClick('hrClearance', hrClearance.ID)}>{hrClearance.Status}</Link> : "Approved"}
+
+                                </td>
                             </tr>
                         </tbody>
                     </table> : null}

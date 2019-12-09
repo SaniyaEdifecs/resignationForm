@@ -1,14 +1,9 @@
 import * as React from 'react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { withStyles, Theme, Typography, createStyles, Table, TableBody, TableCell, TableHead, TableRow, Paper } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import '../CommonStyleSheet.scss';
 
-let EmployeeDetails: any = [];
-let ID: any;
-let list = sp.web.lists.getByTitle("ManagersClearance").items.select("Status", "ID");
-let employeeData:any =[];
-// let intergatedEmployeeData :any=[];
 const StyledTableCell = withStyles((theme: Theme) =>
     createStyles({
         head: {
@@ -32,59 +27,28 @@ const StyledTableRow = withStyles((theme: Theme) =>
     }),
 )(TableRow);
 
-const getClearanceList = () => {
-    // current user email id
-    // sp.web.lists.getByTitle("ResignationList").items.select("ID", "EmployeeCode", "EmployeeName", "ManagerName").get().then((items: any) => {
-    //     employeeData = items;
-    //     console.log("resignation list", employeeData);
-    // })
-    sp.web.currentUser.get().then((response) => {
-        // console.log("Current user details", response);
-        let userId = response.Id;
-
-        if (userId && response.IsSiteAdmin) {
-            list.get().then((items: any) => {
-                EmployeeDetails = items;
-            });
-        }
-        else {
-            list.getById(userId).get().then((items: any) => {
-                EmployeeDetails = items;
-            });
-        }
-        console.log("clearance list select",EmployeeDetails )
-    });
-};
-
 const ManagerClearanceDashboard = (props) => {
-    console.log("props dashboard", props);
-    sp.web.lists.getByTitle("ManagersClearance").items.get().then((items: any) => {
-        let EmployeeDetails = items;
-                console.log("data list0000000000======", EmployeeDetails);
-            });
-    // ID = props.props;
-    // useEffect(() => {
-        // console.log("props dashboard inside", props);
-        getClearanceList();
-        sp.web.lists.getByTitle("ResignationList").items.select("ID", "EmployeeCode", "EmployeeName", "ManagerName").get().then((items: any) => {
-            employeeData = items;
-            console.log("resignation list======", employeeData);
+    const [employeeData, setEmployeeDetail] = useState();
+    const getClearanceList = () => {
+        sp.web.lists.getByTitle("ManagersClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
+            if (items.length > 0) {
+                setEmployeeDetail(items);
+            }
         });
-        
-        EmployeeDetails =  EmployeeDetails.map(x =>(Object as any).assign(x, employeeData.find(y => y.ID == x.ID)));
-    
-        console.log('groupdata======', EmployeeDetails);
-    // }, [EmployeeDetails]);
-
-    const handleClick = (event) =>{
-        console.log("onclick event",event);
-        window.location.href="?component=managerClearance&Id="+event;
     };
+    useEffect(() => {
+        getClearanceList();
+    }, []);
+
+    const handleClick = (event) => {
+        window.location.href = "?component=managerClearance&userId=" + event;
+    };
+
     return (
-       <Paper className="root">
+        <Paper className="root">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                    Clearance Dashboard
+                    IT Clearance Dashboard
                 </Typography>
                 <div className="tableWrapper">
                     <Table >
@@ -98,26 +62,22 @@ const ManagerClearanceDashboard = (props) => {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {EmployeeDetails.length > 0 ? EmployeeDetails.map(EmployeeDetail => (
-                                <StyledTableRow key={EmployeeDetail.ID} onClick={()=>handleClick(EmployeeDetail.ID)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started"? 'pendingState' : null)}>
-                                    <StyledTableCell component="th" scope="row">{EmployeeDetail.ID}</StyledTableCell>
-                                    <StyledTableCell> {EmployeeDetail.EmployeeCode}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetail.EmployeeName}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetail.ManagerName}</StyledTableCell>
+                            {employeeData ? employeeData.map(EmployeeDetail => (
+                                <StyledTableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
+                                    <StyledTableCell component="th" scope="row">{EmployeeDetail.Id}</StyledTableCell>
+                                    <StyledTableCell> {EmployeeDetail.EmployeeName.EmployeeCode}</StyledTableCell>
+                                    <StyledTableCell >{EmployeeDetail.EmployeeName.EmployeeName}</StyledTableCell>
+                                    <StyledTableCell >{EmployeeDetail.EmployeeName.ManagerName}</StyledTableCell>
                                     <StyledTableCell >{EmployeeDetail.Status}</StyledTableCell>
                                 </StyledTableRow>
-                            )) : <StyledTableRow key={EmployeeDetails.ID} onClick={()=>handleClick(EmployeeDetails.ID)} className={(EmployeeDetails.Status == "Pending" || EmployeeDetails.Status == "Not Started" ? 'pendingState' : null)}>
-                                    <StyledTableCell component="th" scope="row">{EmployeeDetails.ID}</StyledTableCell>
-                                    <StyledTableCell> {EmployeeDetails.EmployeeCode}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetails.EmployeeName}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetails.ManagerName}</StyledTableCell>
-                                    <StyledTableCell >{EmployeeDetails.Status}</StyledTableCell>
+                            )) : <StyledTableRow >
+                                    <StyledTableCell colSpan={5} align="center" component="th" scope="row" >No Results found</StyledTableCell>
                                 </StyledTableRow>}
                         </TableBody>
                     </Table>
                 </div>
             </div>
-        </Paper> 
+        </Paper>
     );
 };
 
