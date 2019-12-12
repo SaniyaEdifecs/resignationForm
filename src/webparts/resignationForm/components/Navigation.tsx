@@ -36,16 +36,16 @@ const NavigationItem = (props) => {
     };
 
     let paramvalues = getParams(window.location.search);
-    let data: any = [];
+    let currentUser: any;
 
     sp.web.currentUser.get().then((response) => {
-        data = response;
+        currentUser = response;
     });
 
     const renderChilds = () => {
         switch (paramvalues['component']) {
             case "itClearance":
-                return <ItClearance props={paramvalues['userId']} />;
+                return <ItClearance props={paramvalues['userId']} currentUser = {currentUser}/>;
             case "itClearanceDashboard":
                 return <ITClearanceDashboard props={paramvalues['userId']} />;
             case "managerClearance":

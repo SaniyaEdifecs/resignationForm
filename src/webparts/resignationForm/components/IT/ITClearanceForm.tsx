@@ -1,12 +1,13 @@
 import * as React from 'react';
-import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox } from '@material-ui/core';
-import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
+import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox } from '@material-ui/core';
+import { sp, ItemAddResult} from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 
 const ItClearance = (props) => {
+    console.log('currentUser', props);
     let ID = props.props;
     let detail: any;
     let list = sp.web.lists.getByTitle("ItClearance");
@@ -38,7 +39,7 @@ const ItClearance = (props) => {
             getEmployeeClearanceDetails(ID);
         }
     }, []);
-
+ 
     const getStatusdetails = (status) => {
         switch (status) {
             case "null" || "Not Started" || "Pending":
@@ -121,7 +122,6 @@ const ItClearance = (props) => {
     return (
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
-            {/* <p><Link to="/itClearanceDashboard">Dashboard</Link></p> */}
             <Typography variant="h5" component="h5">
                 IT Clearance
              </Typography>
@@ -243,7 +243,8 @@ const ItClearance = (props) => {
                         </tr>
                         {showButton ? <tr>
                             <td colSpan={3} className="noBoxShadow">
-                                <FormControlLabel control={<Checkbox name="DuesPending" required={false} defaultChecked={state.DuesPending.value} onChange={handleOnChange} value={state.DuesPending.value}/>} label="Dues Pending" />
+                                
+                                <FormControlLabel control={<Checkbox name="DuesPending" checked={state.DuesPending.value} onBlur={handleOnBlur}  onChange={handleOnChange} />} label="Dues Pending" />
                             </td>
                         </tr> : null}
                         {showButton ? <tr>

@@ -14,9 +14,9 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
       const isInputFieldRequired = validationSchema[key].required;
-       const stateValue = state[key].value; // state value
-       const stateError = state[key].error;
-    
+      const stateValue = state[key].value; // state value
+      const stateError = state[key].error;
+
       // state error
       return (isInputFieldRequired && !stateValue) || stateError;
     });
@@ -44,10 +44,10 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   let value: any;
   const checkValidation = (event) => {
     setIsDirty(true);
-    console.log(event.target.type);
-    if (event.target.type == "checkbox") {
+if (event.target.type == "checkbox") {
       name = event.target.name;
       value = event.target.checked;
+      console.log(event.target.type, value);
     } else {
       name = event.target.name;
       value = event.target.value;
@@ -67,7 +67,10 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       //   }
       // }
     }
-    if ((event.target.type != "text" && event.target.type != "textarea") && (name != "DuesPending" && value.toLowerCase() == "no" )) {
+    else {
+      error = "";
+    }
+    if ((event.target.type != "text" && event.target.type != "textarea") && (name != "DuesPending" && value.toLowerCase() == "no")) {
       error = "Dues Pending";
     }
     setState(prevState => ({
@@ -79,14 +82,14 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   // Used to handle every changes in every input
   const handleOnBlur = useCallback(
     event => {
-        checkValidation(event);
+      checkValidation(event);
     },
     [validationSchema]
   );
 
   const handleOnChange = useCallback(
     event => {
-        checkValidation(event);
+      checkValidation(event);
     },
     [validationSchema]
   );
@@ -108,7 +111,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     },
     [state]
   );
-  return { state, disable, saveForm, status, setStatus, setIsDirty , handleOnChange, setState, handleOnBlur, handleOnSubmit };
+  return { state, disable, saveForm, status, setStatus, setIsDirty, handleOnChange, setState, handleOnBlur, handleOnSubmit };
 };
 
 export default useForm;

@@ -62,6 +62,7 @@ const EmployeeDetails = (props) => {
 
     const getEmployeeDetails = (employeeID) => {
         sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeID).get().then((detail: any) => {
+            console.log("detail", detail);
             setEmployeeNameId(detail.EmployeeNameId);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
@@ -122,7 +123,7 @@ const EmployeeDetails = (props) => {
         <Container component="main">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                   Employee Detail
+                   Employee Details
                 </Typography>
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>

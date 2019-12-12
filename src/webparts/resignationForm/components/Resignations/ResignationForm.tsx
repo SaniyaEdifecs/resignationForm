@@ -2,6 +2,8 @@ import * as React from 'react';
 import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
+import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 
@@ -9,12 +11,14 @@ const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
     // Define your state schema
     const [isdisable, setDisable] = useState(false);
+    // const [LastWorkingDate, setLastWorkingDate] = useState(null);
     const formFields = [
         "EmployeeCode",
         "FirstName",
         "LastName",
         "WorkEmail",
         // "PersonalEmail",
+        "LastWorkingDate",
         "ResignationReason",
         "OtherReason",
         "Department",
@@ -40,38 +44,42 @@ const ResignationForm = (props) => {
         };
 
     });
-  
-     const getPeoplePickerItems = (items) => {
+
+    const handleDateChange = (event) => {
+        setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: event, error: "" }) }));
+        // console.log("=======", LastWorkingDate);
+    };
+    const getPeoplePickerItems = (items) => {
         if (items[0]) {
             setIsDirty(true);
-          let peoplePickerValue = items[0];
-          let fullName = peoplePickerValue.text.split(' ');
-          let mFirstName = fullName[0];
-          let mLastName = fullName[fullName.length - 1];
-          let mEmail = peoplePickerValue.secondaryText;
-          console.log(mEmail, mLastName, mFirstName);
-          setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: "" }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
+            let peoplePickerValue = items[0];
+            let fullName = peoplePickerValue.text.split(' ');
+            let mFirstName = fullName[0];
+            let mLastName = fullName[fullName.length - 1];
+            let mEmail = peoplePickerValue.secondaryText;
+            console.log(mEmail, mLastName, mFirstName);
+            setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: "" }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
         }
-        else{
-            setState(prevState => ({...prevState}));
+        else {
+            setState(prevState => ({ ...prevState }));
         }
-      };
-    
-      const _getPeoplePickerItems = (items) => {
+    };
+
+    const _getPeoplePickerItems = (items) => {
         if (items[0]) {
             setIsDirty(true);
-          let peoplePickerValue = items[0];
-          let fullName = peoplePickerValue.text.split(' ');
-          let eFirstName = fullName[0];
-          let eLastName = fullName[fullName.length - 1];
-          let eEmail = peoplePickerValue.secondaryText;
-          console.log(eEmail, eLastName, eFirstName);
-          setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
+            let peoplePickerValue = items[0];
+            let fullName = peoplePickerValue.text.split(' ');
+            let eFirstName = fullName[0];
+            let eLastName = fullName[fullName.length - 1];
+            let eEmail = peoplePickerValue.secondaryText;
+            console.log(eEmail, eLastName, eFirstName);
+            setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
         }
-        else{
+        else {
             setState(prevState => ({ ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }), ['WorkEmail']: ({ value: "", error: "" }), ['ID']: ({ value: "", error: "" }) }));
         }
-      };
+    };
 
     const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
         stateSchema,
@@ -101,7 +109,7 @@ const ResignationForm = (props) => {
 
     const addListItem = (elements) => {
         let ID = props.props;
-        elements = { ...elements, EmployeeName: state.FirstName + " " + state.LastName, ManagerName: state.ManagerFirstName + " " +state.ManagerLastName };
+        elements = { ...elements, EmployeeName: state.FirstName + " " + state.LastName, ManagerName: state.ManagerFirstName + " " + state.ManagerLastName };
         let list = sp.web.lists.getByTitle("ResignationList");
         if (ID) {
             elements = { ...elements, 'ID': ID }; // remove ID
@@ -111,24 +119,24 @@ const ResignationForm = (props) => {
                 //  redirect to dashboard
             });
         } else {
-            elements = {...elements, 'Status': 'In Progress'};
+            elements = { ...elements, 'Status': 'In Progress' };
             list.items.add(elements).then((response: ItemAddResult): void => {
                 let item = response.data;
-                console.log("check here id value",item);
+                console.log("check here id value", item);
                 if (item) {
-                    sp.web.lists.getByTitle("ItClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("ManagersClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started",ManagerEmail: elements.ManagerEmail}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("OperationsClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("Finance%20Clearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("SalesForceClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("SalesForceClearance").items.add({EmployeeNameId: item.ID, Status: "Not Started"}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("Employee%20Details").items.add({EmployeeNameId: item.ID}).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate }).then((response: ItemAddResult) => {
                     });
                     setState(stateSchema);
                 }
@@ -169,7 +177,7 @@ const ResignationForm = (props) => {
                             {state.FirstName.error && <p style={errorStyle}>{state.FirstName.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" disabled={isdisable} margin="normal" required fullWidth label="Last Name"  value={state.LastName.value}  name="LastName" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            <TextField variant="outlined" disabled={isdisable} margin="normal" required fullWidth label="Last Name" value={state.LastName.value} name="LastName" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
@@ -177,10 +185,16 @@ const ResignationForm = (props) => {
                         <TextField variant="outlined" margin="normal" fullWidth label="ID" value={state.ID.value} name="ID" onBlur={handleOnBlur} onChange={handleOnChange} />
                     </Hidden> */}
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={12}>
+                        <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
                                 value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
+                                <DatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
+                                    value={state.LastWorkingDate.value} name="LastWorkingDate" onChange={handleDateChange} />
+                            </MuiPickersUtilsProvider>
                         </Grid>
                         {/* <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Personal Email" value={state.PersonalEmail.value} name="PersonalEmail" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} />
@@ -224,19 +238,19 @@ const ResignationForm = (props) => {
                             {state.ManagerFirstName.error && <p style={errorStyle}>{state.ManagerFirstName.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={4}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" disabled={isdisable} value={state.ManagerLastName.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerLastName" autoComplete="lastName"  />
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" disabled={isdisable} value={state.ManagerLastName.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerLastName" autoComplete="lastName" />
                             {state.ManagerLastName.error && <p style={errorStyle}>{state.ManagerLastName.error}</p>}
 
                         </Grid>
                     </Grid>
 
-                    <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail"  />
+                    <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail" />
                     {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
 
                     <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Resignation Summary" name="ResignationSummary" required value={state.ResignationSummary.value} placeholder="Resignation Summary" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
                     {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>}
 
-                    <Button type="submit"  className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
+                    <Button type="submit" className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
                 </form>
             </div>
         </Container>

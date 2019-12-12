@@ -51,6 +51,7 @@ const ResignationList = (props) => {
     }, []);
 
     const handleClick = (event) => {
+        // window.history.pushState({urlPath:'/"?component=resignationDetail&userId="' + event'},"",'/page1')
         window.location.href = "?component=resignationDetail&userId=" + event;
     };
 
