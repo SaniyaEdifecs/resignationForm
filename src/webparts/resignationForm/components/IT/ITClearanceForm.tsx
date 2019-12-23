@@ -68,7 +68,7 @@ const ItClearance = (props) => {
                     stateSchema[formField].value = "";
                     stateSchema[formField].error = "";
                 } else {
-                    stateSchema[formField].value = detail[formField] + "";
+                    stateSchema[formField].value = detail[formField] ;
                     stateSchema[formField].error = "";
                 }
             });
@@ -109,11 +109,14 @@ const ItClearance = (props) => {
             });
         }
     };
+    
     const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm,
     );
+    console.log(state.DuesPending.value);
+    
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
@@ -243,7 +246,6 @@ const ItClearance = (props) => {
                         </tr>
                         {showButton ? <tr>
                             <td colSpan={3} className="noBoxShadow">
-                                
                                 <FormControlLabel control={<Checkbox name="DuesPending" checked={state.DuesPending.value} onBlur={handleOnBlur}  onChange={handleOnChange} />} label="Dues Pending" />
                             </td>
                         </tr> : null}
