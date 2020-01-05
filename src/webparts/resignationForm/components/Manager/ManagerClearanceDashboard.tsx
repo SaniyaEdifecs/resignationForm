@@ -48,7 +48,7 @@ const ManagerClearanceDashboard = (props) => {
         <Paper className="root">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                    IT Clearance Dashboard
+                    Manager Clearance Dashboard
                 </Typography>
                 <div className="tableWrapper">
                     <Table >

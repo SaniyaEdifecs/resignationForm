@@ -24,7 +24,7 @@ const Dashboard = (props) => {
                 <Grid container justify="flex-end">
                     <Grid item xs={6} >
                     </Grid>
-                    <Grid item xs={6} >
+                    <Grid item xs={6} className="rightAlign" >
                         <Button type="button" variant="contained" color="primary" onClick={handleClick}>Offboarding Process</Button>
                     </Grid>
                 </Grid>

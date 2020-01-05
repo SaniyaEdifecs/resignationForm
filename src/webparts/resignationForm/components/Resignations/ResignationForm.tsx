@@ -2,7 +2,7 @@ import * as React from 'react';
 import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
-import { MuiPickersUtilsProvider, DatePicker } from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
@@ -34,10 +34,20 @@ const ResignationForm = (props) => {
     let selectedOption = 0;
     formFields.forEach(formField => {
         stateSchema[formField] = {};
-        stateSchema[formField].value = "";
+        if (formField === "LastWorkingDate") {
+            stateSchema[formField].value = new Date();
+        } else {
+            stateSchema[formField].value = "";
+        }
         stateSchema[formField].error = "";
         validationStateSchema[formField] = {};
-        validationStateSchema[formField].required = true;
+
+        if (formField === 'OtherReason') {
+            validationStateSchema[formField].required = false;
+        } else {
+            validationStateSchema[formField].required = true;
+        }
+
         validationStateSchema[formField].validator = {
             regex: '',
             error: ''
@@ -107,6 +117,26 @@ const ResignationForm = (props) => {
         }
     }, []);
 
+    useEffect(() => {
+        validationStateSchema['OtherReason'].required = state.ResignationReason.value === 'Other';
+
+        if (validationStateSchema['OtherReason'].required && !state.OtherReason.value) {
+            if (state.OtherReason.error === '') {
+                setState(prevState => ({
+                    ...prevState,
+                    ['OtherReason']: { value: '', error: 'This field is required' }
+                }));
+            }
+        } else {
+            if (state.OtherReason.error !== '') {
+                setState(prevState => ({
+                    ...prevState,
+                    ['OtherReason']: { value: '', error: '' }
+                }));
+            }
+        }
+    }, [state]);
+
     const addListItem = (elements) => {
         let ID = props.props;
         elements = { ...elements, EmployeeName: state.FirstName + " " + state.LastName, ManagerName: state.ManagerFirstName + " " + state.ManagerLastName };
@@ -134,7 +164,7 @@ const ResignationForm = (props) => {
                     });
                     sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("HrClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
                     sp.web.lists.getByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate }).then((response: ItemAddResult) => {
                     });
@@ -192,7 +222,7 @@ const ResignationForm = (props) => {
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} >
-                                <DatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
+                                <KeyboardDatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
                                     value={state.LastWorkingDate.value} name="LastWorkingDate" onChange={handleDateChange} />
                             </MuiPickersUtilsProvider>
                         </Grid>
@@ -205,14 +235,14 @@ const ResignationForm = (props) => {
                         <Grid item xs={12} sm={6}>
                             <FormControl variant="outlined" className="fullWidth">
                                 <InputLabel htmlFor="reason">Reason for Resignation</InputLabel>
-                                <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} id="reason" onChange={handleOnChange} onBlur={handleOnBlur} name="ResignationReason"  >
+                                <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} id="reason" onChange={handleOnChange} onBlur={handleOnChange} name="ResignationReason"  >
                                     {resignationReasonList.map((list, index) => <MenuItem key={index} value={list}>{list}</MenuItem>)}
                                 </Select>
                                 {state.ResignationReason.error && <p style={errorStyle}>{state.ResignationReason.error}</p>}
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Specify(If other is selected)" disabled={isdisable} value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            <TextField variant="outlined" margin="normal" fullWidth label="Specify(If other is selected)" disabled={isdisable} required={state.ResignationReason.value === 'Other'} value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.OtherReason.error && <p style={errorStyle}>{state.OtherReason.error}</p>}
                         </Grid>
                     </Grid>

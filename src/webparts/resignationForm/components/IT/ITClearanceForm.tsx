@@ -1,25 +1,28 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox } from '@material-ui/core';
-import { sp, ItemAddResult} from '@pnp/sp';
+import { sp, ItemAddResult } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
+import Link from '@material-ui/core/Link';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 
 const ItClearance = (props) => {
-    console.log('currentUser', props);
+    // // console.log('currentUser', props);
     let ID = props.props;
     let detail: any;
     let list = sp.web.lists.getByTitle("ItClearance");
     const [isUserExist, setUserExistence] = useState(false);
     const [showButton, setButtonVisibility] = useState(true);
+    const [duesPendingBoolean, setDuesPendingBoolean] = useState(false);
+    const [disableDuesPending, setDisableDuesPending] = useState(false);
     const [isdisable, setDisable] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments","DuesPending"
+        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments"
     ];
-
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -34,13 +37,58 @@ const ItClearance = (props) => {
         };
 
     });
+    stateSchema['selectFields'] = ["DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices"];
+    const onSubmitForm = (value) => {
+        showLoader(true);
+        let payload = {};
+        for (const key in value) {
+            payload[key] = value[key].value;
+        }
+        
+        payload = { ...payload, 'Status': status, 'DuesPending': duesPendingBoolean };
+        // console.log("save==========dues", payload)
+        // if (isUserExist) {
+        list.items.getById(ID).update(payload).then(i => {
+            showLoader(false);
+            getEmployeeClearanceDetails(ID);
+            // window.location.href = "?component=itClearanceDashboard";
+
+        }, (error: any): void => {
+            // console.log('Error while creating the item: ' + error);
+        });
+        // }
+        //  else {
+        //     payload = { ...payload, ID };
+        //     list.items.add(payload).then((response: ItemAddResult): void => {
+        //         const item = response.data as string;
+        //         if (item) {
+        //             showLoader(false);
+        //             // window.location.href = "?component=itClearanceDashboard";
+        //         }
+        //     }, (error: any): void => {
+        //         // console.log('Error while creating the item: ' + error);
+        //     });
+        // }
+    };
+    const duesPendingChanged = (event) => {
+        // console.log(event.target.checked)
+        setDuesPendingBoolean(event.target.checked)
+    }
+    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
+
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
         }
     }, []);
- 
-    const getStatusdetails = (status) => {
+
+
+
+    const getStatusDetails = (status) => {
         switch (status) {
             case "null" || "Not Started" || "Pending":
                 setButtonVisibility(true);
@@ -61,73 +109,84 @@ const ItClearance = (props) => {
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            getStatusdetails(detail.Status);
+            getStatusDetails(detail.Status);
             setUserExistence(true);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
                     stateSchema[formField].error = "";
                 } else {
-                    stateSchema[formField].value = detail[formField] ;
+                    stateSchema[formField].value = detail[formField];
                     stateSchema[formField].error = "";
                 }
             });
-            console.log("getdetail", stateSchema);
+            // // console.log("getdetail", stateSchema);
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
-            console.log('Error while creating the item: ' + error);
+            // console.log('Error while creating the item: ' + error);
         });
     };
 
-    const onSubmitForm = (value) => {
-        showLoader(true);
-        for (const key in value) {
-            value[key] = value[key].value;
-        }
-        value = { ...value, 'Status': status };
-        console.log("save==========dues", value)
-        if (isUserExist) {
-            list.items.getById(ID).update(value).then(i => {
-                showLoader(false);
-                // getEmployeeClearanceDetails(ID);
-                // window.location.href = "?component=itClearanceDashboard";
 
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        } else {
-            value = { ...value, ID };
-            list.items.add(value).then((response: ItemAddResult): void => {
-                const item = response.data as string;
-                if (item) {
-                    showLoader(false);
-                    // window.location.href = "?component=itClearanceDashboard";
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        }
-    };
-    
-    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm,
-    );
-    console.log(state.DuesPending.value);
-    
+
+    useEffect(() => {
+        setDuesPendingBoolean(false)
+        setDisableDuesPending(false);
+        let allYes = true;
+
+        state.selectFields.forEach((field, key) => {
+
+            if (state[field].value === 'No') {
+                // console.log("found ")
+                setDuesPendingBoolean(true)
+                setDisableDuesPending(false);
+                allYes = false;
+            }
+            if (state.selectFields.length - 1 === key && allYes === true) {
+                // console.log("no no found ")
+                setDisableDuesPending(true);
+            }
+
+
+        });
+
+    }, [state]);
+    useEffect(() => {
+
+        // console.log("called")
+        // action on update of movies
+        // setDuesPendingBoolean(duesPendingBoolean)
+        // console.log("duesPendingBoolean = ", duesPendingBoolean)
+        // console.log("disableDuesPending = ", disableDuesPending)
+    }, [duesPendingBoolean, disableDuesPending]);
+
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
         margin: '0',
     };
+    const handleClick = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = "?component=" + url;
+        }
+        console.info('You clicked a breadcrumb.');
+    }
     return (
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             <Typography variant="h5" component="h5">
                 IT Clearance
              </Typography>
+            <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                <Link color="inherit" onClick={() => handleClick('itClearanceDashboard', "")}>
+                    Dashboard
+                    </Link>
+                <Typography color="textPrimary">Clearance Form</Typography>
+            </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
 
                 <table cellSpacing="0" cellPadding="0">
@@ -246,16 +305,17 @@ const ItClearance = (props) => {
                         </tr>
                         {showButton ? <tr>
                             <td colSpan={3} className="noBoxShadow">
-                                <FormControlLabel control={<Checkbox name="DuesPending" checked={state.DuesPending.value} onBlur={handleOnBlur}  onChange={handleOnChange} />} label="Dues Pending" />
+                                <FormControlLabel control={<Checkbox name="DuesPending" value={duesPendingBoolean} checked={duesPendingBoolean} onChange={duesPendingChanged} disabled={disableDuesPending} />} label="Dues Pending " />
                             </td>
                         </tr> : null}
                         {showButton ? <tr>
                             <td colSpan={3} >
                                 {/* <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button> */}
-                                {disable == true ? <div className="inlineBlock">
+                                {disable == true || disableDuesPending == false ? <div className="inlineBlock">
                                     <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
-                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
-                                </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
+                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || disableDuesPending == false}>Dues Complete</Button>
+                                </div> :
+                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
                             </td>
                         </tr> : null}
 

@@ -48,7 +48,7 @@ const EmployeeDashboard = (props) => {
         <Paper className="root">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                    IT Clearance Dashboard
+                   Employee Clearance Dashboard
                 </Typography>
                 <div className="tableWrapper">
                     <Table >
@@ -73,7 +73,7 @@ const EmployeeDashboard = (props) => {
                                     <StyledTableCell >{EmployeeDetail.PersonalPhone}</StyledTableCell>
                                 </StyledTableRow>
                             )) : <StyledTableRow >
-                                    <StyledTableCell colSpan={5} align="center" component="th" scope="row" >No Results found</StyledTableCell>
+                                    <StyledTableCell colSpan={6} align="center" component="th" scope="row" >No Results found</StyledTableCell>
                                 </StyledTableRow>}
                         </TableBody>
                     </Table>

@@ -1,5 +1,8 @@
 @import "../components/Variable.scss";
-
+.rightAlign{
+  text-align: right;
+  margin-bottom: 20px !important;
+}
 .formView {
   a {
     text-decoration: none;
@@ -9,6 +12,9 @@
       text-decoration: underline;
     }
   }
+}
+.marginZero{
+  margin-top: 0!important;
 }
 
 .MuiTypography-colorPrimary {
