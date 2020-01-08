@@ -45,7 +45,7 @@ const NavigationItem = (props) => {
     const renderChilds = () => {
         switch (paramvalues['component']) {
             case "itClearance":
-                return <ItClearance props={paramvalues['userId']} currentUser = {currentUser}/>;
+                return <ItClearance props={paramvalues['userId']}/>;
             case "itClearanceDashboard":
                 return <ITClearanceDashboard props={paramvalues['userId']} />;
             case "managerClearance":

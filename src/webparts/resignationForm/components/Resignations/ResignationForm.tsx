@@ -146,7 +146,7 @@ const ResignationForm = (props) => {
             list.items.getById(ID).update(elements).then(response => {
                 console.log("updated", response);
                 setState(stateSchema);
-                //  redirect to dashboard
+
             });
         } else {
             elements = { ...elements, 'Status': 'In Progress' };
@@ -154,13 +154,17 @@ const ResignationForm = (props) => {
                 let item = response.data;
                 console.log("check here id value", item);
                 if (item) {
+                   
                     sp.web.lists.getByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
                     sp.web.lists.getByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((response: ItemAddResult) => {
+                        console.log("manager",response);
                     });
                     sp.web.lists.getByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                        console.log("operations",response);
                     });
                     sp.web.lists.getByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                        console.log("Finance",response);
                     });
                     sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
@@ -169,6 +173,7 @@ const ResignationForm = (props) => {
                     sp.web.lists.getByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate }).then((response: ItemAddResult) => {
                     });
                     setState(stateSchema);
+                    // window.location.href = "?component=resignationDashboard";
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);

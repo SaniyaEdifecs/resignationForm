@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { withStyles, Theme, Typography, createStyles, Table, TableBody, TableCell, TableHead, TableRow, Paper } from '@material-ui/core';
+import { withStyles, Theme, Typography, createStyles, Table, TableBody, TableCell, TableHead, TableRow, Paper, TablePagination } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import '../CommonStyleSheet.scss';
 
@@ -77,6 +77,7 @@ const ITClearanceDashboard = (props) => {
                                 </StyledTableRow>}
                         </TableBody>
                     </Table>
+                    
                 </div>
             </div>
         </Paper>

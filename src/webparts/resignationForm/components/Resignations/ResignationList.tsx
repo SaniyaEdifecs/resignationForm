@@ -1,11 +1,8 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { withStyles, Theme, createStyles } from '@material-ui/core/styles';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
+import{Table, TableBody,TableCell, TableHead,  TableRow} from '@material-ui/core/';
+
 import Paper from '@material-ui/core/Paper';
 import { sp } from '@pnp/sp';
 import '../CommonStyleSheet.scss';
@@ -90,6 +87,15 @@ const ResignationList = (props) => {
                                 </StyledTableRow>}
                         </TableBody>
                     </Table>
+                    {/* <TablePagination
+          rowsPerPageOptions={[5, 10, 25]}
+          component="div"
+          count={rows.length}
+          rowsPerPage={rowsPerPage}
+          page={page}
+          onChangePage={handleChangePage}
+          onChangeRowsPerPage={handleChangeRowsPerPage}
+        /> */}
                 </div>
             </div>
         </Paper>

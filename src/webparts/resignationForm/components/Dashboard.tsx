@@ -25,7 +25,7 @@ const Dashboard = (props) => {
                     <Grid item xs={6} >
                     </Grid>
                     <Grid item xs={6} className="rightAlign" >
-                        <Button type="button" variant="contained" color="primary" onClick={handleClick}>Offboarding Process</Button>
+                        <Button type="button" variant="contained" color="primary" onClick={handleClick}>Initiate Offboarding Form</Button>
                     </Grid>
                 </Grid>
                 <ResignationList />

@@ -154,7 +154,7 @@ table {
   }
   .MuiExpansionPanelDetails-root {
     padding: 0 24px;
-    .MuiFormControl-marginNormal {
+    .MuiFormControl-marginNormal { 
       margin-top: 0;
     }
   }
@@ -198,6 +198,9 @@ table {
 }
 .clearanceForm {
   margin-top: 15px;
+  // .MuiFormControl-marginNormal{
+  //   margin:0;
+  // }
   table {
     thead {
       background: lightgray;
@@ -210,10 +213,11 @@ table {
         &:nth-child(2) {
           > div {
             .MuiSelect-selectMenu {
-              margin-top: 8px;
+              margin-top: 0;
             }
             > p {
-              margin-top: 16px !important;
+              margin-top: 5px !important;
+              margin-bottom: 5px !important;
             }
           }
         }
@@ -228,6 +232,7 @@ table {
   td,
   th {
     min-width: 140px;
+    padding:0 5px;
   }
   button {
     margin: 3px 5px;
@@ -300,7 +305,7 @@ table {
   &.MuiButton-root {
     min-width: 100px;
     max-height: 48px;
-    min-height: 48px;
+    min-height: 40px;
   }
 }
 .MuiBreadcrumbs-root {

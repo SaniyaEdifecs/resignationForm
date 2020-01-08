@@ -8,9 +8,8 @@ import '../CommonStyleSheet.scss';
 import Link from '@material-ui/core/Link';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 
-const ItClearance = (props) => {
-    // // console.log('currentUser', props);
-    let ID = props.props;
+const ItClearance = ({props}) => {
+    let ID = props;
     let detail: any;
     let list = sp.web.lists.getByTitle("ItClearance");
     const [isUserExist, setUserExistence] = useState(false);
@@ -46,12 +45,13 @@ const ItClearance = (props) => {
         }
         
         payload = { ...payload, 'Status': status, 'DuesPending': duesPendingBoolean };
-        // console.log("save==========dues", payload)
         // if (isUserExist) {
-        list.items.getById(ID).update(payload).then(i => {
+        list.items.getById(ID).update(payload).then(items => {
+            // console.log()
             showLoader(false);
             getEmployeeClearanceDetails(ID);
-            // window.location.href = "?component=itClearanceDashboard";
+            
+                  // window.location.href = "?component=itClearanceDashboard";
 
         }, (error: any): void => {
             // console.log('Error while creating the item: ' + error);
@@ -71,7 +71,6 @@ const ItClearance = (props) => {
         // }
     };
     const duesPendingChanged = (event) => {
-        // console.log(event.target.checked)
         setDuesPendingBoolean(event.target.checked)
     }
     const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
@@ -173,7 +172,6 @@ const ItClearance = (props) => {
         } else {
             window.location.href = "?component=" + url;
         }
-        console.info('You clicked a breadcrumb.');
     }
     return (
         <div>
