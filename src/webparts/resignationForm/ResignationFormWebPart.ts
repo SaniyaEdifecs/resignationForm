@@ -43,17 +43,18 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
       pages: [
         {
           header: {
-            description: strings.PropertyPaneDescription
+            description: "Resignation"
           },
           groups: [
             {
               groupName: strings.BasicGroupName,
               groupFields: [
                 PropertyPaneTextField('description', {
-                  label: strings.DescriptionFieldLabel
+                  label: "Description"
                 }),
                 PropertyPaneTextField('name', {
-                  label: "Title"
+                  label: "Title",
+                  
                 }),
               ]
             }

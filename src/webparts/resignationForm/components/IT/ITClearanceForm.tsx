@@ -303,17 +303,26 @@ const ItClearance = ({props}) => {
                         </tr>
                         {showButton ? <tr>
                             <td colSpan={3} className="noBoxShadow">
-                                <FormControlLabel control={<Checkbox name="DuesPending" value={duesPendingBoolean} checked={duesPendingBoolean} onChange={duesPendingChanged} disabled={disableDuesPending} />} label="Dues Pending " />
+                                <FormControlLabel control={<Checkbox name="DuesPending" value={duesPendingBoolean} checked={duesPendingBoolean} onChange={duesPendingChanged} disabled={disableDuesPending} />} label="Associate Notification " />
                             </td>
                         </tr> : null}
+                        <tr>
+                            <td>
+                            <FormControlLabel control={<Checkbox name="GrantClearance" value={duesPendingBoolean} checked={duesPendingBoolean} onChange={duesPendingChanged} disabled={disableDuesPending} />} label="Grant Clearance " />
+                            </td>
+                            <td colSpan={2}>
+                             <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Additional Information" name="AdditinalText" required placeholder="Any additional information" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
+                    
+                            </td>
+                        </tr>
                         {showButton ? <tr>
                             <td colSpan={3} >
                                 {/* <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button> */}
                                 {disable == true || disableDuesPending == false ? <div className="inlineBlock">
                                     <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
-                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || disableDuesPending == false}>Dues Complete</Button>
+                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || disableDuesPending == false}>Submit</Button>
                                 </div> :
-                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
+                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>}
                             </td>
                         </tr> : null}
 
