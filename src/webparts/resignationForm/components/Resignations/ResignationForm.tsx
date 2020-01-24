@@ -158,13 +158,13 @@ const ResignationForm = (props) => {
                     sp.web.lists.getByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });
                     sp.web.lists.getByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((response: ItemAddResult) => {
-                        console.log("manager",response);
+                        
                     });
                     sp.web.lists.getByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
-                        console.log("operations",response);
+                      
                     });
                     sp.web.lists.getByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
-                        console.log("Finance",response);
+                       
                     });
                     sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
                     });

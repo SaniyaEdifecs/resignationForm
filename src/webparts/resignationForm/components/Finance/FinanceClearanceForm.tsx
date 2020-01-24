@@ -212,6 +212,7 @@ const FinanceClearance = (props) => {
                                 {state.TalentozAccessComments.error && <p style={errorStyle}>{state.TalentozAccessComments.error}</p>}
                             </td>
                         </tr>
+                      
                         <tr>
                             <td>Investement Proofs as required for income tax</td>
                             <td>

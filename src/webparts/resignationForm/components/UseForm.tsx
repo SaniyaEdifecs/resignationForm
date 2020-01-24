@@ -49,7 +49,8 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   let name: any;
   let value: any;
   const checkValidation = (event) => {
-    setIsDirty(true);
+
+   setIsDirty(true);
     if (event.target.type == "checkbox") {
       name = event.target.name;
       value = event.target.checked;
@@ -76,9 +77,9 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
 
 
     // for clearance forms
-    if ((event.target.type != "text" && event.target.type != "textarea") && (name != "DuesPending" && value == "No")) {
-      error = "Dues Pending";
-    }
+    // if ((event.target.type != "text" && event.target.type != "textarea") && (name != "DuesPending" && value == "No")) {
+    //   error = "Dues Pending";
+    // }
 
       setState(prevState => ({
         ...prevState,
@@ -120,7 +121,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     },
     [state]
   );
-  return { state, disable, saveForm, status, setStatus, setIsDirty, handleOnChange, setState, handleOnBlur, handleOnSubmit };
+  return { state, disable, setDisable, saveForm, status, setStatus, setIsDirty, handleOnChange, setState, handleOnBlur, handleOnSubmit };
 };
 
 export default useForm;

@@ -1,89 +1,114 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { withStyles, Theme, Typography, createStyles, Paper } from '@material-ui/core';
+import { Paper } from '@material-ui/core';
+import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox, RadioGroup, Radio } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import Link from '@material-ui/core/Link';
+import useForm from '../UseForm';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import Moment from 'react-moment';
 import '../CommonStyleSheet.scss';
 
-const ResignationDetail = (props) => {
-    console.log("props", props);
-    let ID = props.props;
-    const [employeeDetail, setEmployeeDetail] = useState();
-    const [managerClearance, setManagerClearance] = useState();
-    const [salesForceClearance, setSalesForceClearance] = useState();
-    const [operationsClearance, setOperationsClearance] = useState();
-    const [financeClearance, setFinanceClearance] = useState();
-    const [hrClearance, setHrClearance] = useState();
+const ResignationDetail = ({ props }) => {
+    let ID = props;
+    const [readOnly, setReadOnly] = useState(false);
+    const [employeeDetail, setEmployeeDetail] = useState({});
+    const [itDetail, setItDetail] = useState({});
+    const [managerClearance, setManagerClearance] = useState({});
+    const [salesForceClearance, setSalesForceClearance] = useState({});
+    const [operationsClearance, setOperationsClearance] = useState({});
+    const [financeClearance, setFinanceClearance] = useState({});
+    const [hrClearance, setHrClearance] = useState({});
+    const formFields = [
+        "FinalComments"
+    ];
+    var stateSchema = {};
+    var validationStateSchema = {};
+    formFields.forEach(formField => {
+        stateSchema[formField] = {};
+        validationStateSchema[formField] = {};
+        stateSchema[formField].value = "";
+        stateSchema[formField].error = "";
+        validationStateSchema[formField].required = true;
+    });
+    stateSchema['selectFields'] = ["FinalComments"];
+    const onSubmitForm = (value) => {
+        // showLoader(true);
+        let payload = {};
+        for (const key in value) {
+            payload[key] = value[key].value;
+        }
+
+        payload = { ...payload, 'Status': status };
+        console.log("payload", payload);
+        sp.web.lists.getByTitle("ResignationList").items.getById(ID).update(payload).then(items => {
+            // showLoader(false);
+            // getEmployeeClearanceDetails(ID);
+            // window.location.href = "?component=itClearanceDashboard";
+        });
+
+    };
+    const { state, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
+
+
     const getEmployeeDetail = () => {
-        sp.web.lists.getByTitle("ItClearance").items.select('Id', 'Status', 'EmployeeName', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeName', 'EmployeeName/EmployeeCode', 'EmployeeName/Department', 'EmployeeName/JobTitle').expand("EmployeeName").get().then((items) => {
-            if (items) {
-                console.log("resignation details", items);
-                items.forEach(item => {
-                    if (ID == item.EmployeeNameId) {
-                        console.log('it clerance status', item);
-                        setEmployeeDetail(item);
-                    }
-                });
+        sp.web.lists.getByTitle('ResignationList').items.getById(ID).get().then((response: any) => {
+            setEmployeeDetail(response);
+            console.log("resignation details", response);
+            if (response['Status'] === "Approved") {
+                console.log("here");
+                setReadOnly(true);
             }
         });
-        sp.web.lists.getByTitle("ManagersClearance").items.select('Id', 'Status', 'EmployeeNameId').get().then((items) => {
+        sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                items.forEach(item => {
-                    if (ID == item.EmployeeNameId) {
-                        console.log('manager clearance status', item);
-                        setManagerClearance(item);
-                    }
-                });
+                setItDetail(items[0]);
+                // console.log("itclearance details", items[0]);
             }
         });
-        sp.web.lists.getByTitle("OperationsClearance").items.select('Id', 'Status', 'EmployeeNameId').get().then((items) => {
+        sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                items.forEach(item => {
-                    if (ID == item.EmployeeNameId) {
-                        console.log('OPs clearance status', item);
-                        setOperationsClearance(item);
-                    }
-                });
+                setManagerClearance(items[0]);
             }
         });
-        sp.web.lists.getByTitle("Finance%20Clearance").items.select('Id', 'Status', 'EmployeeNameId').get().then((items) => {
+        sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                items.forEach(item => {
-                    if (ID == item.EmployeeNameId) {
-                        console.log('Finance clearance status', item);
-                        setFinanceClearance(item);
-                    }
-                });
+                // console.log('OPs clearance status', items[0]);
+                setOperationsClearance(items[0]);
             }
         });
-        sp.web.lists.getByTitle("SalesForceClearance").items.select('Id', 'Status', 'EmployeeNameId').get().then((items) => {
+        sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                console.log('SF clearance status', items);
-                items.forEach(item => {
-                    if (ID == item.EmployeeNameId) {
-                        console.log('SF clearance status', item);
-                        setSalesForceClearance(item);
-                    }
-                });
+                setFinanceClearance(items[0]);
             }
         });
-        sp.web.lists.getByTitle("HrClearance").items.select('Id', 'Status', 'EmployeeNameId').get().then((items) => {
+        sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                console.log('SF clearance status', items);
-                items.forEach(item => {
-                    if (ID == item.EmployeeNameId) {
-                        console.log('HR clearance status', item);
-                        setHrClearance(item);
-                    }
-                });
+                // console.log('SF clearance status', items);
+                setSalesForceClearance(items[0]);
+            }
+        });
+        sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
+            if (items) {
+                console.log('HR clearance status', items);
+                setHrClearance(items[0]);
             }
         });
     }
     useEffect(() => {
         getEmployeeDetail();
     }, []);
+    useEffect(() => { }, [employeeDetail]);
 
+    const errorStyle = {
+        color: 'red',
+        fontSize: '13px',
+        margin: '0',
+    };
     const handleClick = (url, ID) => {
         event.preventDefault();
         if (ID) {
@@ -96,91 +121,445 @@ const ResignationDetail = (props) => {
     }
     return (
         <Paper className="root">
-            <div className="formView">
-                <Typography variant="h5" component="h3">
-                    Clearance Details
+            {employeeDetail['Status'] != "Approved" ?
+                <div className="formView">
+                    <Typography variant="h5" component="h3">
+                        Clearance Details
                 </Typography>
-                <Breadcrumbs separator="›" aria-label="breadcrumb">
-                    <Link color="inherit" onClick={() => handleClick('resignationDashboard', "")}>
-                        Dashboard
+                    <Breadcrumbs separator="›" aria-label="breadcrumb">
+                        <Link color="inherit" onClick={() => handleClick('resignationDashboard', "")}>
+                            Dashboard
                     </Link>
-                    {/* <Link color="inherit" onClick={handleClick}>
-                        Core
-                    </Link> */}
-                    <Typography color="textPrimary">Clearance Details</Typography>
-                </Breadcrumbs>
-                <div className="clearanceTable">
-                    {employeeDetail ? <table cellPadding="0" cellSpacing="0">
-                        <tbody>
-                            <tr>
-                                <th colSpan={2}><h3>Employee Details</h3></th>
-                            </tr>
-                            <tr>
-                                <th>Employee Code</th>
-                                <td>{employeeDetail.EmployeeName.EmployeeCode}</td>
-                            </tr>
-                            <tr>
-                                <th>Employee Name</th>
-                                <td>{employeeDetail.EmployeeName.EmployeeName}</td>
-                            </tr>
-                            <tr>
-                                <th>Department</th>
-                                <td>{employeeDetail.EmployeeName.Department}</td>
-                            </tr>
-                            <tr>
-                                <th>Title</th>
-                                <td>{employeeDetail.EmployeeName.JobTitle}</td>
-                            </tr>
-                            <tr>
-                                <th colSpan={2}><h3>Clearance Status</h3></th>
-                            </tr>
-                            <tr>
-                                <td>Manager Clearance</td>
-                                <td>
-                                    {managerClearance && managerClearance.Status != "Approved" ?
-                                        <Link onClick={() => handleClick('managerClearance', managerClearance.ID)}>{managerClearance.Status}</Link> : "Approved"}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>IT Clearance</td>
-                                <td>
-                                    {employeeDetail && employeeDetail.Status != "Approved" ?
-                                        <Link onClick={() => handleClick('itClearance', employeeDetail.ID)}>{employeeDetail.Status}</Link> : "Approved"}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>SalesForce Clearance</td>
-                                <td>
-                                    {salesForceClearance && salesForceClearance.Status != "Approved" ?
-                                        <Link onClick={() => handleClick('salesForceClearance', salesForceClearance.ID)}>{salesForceClearance.Status}</Link> : "Approved"}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Finance Clearance</td>
-                                <td>
-                                    {financeClearance && financeClearance.Status != "Approved" ?
-                                        <Link onClick={() => handleClick('financeClearance', financeClearance.ID)}>{financeClearance.Status}</Link> : "Approved"}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Operations/Admin Clearance</td>
-                                <td>
-                                    {operationsClearance && operationsClearance.Status != "Approved" ?
-                                        <Link onClick={() => handleClick('operationsClearance', operationsClearance.ID)}>{operationsClearance.Status}</Link> : "Approved"}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>HR Clearance</td>
-                                <td>
-                                    {hrClearance && hrClearance.Status != "Approved" ?
-                                        <Link onClick={() => handleClick('hrClearance', hrClearance.ID)}>{hrClearance.Status}</Link> : "Approved"}
+                        <Typography color="textPrimary">Clearance Details</Typography>
+                    </Breadcrumbs>
+                    <div className="clearanceTable">
+                        {employeeDetail ? <table cellPadding="0" cellSpacing="0">
+                            <tbody>
+                                <tr>
+                                    <th colSpan={2}><h3>Employee Details</h3></th>
+                                </tr>
+                                <tr>
+                                    <th>Employee Code</th>
+                                    <td>{employeeDetail['EmployeeCode']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Employee Name</th>
+                                    <td>{employeeDetail['EmployeeName']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Department</th>
+                                    <td>{employeeDetail['Department']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Title</th>
+                                    <td>{employeeDetail['JobTitle']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Working Date</th>
+                                    <td><Moment format="DD/MM/YYYY">{employeeDetail['LastWorkingDate']}</Moment></td>
+                                </tr>
+                                <tr>
+                                    <th colSpan={2}><h3>Clearance Status</h3></th>
+                                </tr>
+                                <tr>
+                                    <td>Manager Clearance</td>
+                                    <td>
+                                        {managerClearance && managerClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => handleClick('managerClearance', managerClearance['ID'])}>{managerClearance['Status']}</Link> : "Approved"}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>IT Clearance</td>
+                                    <td>
+                                        {itDetail && itDetail['Status'] != "Approved" ?
+                                            <Link onClick={() => handleClick('itClearance', itDetail['ID'])}>{itDetail['Status']}</Link> : "Approved"}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>SalesForce Clearance</td>
+                                    <td>
+                                        {salesForceClearance && salesForceClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => handleClick('salesForceClearance', salesForceClearance['ID'])}>{salesForceClearance['Status']}</Link> : "Approved"}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Finance Clearance</td>
+                                    <td>
+                                        {financeClearance && financeClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => handleClick('financeClearance', financeClearance['ID'])}>{financeClearance['Status']}</Link> : "Approved"}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Operations/Admin Clearance</td>
+                                    <td>
+                                        {operationsClearance && operationsClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => handleClick('operationsClearance', operationsClearance['ID'])}>{operationsClearance['Status']}</Link> : "Approved"}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>HR Clearance</td>
+                                    <td>
+                                        {hrClearance && hrClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => handleClick('hrClearance', hrClearance['ID'])}>{hrClearance['Status']}</Link> : "Approved"}
 
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table> : null}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table> : null}
+                    </div>
                 </div>
-            </div>
+                : <div className="formView clearanceReviewForm">
+                    <Typography variant="h5" component="h3">
+                        Clearance Review
+                    </Typography>
+                    <div className="clearanceTable">
+                        <table cellPadding="0" cellSpacing="0">
+                            <tbody>
+                                <tr>
+                                    <th>Employee Code</th>
+                                    <td>{employeeDetail['EmployeeCode']}</td>
+                                    <th>Resignation Date</th>
+                                    <td><Moment format="DD/MM/YYYY">{employeeDetail['ResignationDate']}</Moment></td>
+                                </tr>
+                                <tr>
+                                    <th>Employee Name</th>
+                                    <td>{employeeDetail['EmployeeName']}</td>
+                                    <th>Last Working Date</th>
+                                    <td> <Moment format="DD/MM/YYYY">{employeeDetail['LastWorkingDate']}</Moment></td>
+                                </tr>
+                                <tr>
+                                    <th>Department/BU</th>
+                                    <td>{employeeDetail['Department']}</td>
+                                    <th>Personal Email</th>
+                                    <td>{employeeDetail['PersonalEmail']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Location</th>
+                                    <td>{employeeDetail['Location']}</td>
+                                    <th>Personal Phone</th>
+                                    <td>{employeeDetail['PersonalPhone']}</td>
+                                </tr>
+                                <tr className="backgroundColor">
+                                    <th>Clearance by</th>
+                                    <th>ITEM</th>
+                                    <th>YES/NO/NA</th>
+                                    <th>COMMENTS</th>
+                                </tr>
+                                <tr>
+                                    <th align="center">Manager</th>
+                                    <td colSpan={3} className="innerTable">
+                                        <table cellPadding="0" cellSpacing="0" >
+                                            <tbody>
+                                                <tr>
+                                                    <td>Handover complete</td>
+                                                    <td>{managerClearance && managerClearance['HandoverComplete']} </td>
+                                                    <td>{managerClearance['HandoverCompleteComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Data Backup</td>
+                                                    <td>{managerClearance['DataBackup']} </td>
+                                                    <td>{managerClearance['DataBackupComments']}</td>
+
+                                                </tr>
+                                                <tr>
+                                                    <td>Email Backup</td>
+                                                    <td>{managerClearance['EmailBackup']}</td>
+                                                    <td>{managerClearance['EmailBackupComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Notice Waiver (No. of days)</td>
+                                                    <td>{managerClearance['NoticeWaiver']}</td>
+                                                    <td>{managerClearance['NoticeWaiverComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Access removal (All applications)</td>
+                                                    <td> {managerClearance['AccessRemoval']}</td>
+                                                    <td>{managerClearance['AccessRemovalComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Email re-routing</td>
+                                                    <td>{managerClearance['EmailRe_x002d_routing']} </td>
+                                                    <td>{managerClearance['EmailRe_x002d_routingComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Others(Specify)</td>
+                                                    <td>{managerClearance['Others_x0028_specify_x0029_']} </td>
+                                                    <td>{managerClearance['OtherComments']} </td>
+                                                </tr>
+                                                {/* <tr>
+                                                    <td>Additional Comments</td>
+                                                    <td colSpan={2}>{managerClearance.AdditionalMessage}</td>
+                                                </tr> */}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>IT</th>
+                                    <td colSpan={3} className="innerTable">
+                                        <table cellPadding="0" cellSpacing="0" >
+                                            <tbody>
+                                                <tr>
+                                                    <td colSpan={3}>Hardware</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Laptop/Destop/Dock Station</td>
+                                                    <td>{itDetail && itDetail['Laptop_x002f_Desktop']} </td>
+                                                    <td>{itDetail['DesktopComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Others - Charger, Mouse, Headphones etc.</td>
+                                                    <td>{itDetail['PeripheralDevices']} </td>
+                                                    <td>{itDetail['PeripheralDevicesComments0']}</td>
+
+                                                </tr>
+                                                <tr>
+                                                    <td colSpan={3}>Assigned cards</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Access Card</td>
+                                                    <td>{itDetail['AccessCard']}</td>
+                                                    <td>{itDetail['AccessCardComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>ID Card</td>
+                                                    <td>{itDetail['IDCard']}</td>
+                                                    <td>{itDetail['IDCardComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Phone & SIM/Data Card</td>
+                                                    <td>{itDetail['DataCard']}</td>
+                                                    <td>{itDetail['DataCardComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Additional Comments</td>
+                                                    <td colSpan={2}>{itDetail['AdditionalMessage']}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>SalesForce</th>
+                                    <td colSpan={3} className="innerTable">
+                                        <table cellPadding="0" cellSpacing="0" >
+                                            <tbody>
+                                                <tr>
+                                                    <td>SDFC License termination: <br />
+                                                        email to Katie.loescher@edifecs.com
+                                                    </td>
+                                                    <td>{salesForceClearance && salesForceClearance['LicenseTermination']} </td>
+                                                    <td>{salesForceClearance['LicenseTerminationComment']}</td>
+                                                </tr>
+
+                                                <tr>
+                                                    {/* <td>Additional Comments</td>
+                                                    <td colSpan={2}>{salesForceClearance['AdditionalMessage']}</td> */}
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Operations/Admins</th>
+                                    <td colSpan={3} className="innerTable">
+                                        <table cellPadding="0" cellSpacing="0" >
+                                            <tbody>
+                                                <tr>
+                                                    <td>Pedestal Keys</td>
+                                                    <td>{operationsClearance && operationsClearance['PedestalKeys']} </td>
+                                                    <td>{operationsClearance['PedestalKeysComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Car/Bike Stickers</td>
+                                                    <td>{operationsClearance['Stickers']}</td>
+                                                    <td>{operationsClearance['StickerComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Library Books</td>
+                                                    <td>{operationsClearance['LibraryBooks']}</td>
+                                                    <td>{operationsClearance['LibraryBooksComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Sim Card</td>
+                                                    <td>{operationsClearance['SimCard']}</td>
+                                                    <td>{operationsClearance['SimCardComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Visiting Cards</td>
+                                                    <td>{operationsClearance['VisitingCards']}</td>
+                                                    <td>{operationsClearance['VisitingCardsComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Kuoni & Concur Access</td>
+                                                    <td>{operationsClearance['KuoniConcurAccess']}</td>
+                                                    <td>{operationsClearance['KuoniConcurAccessComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Biometric Access</td>
+                                                    <td>{operationsClearance['BiometricAccess']}</td>
+                                                    <td>{operationsClearance['BiometricAccessComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Others (Specify)</td>
+                                                    <td>{operationsClearance['Others']}</td>
+                                                    <td>{operationsClearance['OthersComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    {/* <td>Additional Comments</td>
+                                                    <td colSpan={2}>{operationsClearance['AdditionalMessage']}</td> */}
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Finance</th>
+                                    <td colSpan={3} className="innerTable">
+                                        <table cellPadding="0" cellSpacing="0" >
+                                            <tbody>
+                                                <tr>
+                                                    <td>Loan/Imprest balance</td>
+                                                    <td>{financeClearance && financeClearance['Loan_x002f_ImprestBalance']} </td>
+                                                    <td>{financeClearance['Loan_x002f_ImprestBalanceComment']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Travel Advance/Expenses</td>
+                                                    <td>{financeClearance['TravelAdvance_x002f_Expenses']}</td>
+                                                    <td>{financeClearance['TravelAdvance_x002f_ExpensesComm']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Telephone reimbursement</td>
+                                                    <td>{financeClearance['TelephoneReimbursement']}</td>
+                                                    <td>{financeClearance['TelephoneReimbursementComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td >Investment proofs as required for Income Tax</td>
+                                                    <td>{financeClearance['InvestmentProofs']}</td>
+                                                    <td>{financeClearance['InvestmentProofsComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>1. House Rent Receipts</td>
+                                                    <td>{financeClearance['HouseRentReceipts']}</td>
+                                                    <td>{financeClearance['HouseRentReceiptsComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>2. Investment u/s 80C</td>
+                                                    <td>{financeClearance['Investment80C']}</td>
+                                                    <td>{financeClearance['Investment80cComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>3. Housing loan</td>
+                                                    <td>{financeClearance['HousingLoan']}</td>
+                                                    <td>{financeClearance['HousingLoanComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    {/* <td>Additional Comments</td>
+                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> */}
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>HR</th>
+                                    <td colSpan={3} className="innerTable">
+                                        <table cellPadding="0" cellSpacing="0" >
+                                            <tbody>
+                                                <tr>
+                                                    <td>Resignation email & acceptance</td>
+                                                    <td>{hrClearance && hrClearance['Resignationemailacceptance']} </td>
+                                                    <td>{hrClearance['ResignationAcceptancecomments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Exit Interview Form</td>
+                                                    <td>{hrClearance['ExitInterview']}</td>
+                                                    <td>{hrClearance['ExitInterviewComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Relocation/Referral Bonus</td>
+                                                    <td>{hrClearance['Relocation_x002f_ReferralBonus']}</td>
+                                                    <td>{hrClearance['Relocation_x002f_ReferralBonusCo']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td >Sign-on bonus</td>
+                                                    <td>{hrClearance['Sign_x002d_onBonus']}</td>
+                                                    <td>{hrClearance['Sign_x002d_onBonusComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>EL Balance</td>
+                                                    <td>{hrClearance['ELBalance']}</td>
+                                                    <td>{hrClearance['ELBalanceComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Shift Allowance</td>
+                                                    <td>{hrClearance['ShiftAllowance']}</td>
+                                                    <td>{hrClearance['ShiftAllowanceComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Terminate on Hr systems - ADP, Bamboo,
+                                                        <br /> Org.Wizard, Jobvite, Savior
+                                                    </td>
+                                                    <td>{hrClearance['TerminateOnHRSystems']}</td>
+                                                    <td>{hrClearance['TerminateOnHRSystemsComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Shortfall of Notice (Waiver if any)</td>
+                                                    <td>{hrClearance['ShiftAllowance']}</td>
+                                                    <td>{hrClearance['ShiftAllowanceComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colSpan={3}>Payroll, Compliance & Benefits:</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Gratuity</td>
+                                                    <td>{hrClearance['Gratuity']}</td>
+                                                    <td>{hrClearance['GratuityComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Insurance Deductions</td>
+                                                    <td>{hrClearance['Insurance']}</td>
+                                                    <td>{hrClearance['InsuranceComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>PF/ESI</td>
+                                                    <td>{hrClearance['PF_x002f_ESI']}</td>
+                                                    <td>{hrClearance['PF_x002f_ESIComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Others (Specify)</td>
+                                                    <td>{hrClearance['Others']}</td>
+                                                    <td>{hrClearance['OthersComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    {/* <td>Additional Comments</td>
+                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> */}
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colSpan={4}></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        {readOnly ? <div>
+                            <strong>Final Comments:</strong>
+                            <span>{employeeDetail['FinalComments']}</span>
+                        </div> :
+                            <form onSubmit={handleOnSubmit} className="clearanceForm marginTop16">
+                                <div>
+                                    <TextField id="outlined-textarea" required className="width50 MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal" label="Final Comments" name="FinalComments" placeholder="Enter message here..." multiline margin="normal" variant="outlined" onChange={handleOnChange} value={state.FinalComments.value} />
+                                    {state.FinalComments.error && <p style={errorStyle}>{state.FinalComments.error}</p>}
+                                </div>
+                                <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>
+                            </form>}
+                    </div>
+                </div>
+            }
         </Paper>
     );
 };

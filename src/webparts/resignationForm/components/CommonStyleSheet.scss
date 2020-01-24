@@ -98,7 +98,9 @@ h2 {
 .marginTop16 {
   margin-top: 16px !important;
 }
-
+.width50{
+  width: 50%;
+}
 table {
   margin: 15px 0;
   tbody {
@@ -326,5 +328,34 @@ table {
 .noBoxShadow{
   .MuiTypography-body1{
     box-shadow: none;
+  }
+  span{
+    padding: 5px;
+    font-size: 14px;
+    &.MuiIconButton-label *{
+      width: 20px;
+      height: 20px;
+    }
+  }
+  .MuiFormControl-marginNormal{
+    margin-top: 0;
+    margin-bottom: 8px;
+    margin-left: 33px;
+    width: calc(100% - 50px) !important;
+  }
+  p{
+    margin-left: 33px !important;
+  }
+}
+.backgroundColor{
+  background-color: #cdced0;
+}
+.innerTable{
+  padding: 0;
+  border: 0;
+  table{
+    margin: 0;
+    border-width: 0 ;
+    width: 100%;
   }
 }

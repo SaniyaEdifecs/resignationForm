@@ -1,30 +1,42 @@
 import * as React from 'react';
 import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
+import { Button, TextField, Grid, Container, Typography } from '@material-ui/core';
+import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
+// import { InputProps as MuiInputProps } from '@material-ui';
+import MaskedInput from 'react-text-mask'
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import { element } from 'prop-types';
+import DateFnsUtils from '@date-io/date-fns';
 
 const EmployeeDetails = (props) => {
     // Define your state schema
     // const [isdisable, setDisable] = useState(false);
-    const[employeeNameId, setEmployeeNameId] = useState();
+    const [employeeNameId, setEmployeeNameId] = useState();
     const formFields = [
         "EmployeeCode",
         "FirstName",
         "LastName",
         "PersonalEmail",
-        "PersonalPhone"
+        "PersonalPhone",
+        "LastWorkingDate",
+        "ResignationDate",
+        "Location"
     ];
-
+    const mask = ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
         stateSchema[formField] = {};
-        stateSchema[formField].value = "";
-        stateSchema[formField].error = "";
+
         validationStateSchema[formField] = {};
+        if (formField === "ResignationDate") {
+            stateSchema[formField].value = new Date();
+        } else {
+            stateSchema[formField].value = "";
+        }
+        stateSchema[formField].error = "";
         validationStateSchema[formField].required = true;
         validationStateSchema[formField].validator = {
             regex: '',
@@ -32,22 +44,26 @@ const EmployeeDetails = (props) => {
         };
 
     });
-  
-      const _getPeoplePickerItems = (items) => {
+
+    const handleDateChange = (event) => {
+        setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
+        // console.log("=======", LastWorkingDate);
+    };
+    const _getPeoplePickerItems = (items) => {
         if (items[0]) {
             setIsDirty(true);
-          let peoplePickerValue = items[0];
-          let fullName = peoplePickerValue.text.split(' ');
-          let eFirstName = fullName[0];
-          let eLastName = fullName[fullName.length - 1];
-          let eEmail = peoplePickerValue.secondaryText;
-          console.log(eEmail, eLastName, eFirstName);
-          setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }) }));
+            let peoplePickerValue = items[0];
+            let fullName = peoplePickerValue.text.split(' ');
+            let eFirstName = fullName[0];
+            let eLastName = fullName[fullName.length - 1];
+            let eEmail = peoplePickerValue.secondaryText;
+            console.log(eEmail, eLastName, eFirstName);
+            setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }) }));
         }
-        else{
-            setState(prevState => ({ ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }),  }));
+        else {
+            setState(prevState => ({ ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }), }));
         }
-      };
+    };
 
     const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
         stateSchema,
@@ -85,17 +101,18 @@ const EmployeeDetails = (props) => {
     }, []);
 
     const addListItem = (elements) => {
+        console.log("==", elements);
         let ID = props.props;
         let list = sp.web.lists.getByTitle("Employee%20Details");
         if (ID) {
             list.items.getById(ID).update(elements).then(item => {
-                sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({'PersonalEmail': elements.PersonalEmail}).then(response =>{
+                sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location }).then(response => {
                 });
                 setState(stateSchema);
                 window.location.href = "?component=employeeDashboard";
                 //  redirect to dashboard
             });
-        } 
+        }
         // else {
         //     list.items.add(elements).then((items: ItemAddResult): void => {
         //         let item = items.data;
@@ -103,7 +120,7 @@ const EmployeeDetails = (props) => {
         //         if (item) {
         //             sp.web.lists.getByTitle("Employee%20Details").items.add({EmployeeNameId: item.ID}).then((item: ItemAddResult) => {
         //             });
-                   
+
         //             setState(stateSchema);
         //         }
         //     }, (error: any): void => {
@@ -123,7 +140,7 @@ const EmployeeDetails = (props) => {
         <Container component="main">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                   Employee Details
+                    Employee Details
                 </Typography>
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
@@ -142,22 +159,44 @@ const EmployeeDetails = (props) => {
                             {state.FirstName.error && <p style={errorStyle}>{state.FirstName.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name"  value={state.LastName.value}  name="LastName" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" value={state.LastName.value} name="LastName" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
-                  
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={6}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
+                                <KeyboardDatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
+                                    value={state.LastWorkingDate.value} name="LastWorkingDate" onChange={handleDateChange} />
+                            </MuiPickersUtilsProvider>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
+                                <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy"
+                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
+                            </MuiPickersUtilsProvider>
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Personal Email" value={state.PersonalEmail.value} name="PersonalEmail" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} />
                             {state.PersonalEmail.error && <p style={errorStyle}>{state.PersonalEmail.error}</p>}
-                        </Grid> 
+                        </Grid>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Personal Phone" value={state.PersonalPhone.value} name="PersonalPhone" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} />
+                            {/* <TextField variant="outlined" margin="normal" required fullWidth label="Personal Phone" value={state.PersonalPhone.value} name="PersonalPhone" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} /> */}
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Personal Phone" name="PersonalPhone" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} InputProps={{ inputComponent: MaskedInput, }} inputProps={{ guide: false, mask, placeholderChar: '\u2000', }}
+                                type="tel" value={state.PersonalPhone.value} />
                             {state.PersonalPhone.error && <p style={errorStyle}>{state.PersonalPhone.error}</p>}
-                        </Grid> 
+                        </Grid>
                     </Grid>
-                    <Button type="submit"  className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Location" value={state.Location.value} name="Location" onBlur={handleOnBlur} autoComplete="Location" onChange={handleOnChange} />
+                            {state.Location.error && <p style={errorStyle}>{state.Location.error}</p>}
+                        </Grid>
+                    </Grid>
+
+                    <Button type="submit" className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
                 </form>
             </div>
         </Container>

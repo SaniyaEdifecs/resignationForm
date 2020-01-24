@@ -20,7 +20,7 @@ const HrClearance = (props) => {
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "Deductions", "DeductionsComments", "ELBalance", "ELBalanceComments", "Ex_x002d_Gratia", "Ex_x002d_GratiaComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Insurance", "InsuranceComments", "LeaveEncashment", "LeaveEncashmentComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "ServiceLetter", "ServiceLetterComments", "ShiftAllowance", "ShiftAllowanceComments", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TelephoneAllowance", "TelephoneAllowanceComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments"
+        "Deductions", "DeductionsComments", "ELBalance", "ELBalanceComments", "Ex_x002d_Gratia", "Ex_x002d_GratiaComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Insurance", "InsuranceComments", "LeaveEncashment", "LeaveEncashmentComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "ServiceLetter", "ServiceLetterComments", "ShiftAllowance", "ShiftAllowanceComments", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TelephoneAllowance", "TelephoneAllowanceComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver","WaiverComments"
     ];
     var stateSchema = {};
     var validationStateSchema = {};
@@ -93,15 +93,15 @@ const HrClearance = (props) => {
                 if (value.Status == "Approved") {
                     sp.web.lists.getByTitle("HrClearance").items.getById(ID).select('Id', 'EmployeeNameId').get().then(data => {
                         console.log("data after submission", data);
-                        if(data){
-                            sp.web.lists.getByTitle("ResignationList").items.getById(data.EmployeeNameId).update({Status: "Completed" }).then(response => {
-                                if(response){
+                        if (data) {
+                            sp.web.lists.getByTitle("ResignationList").items.getById(data.EmployeeNameId).update({ Status: "Completed" }).then(response => {
+                                if (response) {
                                     console.log("Resiignation", response);
                                     // window.location.href = "?component=hrClearanceDashboard";
                                 }
                             });
                         }
-                        
+
                     });
                 }
             }, (error: any): void => {
@@ -151,6 +151,21 @@ const HrClearance = (props) => {
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td>Resignation email & acceptance</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.Resignationemailacceptance.value} disabled={isDisable} id="Resignationemailacceptance" onBlur={handleOnBlur} onChange={handleOnChange} name="Resignationemailacceptance"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.Resignationemailacceptance.error && <p style={errorStyle}>{state.Resignationemailacceptance.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="ResignationAcceptancecomments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ResignationAcceptancecomments.value} />
+                                {state.ResignationAcceptancecomments.error && <p style={errorStyle}>{state.ResignationAcceptancecomments.error}</p>}
+                            </td>
+                        </tr>
                         <tr>
                             <td>Exit Interview</td>
                             <td>
@@ -287,6 +302,21 @@ const HrClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
+                            <td>Shortfall of Notice (Waiver if any)</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.Waiver.value} disabled={isDisable} id="Waiver" onBlur={handleOnBlur} onChange={handleOnChange} name="Waiver"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.Waiver.error && <p style={errorStyle}>{state.Waiver.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="WaiverComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.WaiverComments.value} />
+                                {state.WaiverComments.error && <p style={errorStyle}>{state.WaiverComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Service Letter</td>
                             <td>
                                 <FormControl>
@@ -332,7 +362,7 @@ const HrClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Insurance</td>
+                            <td>Insurance Deletion</td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Insurance.value} id="Insurance" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Insurance"  >
@@ -344,6 +374,36 @@ const HrClearance = (props) => {
                             <td>
                                 <TextField margin="normal" name="InsuranceComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.InsuranceComments.value} />
                                 {state.InsuranceComments.error && <p style={errorStyle}>{state.InsuranceComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>PF/ESI</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.PF_x002f_ESI.value} id="PF_x002f_ESI" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="PF_x002f_ESI"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.PF_x002f_ESI.error && <p style={errorStyle}>{state.PF_x002f_ESI.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="PF_x002f_ESIComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.PF_x002f_ESIComments.value} />
+                                {state.PF_x002f_ESIComments.error && <p style={errorStyle}>{state.PF_x002f_ESIComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Others (Specify)</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.Others.value} id="Others" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Others"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.Others.error && <p style={errorStyle}>{state.Others.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="OthersComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.OthersComments.value} />
+                                {state.OthersComments.error && <p style={errorStyle}>{state.OthersComments.error}</p>}
                             </td>
                         </tr>
                         {showButton ? <tr>
