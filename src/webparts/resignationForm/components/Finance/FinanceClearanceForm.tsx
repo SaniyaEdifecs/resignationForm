@@ -1,23 +1,23 @@
 import * as React from 'react';
-import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox } from '@material-ui/core';
-import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio } from '@material-ui/core';
+import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
+import Link from '@material-ui/core/Link';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 
-const FinanceClearance = (props) => {
-    let ID = props.props;
+const FinanceClearance = ({ props }) => {
+    let ID = props;
     let detail: any;
     let list = sp.web.lists.getByTitle("Finance%20Clearance");
-    const [isUserExist, setUserExistence] = useState(false);
     const [showButton, setButtonVisibility] = useState(true);
-    const [duesPending, setDuesPending] = useState();
-    const [isdisable, setDisable] = useState(false);
+    const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "ConfidentialInfoComments", "ConfidentialInformation", "HouseRentReceipts", "HouseRentReceiptsComments", "HousingLoan", "HousingLoanComments", "Investment80C", "Investment80cComments", "InvestmentProofs", "InvestmentProofsComments", "Loan_x002f_ImprestBalance", "Loan_x002f_ImprestBalanceComment", "TalentozAccess", "TalentozAccessComments", "TelephoneReimbursement", "TelephoneReimbursementComments", "TravelAdvance_x002f_Expenses", "TravelAdvance_x002f_ExpensesComm"
+        "ConfidentialInfoComments", "ConfidentialInformation", "HouseRentReceipts", "HouseRentReceiptsComments", "HousingLoan", "HousingLoanComments", "Investment80C", "Investment80cComments", "InvestmentProofs", "InvestmentProofsComments", "Loan_x002f_ImprestBalance", "Loan_x002f_ImprestBalanceComment", "TalentozAccess", "TalentozAccessComments", "TelephoneReimbursement", "TelephoneReimbursementComments", "TravelAdvance_x002f_Expenses", "TravelAdvance_x002f_ExpensesComm", "DuesPending", "MessageToAssociate", "AdditionalInformation"
     ];
 
     var stateSchema = {};
@@ -27,30 +27,54 @@ const FinanceClearance = (props) => {
         stateSchema[formField].value = "";
         stateSchema[formField].error = "";
         validationStateSchema[formField] = {};
-        validationStateSchema[formField].required = true;
+        if (formField === 'AdditionalInformation' || formField === 'MessageToAssociate') {
+            validationStateSchema[formField].required = false;
+        } else {
+            validationStateSchema[formField].required = true;
+        }
+
         validationStateSchema[formField].validator = {
             regex: '',
             error: ''
         };
 
     });
+    const onSubmitForm = (value) => {
+        showLoader(true);
+        let payload = {};
+        for (const key in value) {
+            payload[key] = value[key].value;
+        }
 
-    const handleChange = (event) => {
-        setDuesPending({ ...state, ['duesPending']: event.target.checked });
+        payload = { ...payload, 'Status': status };
+        console.log("payload", payload);
+        list.items.getById(ID).update(payload).then(items => {
+            showLoader(false);
+            getEmployeeClearanceDetails(ID);
+            // window.location.href = "?component=itClearanceDashboard";
+        }, (error: any): void => {
+            // console.log('Error while creating the item: ' + error);
+        });
     };
+    const { state, setState, disable, setDisable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
+
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
         }
     }, []);
 
-    const getStatusdetails = (status) => {
+    const getStatusDetails = (status) => {
         switch (status) {
             case "null" || "Not Started" || "Pending":
                 setButtonVisibility(true);
                 break;
             case "Approved":
-                setDisable(true);
+                setReadOnly(true);
                 setButtonVisibility(false);
                 break;
             default:
@@ -61,72 +85,82 @@ const FinanceClearance = (props) => {
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            getStatusdetails(detail.Status);
-            setUserExistence(true);
+            console.log("====", detail);
+            getStatusDetails(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
                     stateSchema[formField].error = "";
                 } else {
-                    stateSchema[formField].value = detail[formField] + "";
+                    stateSchema[formField].value = detail[formField];
                     stateSchema[formField].error = "";
                 }
             });
-            console.log("getdetail", stateSchema);
+            // // console.log("getdetail", stateSchema);
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
-            console.log('Error while creating the item: ' + error);
+            // console.log('Error while creating the item: ' + error);
         });
     };
 
-    const onSubmitForm = (value) => {
-        showLoader(true);
-        for (const key in value) {
-            value[key] = value[key].value;
-        }
-        value = { ...value, 'Status': status };
-        if (isUserExist) {
-            list.items.getById(ID).update(value).then(i => {
-                showLoader(false);
-                window.location.href = "?component=financeDashboard";
-
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        } else {
-            value = { ...value, ID };
-            list.items.add(value).then((response: ItemAddResult): void => {
-                const item = response.data as string;
-                if (item) {
-                    showLoader(false);
-                    window.location.href = "?component=financeDashboard";
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
-        }
-    };
-
-
-    const { state, setState, disable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm,
-
-    );
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
         margin: '0',
     };
+    useEffect(() => {
+        console.log(disable);
+        validationStateSchema['MessageToAssociate'].required = state.DuesPending.value === 'NotifyAssociate';
+        validationStateSchema['AdditionalInformation'].required = false;
+        // if (state.DuesPending.value === 'NotifyAssociate') {
+        //     setDisable(true);
+        //     setStatus("Pending");
+        // } else {
+        //     if (disable != true && state.DuesPending.value === 'GrantClearance') {
+        //         console.log("here");
+        //         setStatus("Approved");
+        //     }
+        // }
 
+        if (validationStateSchema['MessageToAssociate'].required && !state.MessageToAssociate.value) {
+            if (state.MessageToAssociate.error === '') {
+                setState(prevState => ({
+                    ...prevState,
+                    ['MessageToAssociate']: { value: '', error: 'This field is required' }
+                }));
+            }
+
+        } else {
+            if (state.MessageToAssociate.error !== '') {
+                setState(prevState => ({
+                    ...prevState,
+                    ['MessageToAssociate']: { value: '', error: '' }
+                }));
+
+            }
+        }
+    }, [state]);
+    const handleClick = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = "?component=" + url;
+        }
+    };
     return (
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             <Typography variant="h5" component="h5">
                 Finance Clearance
             </Typography>
+            <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                <Link color="inherit" onClick={() => handleClick('hrClearanceDashboard', "")}>
+                    Dashboard
+                    </Link>
+                <Typography color="textPrimary">Clearance Form</Typography>
+            </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
@@ -141,14 +175,14 @@ const FinanceClearance = (props) => {
                             <td>Loan/Imprest Balance</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Loan_x002f_ImprestBalance.value} disabled={isdisable}  id="Loan_x002f_ImprestBalance" onBlur={handleOnBlur} onChange={handleOnChange} name="Loan_x002f_ImprestBalance"  >
+                                    <Select value={state.Loan_x002f_ImprestBalance.value} disabled={readOnly} id="Loan_x002f_ImprestBalance" onBlur={handleOnBlur} onChange={handleOnChange} name="Loan_x002f_ImprestBalance" autoFocus >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Loan_x002f_ImprestBalance.error && <p style={errorStyle}>{state.Loan_x002f_ImprestBalance.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" onChange={handleOnChange} disabled={isdisable}  onBlur={handleOnBlur} required name="Loan_x002f_ImprestBalanceComment" value={state.Loan_x002f_ImprestBalanceComment.value} />
+                                <TextField margin="normal" onChange={handleOnChange} disabled={readOnly} onBlur={handleOnBlur} required name="Loan_x002f_ImprestBalanceComment" value={state.Loan_x002f_ImprestBalanceComment.value} />
                                 {state.Loan_x002f_ImprestBalanceComment.error && <p style={errorStyle}>{state.Loan_x002f_ImprestBalanceComment.error}</p>}
                             </td>
                         </tr>
@@ -156,14 +190,14 @@ const FinanceClearance = (props) => {
                             <td>Travel Advance/Expenses</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.TravelAdvance_x002f_Expenses.value} disabled={isdisable}  id="TravelAdvance_x002f_Expenses" onBlur={handleOnBlur} onChange={handleOnChange} name="TravelAdvance_x002f_Expenses"  >
+                                    <Select value={state.TravelAdvance_x002f_Expenses.value} disabled={readOnly} id="TravelAdvance_x002f_Expenses" onBlur={handleOnBlur} onChange={handleOnChange} name="TravelAdvance_x002f_Expenses"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.TravelAdvance_x002f_Expenses.error && <p style={errorStyle}>{state.TravelAdvance_x002f_Expenses.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="TravelAdvance_x002f_ExpensesComm" disabled={isdisable}  value={state.TravelAdvance_x002f_ExpensesComm.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="TravelAdvance_x002f_ExpensesComm" disabled={readOnly} value={state.TravelAdvance_x002f_ExpensesComm.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.TravelAdvance_x002f_ExpensesComm.error && <p style={errorStyle}>{state.TravelAdvance_x002f_ExpensesComm.error}</p>}
                             </td>
                         </tr>
@@ -171,14 +205,14 @@ const FinanceClearance = (props) => {
                             <td>Telephone Reimbursement</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.TelephoneReimbursement.value} disabled={isdisable}  id="TelephoneReimbursement" onBlur={handleOnBlur} onChange={handleOnChange} name="TelephoneReimbursement"  >
+                                    <Select value={state.TelephoneReimbursement.value} disabled={readOnly} id="TelephoneReimbursement" onBlur={handleOnBlur} onChange={handleOnChange} name="TelephoneReimbursement"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.TelephoneReimbursement.error && <p style={errorStyle}>{state.TelephoneReimbursement.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="TelephoneReimbursementComments" disabled={isdisable}  value={state.TelephoneReimbursementComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="TelephoneReimbursementComments" disabled={readOnly} value={state.TelephoneReimbursementComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.TelephoneReimbursementComments.error && <p style={errorStyle}>{state.TelephoneReimbursementComments.error}</p>}
                             </td>
                         </tr>
@@ -186,14 +220,14 @@ const FinanceClearance = (props) => {
                             <td>Revoke all confedential Information(credit cards, debit card, bank account login credentials etc)</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.ConfidentialInformation.value} disabled={isdisable}  id="ConfidentialInformation" onBlur={handleOnBlur} onChange={handleOnChange} name="ConfidentialInformation"  >
+                                    <Select value={state.ConfidentialInformation.value} disabled={readOnly} id="ConfidentialInformation" onBlur={handleOnBlur} onChange={handleOnChange} name="ConfidentialInformation"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.ConfidentialInformation.error && <p style={errorStyle}>{state.ConfidentialInformation.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="ConfidentialInfoComments" disabled={isdisable}  value={state.ConfidentialInfoComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="ConfidentialInfoComments" disabled={readOnly} value={state.ConfidentialInfoComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.ConfidentialInfoComments.error && <p style={errorStyle}>{state.ConfidentialInfoComments.error}</p>}
                             </td>
                         </tr>
@@ -201,30 +235,30 @@ const FinanceClearance = (props) => {
                             <td>Talentoz Access</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.TalentozAccess.value} id="TalentozAccess" disabled={isdisable} onBlur={handleOnBlur} onChange={handleOnChange} name="TalentozAccess"  >
+                                    <Select value={state.TalentozAccess.value} id="TalentozAccess" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="TalentozAccess"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.TalentozAccess.error && <p style={errorStyle}>{state.TalentozAccess.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="TalentozAccessComments" disabled={isdisable}  value={state.TalentozAccessComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="TalentozAccessComments" disabled={readOnly} value={state.TalentozAccessComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.TalentozAccessComments.error && <p style={errorStyle}>{state.TalentozAccessComments.error}</p>}
                             </td>
                         </tr>
-                      
+
                         <tr>
                             <td>Investement Proofs as required for income tax</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.InvestmentProofs.value} disabled={isdisable}  id="InvestmentProofs" onBlur={handleOnBlur} onChange={handleOnChange} name="InvestmentProofs"  >
+                                    <Select value={state.InvestmentProofs.value} disabled={readOnly} id="InvestmentProofs" onBlur={handleOnBlur} onChange={handleOnChange} name="InvestmentProofs"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.InvestmentProofs.error && <p style={errorStyle}>{state.InvestmentProofs.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="InvestmentProofsComments" disabled={isdisable}  value={state.InvestmentProofsComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="InvestmentProofsComments" disabled={readOnly} value={state.InvestmentProofsComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.InvestmentProofsComments.error && <p style={errorStyle}>{state.InvestmentProofsComments.error}</p>}
                             </td>
                         </tr>
@@ -232,14 +266,14 @@ const FinanceClearance = (props) => {
                             <td>1. House Rent Receipts</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.HouseRentReceipts.value} disabled={isdisable}  id="HouseRentReceipts" onBlur={handleOnBlur} onChange={handleOnChange} name="HouseRentReceipts"  >
+                                    <Select value={state.HouseRentReceipts.value} disabled={readOnly} id="HouseRentReceipts" onBlur={handleOnBlur} onChange={handleOnChange} name="HouseRentReceipts"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.HouseRentReceipts.error && <p style={errorStyle}>{state.HouseRentReceipts.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="HouseRentReceiptsComments" disabled={isdisable}  value={state.HouseRentReceiptsComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="HouseRentReceiptsComments" disabled={readOnly} value={state.HouseRentReceiptsComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.HouseRentReceiptsComments.error && <p style={errorStyle}>{state.HouseRentReceiptsComments.error}</p>}
                             </td>
                         </tr>
@@ -247,14 +281,14 @@ const FinanceClearance = (props) => {
                             <td>2. Investement u/s 80C</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Investment80C.value} id="Investment80C" disabled={isdisable}  onBlur={handleOnBlur} onChange={handleOnChange} name="Investment80C"  >
+                                    <Select value={state.Investment80C.value} id="Investment80C" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Investment80C"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Investment80C.error && <p style={errorStyle}>{state.Investment80C.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="Investment80cComments" disabled={isdisable}  value={state.Investment80cComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="Investment80cComments" disabled={readOnly} value={state.Investment80cComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.Investment80cComments.error && <p style={errorStyle}>{state.Investment80cComments.error}</p>}
                             </td>
                         </tr>
@@ -262,28 +296,49 @@ const FinanceClearance = (props) => {
                             <td>3. Housing Loan</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.HousingLoan.value} disabled={isdisable} id="HousingLoan" onBlur={handleOnBlur} onChange={handleOnChange} name="HousingLoan"  >
+                                    <Select value={state.HousingLoan.value} disabled={readOnly} id="HousingLoan" onBlur={handleOnBlur} onChange={handleOnChange} name="HousingLoan"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.HousingLoan.error && <p style={errorStyle}>{state.HousingLoan.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="HousingLoanComments" disabled={isdisable}  value={state.HousingLoanComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
+                                <TextField margin="normal" name="HousingLoanComments" disabled={readOnly} value={state.HousingLoanComments.value} onChange={handleOnChange} onBlur={handleOnBlur} required />
                                 {state.HousingLoanComments.error && <p style={errorStyle}>{state.HousingLoanComments.error}</p>}
                             </td>
                         </tr>
-                        {showButton ? <tr>
-                            <td colSpan={3} >
-                                <Button type="submit" className="marginTop16" variant="contained" color="default">Dues Pending</Button>
-                                {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
-                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>
-                                </div> : <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Dues Complete</Button>}
-                            </td>
-                        </tr> : null}
                     </tbody>
                 </table>
+                <div className="noBoxShadow ">
+                    <RadioGroup aria-label="DuesPending" name="DuesPending" value={state.DuesPending.value} onChange={handleOnChange} onBlur={handleOnChange}>
+                        <FormControlLabel value="NotifyAssociate" control={<Radio disabled={readOnly} />} label="Message to Associate" />
+
+
+                        {state.DuesPending.value === 'NotifyAssociate' ?
+                            <div>
+                                <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Message To Associate" name="MessageToAssociate" disabled={readOnly} placeholder="Enter message here..." multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnChange} value={state.MessageToAssociate.value} />
+                                {state.MessageToAssociate.error && <p style={errorStyle}>{state.MessageToAssociate.error}</p>}
+                            </div>
+                            : ''}
+                        <FormControlLabel value="GrantClearance" control={<Radio disabled={readOnly} />} label="Grant Clearance" />
+
+                        {state.DuesPending.value === 'GrantClearance' ?
+                            <div>
+                                <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Additional Information" name="AdditionalInformation" disabled={readOnly} placeholder="Any additional information" multiline margin="normal" variant="outlined" value={state.AdditionalInformation.value} onChange={handleOnChange} onBlur={handleOnChange}
+                                />
+
+                            </div>
+                            : ''}
+                    </RadioGroup>
+                </div>
+                {showButton ? <div>
+                    {disable ? <div className="inlineBlock">
+                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>
+                    </div> :
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary">Submit</Button>}
+
+                </div> : null}
             </form>
         </div>
     );

@@ -197,7 +197,7 @@ const ResignationForm = (props) => {
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" />
+                            <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" autoFocus/>
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>

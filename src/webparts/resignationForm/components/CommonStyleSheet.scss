@@ -1,5 +1,5 @@
 @import "../components/Variable.scss";
-.rightAlign{
+.rightAlign {
   text-align: right;
   margin-bottom: 20px !important;
 }
@@ -13,12 +13,17 @@
     }
   }
 }
-.marginZero{
-  margin-top: 0!important;
+.marginZero {
+  margin-top: 0 !important;
 }
 
 .MuiTypography-colorPrimary {
   color: $theme-color;
+}
+.MuiInputBase-root{
+  &.Mui-disabled{
+    color: rgba(0, 0, 0, 0.5) !important;
+  }
 }
 .MuiFormControl-root {
   &.fullWidth {
@@ -98,11 +103,12 @@ h2 {
 .marginTop16 {
   margin-top: 16px !important;
 }
-.width50{
+.width50 {
   width: 50%;
 }
 table {
   margin: 15px 0;
+  width: 100%;
   tbody {
     th,
     td {
@@ -156,7 +162,7 @@ table {
   }
   .MuiExpansionPanelDetails-root {
     padding: 0 24px;
-    .MuiFormControl-marginNormal { 
+    .MuiFormControl-marginNormal {
       margin-top: 0;
     }
   }
@@ -183,15 +189,16 @@ table {
     margin: 5px;
   }
 }
-.clearanceTable{
-  td,th{
+.clearanceTable {
+  td,
+  th {
     min-width: 250px;
   }
-  th[colspan]{
+  th[colspan] {
     border-left: 0;
     padding-left: 0;
     font-weight: 500;
-    h3{
+    h3 {
       font-size: 18px;
       margin: 0;
       font-weight: inherit;
@@ -199,11 +206,13 @@ table {
   }
 }
 .clearanceForm {
-  margin-top: 15px;
+  margin: 15px 0;
+  max-width: 750px;
   // .MuiFormControl-marginNormal{
   //   margin:0;
   // }
   table {
+    margin: 0;
     thead {
       background: lightgray;
       th {
@@ -233,11 +242,12 @@ table {
   }
   td,
   th {
-    min-width: 140px;
-    padding:0 5px;
+    min-width: 250px;
+    max-width: 250px;
+    padding: 0 5px;
   }
   button {
-    margin: 3px 5px;
+    margin: 3px 10px 0 0;
   }
 }
 
@@ -325,37 +335,52 @@ table {
     color: $theme-color;
   }
 }
-.noBoxShadow{
-  .MuiTypography-body1{
+.noBoxShadow {
+  margin-top: 10px;
+  .MuiTypography-body1 {
     box-shadow: none;
   }
-  span{
+  span {
     padding: 5px;
     font-size: 14px;
-    &.MuiIconButton-label *{
+    &.MuiIconButton-label * {
       width: 20px;
       height: 20px;
     }
   }
-  .MuiFormControl-marginNormal{
+  .MuiFormControl-marginNormal {
     margin-top: 0;
     margin-bottom: 8px;
     margin-left: 33px;
-    width: calc(100% - 50px) !important;
+    width: 100% !important;
   }
-  p{
+  p {
     margin-left: 33px !important;
   }
 }
-.backgroundColor{
+.backgroundColor {
   background-color: #cdced0;
 }
-.innerTable{
+.innerTable {
   padding: 0;
   border: 0;
-  table{
+  table {
     margin: 0;
-    border-width: 0 ;
+    border-width: 0;
     width: 100%;
+    tr {
+      &:last-child {
+        td {
+          border-bottom: 0;
+        }
+      }
+      td {
+        padding: 2px 5px;
+        max-width: 250px;
+        &:last-child{
+          border-right: 0;
+        }
+      }
+    }
   }
 }

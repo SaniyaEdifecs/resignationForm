@@ -1,26 +1,23 @@
 import * as React from 'react';
-import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox } from '@material-ui/core';
-import { sp, ItemAddResult, Item } from '@pnp/sp';
 import { useEffect, useState } from 'react';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio } from '@material-ui/core';
+import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
-// import useCustomFunc, { getStatusdetails } from '../utils';
+import Link from '@material-ui/core/Link';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 
-const HrClearance = (props) => {
-    let ID = props.props;
+const HrClearance = ({ props }) => {
+    let ID = props;
     let detail: any;
     let list = sp.web.lists.getByTitle("HrClearance");
-    const [isUserExist, setUserExistence] = useState(false);
-    const [showButton, setButtonVisibility] = useState();
-    const [duesPending, setDuesPending] = useState();
-    // const [showButton, setButtonVisibility] = useState();
-    const [isDisable, setDisable] = useState(false);
+    const [showButton, setButtonVisibility] = useState(true);
+    const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "Deductions", "DeductionsComments", "ELBalance", "ELBalanceComments", "Ex_x002d_Gratia", "Ex_x002d_GratiaComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Insurance", "InsuranceComments", "LeaveEncashment", "LeaveEncashmentComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "ServiceLetter", "ServiceLetterComments", "ShiftAllowance", "ShiftAllowanceComments", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TelephoneAllowance", "TelephoneAllowanceComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver","WaiverComments"
+       "Resignationemailacceptance", "ResignationAcceptancecomments", "Deductions", "DeductionsComments", "ELBalance", "ELBalanceComments", "Ex_x002d_Gratia", "Ex_x002d_GratiaComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Insurance", "InsuranceComments", "LeaveEncashment", "LeaveEncashmentComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "ServiceLetter", "ServiceLetterComments", "ShiftAllowance", "ShiftAllowanceComments", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TelephoneAllowance", "TelephoneAllowanceComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "PF_x002f_ESI","PF_x002f_ESIComments","Others", "OthersComments"
     ];
     var stateSchema = {};
     var validationStateSchema = {};
@@ -29,13 +26,40 @@ const HrClearance = (props) => {
         stateSchema[formField].value = "";
         stateSchema[formField].error = "";
         validationStateSchema[formField] = {};
-        validationStateSchema[formField].required = true;
+        if (formField === 'AdditionalInformation' || formField === 'MessageToAssociate') {
+            validationStateSchema[formField].required = false;
+        } else {
+            validationStateSchema[formField].required = true;
+        }
+
         validationStateSchema[formField].validator = {
             regex: '',
             error: ''
         };
 
     });
+    const onSubmitForm = (value) => {
+        showLoader(true);
+        let payload = {};
+        for (const key in value) {
+            payload[key] = value[key].value;
+        }
+
+        payload = { ...payload, 'Status': status };
+        console.log("payload", payload);
+        list.items.getById(ID).update(payload).then(items => {
+            showLoader(false);
+            getEmployeeClearanceDetails(ID);
+            // window.location.href = "?component=itClearanceDashboard";
+        }, (error: any): void => {
+            // console.log('Error while creating the item: ' + error);
+        });
+    }
+    const { state, setState, disable, setDisable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
 
     useEffect(() => {
         if (ID) {
@@ -43,13 +67,13 @@ const HrClearance = (props) => {
         }
     }, []);
 
-    const getStatusdetails = (status) => {
+    const getStatusDetails = (status) => {
         switch (status) {
             case "null" || "Not Started" || "Pending":
                 setButtonVisibility(true);
                 break;
             case "Approved":
-                setDisable(true);
+                setReadOnly(true);
                 setButtonVisibility(false);
                 break;
             default:
@@ -57,83 +81,76 @@ const HrClearance = (props) => {
                 break;
         }
     };
+
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            getStatusdetails(detail.Status);
-            setUserExistence(true);
+            console.log("====", detail);
+            getStatusDetails(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
                     stateSchema[formField].error = "";
                 } else {
-                    stateSchema[formField].value = detail[formField] + "";
+                    stateSchema[formField].value = detail[formField];
                     stateSchema[formField].error = "";
                 }
             });
-            console.log("getdetail", stateSchema);
+            // // console.log("getdetail", stateSchema);
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
-            console.log('Error while creating the item: ' + error);
+            // console.log('Error while creating the item: ' + error);
         });
     };
 
-    const onSubmitForm = (value) => {
-        showLoader(true);
-        for (const key in value) {
-            value[key] = value[key].value;
-        }
-        value = { ...value, 'Status': status };
-        console.log("status", value);
-        if (isUserExist) {
-            list.items.getById(ID).update(value).then(item => {
-                console.log("form check ID", item);
-                showLoader(false);
-                if (value.Status == "Approved") {
-                    sp.web.lists.getByTitle("HrClearance").items.getById(ID).select('Id', 'EmployeeNameId').get().then(data => {
-                        console.log("data after submission", data);
-                        if (data) {
-                            sp.web.lists.getByTitle("ResignationList").items.getById(data.EmployeeNameId).update({ Status: "Completed" }).then(response => {
-                                if (response) {
-                                    console.log("Resiignation", response);
-                                    // window.location.href = "?component=hrClearanceDashboard";
-                                }
-                            });
-                        }
 
-                    });
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
+
+    useEffect(() => {
+        console.log(disable);
+        validationStateSchema['MessageToAssociate'].required = state.DuesPending.value === 'NotifyAssociate';
+        validationStateSchema['AdditionalInformation'].required = false;
+        // if (state.DuesPending.value === 'NotifyAssociate') {
+        //     setDisable(true);
+        //     setStatus("Pending");
+        // }
+        // else {
+        //     if (disable != true && state.DuesPending.value === 'GrantClearance') {
+        //         setStatus("Approved");
+        //     }
+        // }
+        if (validationStateSchema['MessageToAssociate'].required && !state.MessageToAssociate.value) {
+            if (state.MessageToAssociate.error === '') {
+                setState(prevState => ({
+                    ...prevState,
+                    ['MessageToAssociate']: { value: '', error: 'This field is required' }
+                }));
+            }
+
         } else {
-            value = { ...value, ID };
-            list.items.add(value).then((response: ItemAddResult): void => {
-                const item = response.data as string;
-                if (item) {
-                    showLoader(false);
-                    // window.location.href = "?component=hrClearanceDashboard";
-                }
-            }, (error: any): void => {
-                console.log('Error while creating the item: ' + error);
-            });
+            if (state.MessageToAssociate.error !== '') {
+                setState(prevState => ({
+                    ...prevState,
+                    ['MessageToAssociate']: { value: '', error: '' }
+                }));
+
+            }
         }
-    };
-
-    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm,
-
-    );
+    }, [state]);
 
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
         margin: '0',
     };
-
+    const handleClick = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = "?component=" + url;
+        }
+    };
 
     return (
         <div>
@@ -141,6 +158,12 @@ const HrClearance = (props) => {
             <Typography variant="h5" component="h5">
                 HR Clearance
             </Typography>
+            <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                <Link color="inherit" onClick={() => handleClick('hrClearanceDashboard', "")}>
+                    Dashboard
+                    </Link>
+                <Typography color="textPrimary">Clearance Form</Typography>
+            </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
@@ -155,14 +178,14 @@ const HrClearance = (props) => {
                             <td>Resignation email & acceptance</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Resignationemailacceptance.value} disabled={isDisable} id="Resignationemailacceptance" onBlur={handleOnBlur} onChange={handleOnChange} name="Resignationemailacceptance"  >
+                                    <Select value={state.Resignationemailacceptance.value} disabled={readOnly} id="Resignationemailacceptance" onBlur={handleOnBlur} onChange={handleOnChange} name="Resignationemailacceptance" autoFocus>
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Resignationemailacceptance.error && <p style={errorStyle}>{state.Resignationemailacceptance.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="ResignationAcceptancecomments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ResignationAcceptancecomments.value} />
+                                <TextField margin="normal" name="ResignationAcceptancecomments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ResignationAcceptancecomments.value} />
                                 {state.ResignationAcceptancecomments.error && <p style={errorStyle}>{state.ResignationAcceptancecomments.error}</p>}
                             </td>
                         </tr>
@@ -170,14 +193,14 @@ const HrClearance = (props) => {
                             <td>Exit Interview</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.ExitInterview.value} disabled={isDisable} id="ExitInterview" onBlur={handleOnBlur} onChange={handleOnChange} name="ExitInterview"  >
+                                    <Select value={state.ExitInterview.value} disabled={readOnly} id="ExitInterview" onBlur={handleOnBlur} onChange={handleOnChange} name="ExitInterview"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.ExitInterview.error && <p style={errorStyle}>{state.ExitInterview.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="ExitInterviewComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ExitInterviewComments.value} />
+                                <TextField margin="normal" name="ExitInterviewComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ExitInterviewComments.value} />
                                 {state.ExitInterviewComments.error && <p style={errorStyle}>{state.ExitInterviewComments.error}</p>}
                             </td>
                         </tr>
@@ -185,14 +208,14 @@ const HrClearance = (props) => {
                             <td>Relocation/Referral Bonus</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Relocation_x002f_ReferralBonus.value} disabled={isDisable} id="Relocation_x002f_ReferralBonus" onBlur={handleOnBlur} onChange={handleOnChange} name="Relocation_x002f_ReferralBonus"  >
+                                    <Select value={state.Relocation_x002f_ReferralBonus.value} disabled={readOnly} id="Relocation_x002f_ReferralBonus" onBlur={handleOnBlur} onChange={handleOnChange} name="Relocation_x002f_ReferralBonus"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Relocation_x002f_ReferralBonus.error && <p style={errorStyle}>{state.Relocation_x002f_ReferralBonus.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="Relocation_x002f_ReferralBonusCo" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Relocation_x002f_ReferralBonusCo.value} />
+                                <TextField margin="normal" name="Relocation_x002f_ReferralBonusCo" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Relocation_x002f_ReferralBonusCo.value} />
                                 {state.Relocation_x002f_ReferralBonusCo.error && <p style={errorStyle}>{state.Relocation_x002f_ReferralBonusCo.error}</p>}
                             </td>
                         </tr>
@@ -200,14 +223,14 @@ const HrClearance = (props) => {
                             <td>Sign-on Bonus</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Sign_x002d_onBonus.value} id="Sign_x002d_onBonus" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Sign_x002d_onBonus"  >
+                                    <Select value={state.Sign_x002d_onBonus.value} id="Sign_x002d_onBonus" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Sign_x002d_onBonus"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Sign_x002d_onBonus.error && <p style={errorStyle}>{state.Sign_x002d_onBonus.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="Sign_x002d_onBonusComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Sign_x002d_onBonusComments.value} />
+                                <TextField margin="normal" name="Sign_x002d_onBonusComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Sign_x002d_onBonusComments.value} />
                                 {state.Sign_x002d_onBonusComments.error && <p style={errorStyle}>{state.Sign_x002d_onBonusComments.error}</p>}
                             </td>
                         </tr>
@@ -215,14 +238,14 @@ const HrClearance = (props) => {
                             <td>Ex-Gratia</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Ex_x002d_Gratia.value} id="Ex_x002d_Gratia" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Ex_x002d_Gratia"  >
+                                    <Select value={state.Ex_x002d_Gratia.value} id="Ex_x002d_Gratia" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Ex_x002d_Gratia"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Ex_x002d_Gratia.error && <p style={errorStyle}>{state.Ex_x002d_Gratia.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="Ex_x002d_GratiaComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Ex_x002d_GratiaComments.value} />
+                                <TextField margin="normal" name="Ex_x002d_GratiaComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Ex_x002d_GratiaComments.value} />
                                 {state.Ex_x002d_GratiaComments.error && <p style={errorStyle}>{state.Ex_x002d_GratiaComments.error}</p>}
                             </td>
                         </tr>
@@ -230,14 +253,14 @@ const HrClearance = (props) => {
                             <td>EL Balance</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.ELBalance.value} id="ELBalance" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="ELBalance"  >
+                                    <Select value={state.ELBalance.value} id="ELBalance" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="ELBalance"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.ELBalance.error && <p style={errorStyle}>{state.ELBalance.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="ELBalanceComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ELBalanceComments.value} />
+                                <TextField margin="normal" name="ELBalanceComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ELBalanceComments.value} />
                                 {state.ELBalanceComments.error && <p style={errorStyle}>{state.ELBalanceComments.error}</p>}
                             </td>
                         </tr>
@@ -245,14 +268,14 @@ const HrClearance = (props) => {
                             <td>Leave Encashment</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.LeaveEncashment.value} disabled={isDisable} id="LeaveEncashment" onBlur={handleOnBlur} onChange={handleOnChange} name="LeaveEncashment"  >
+                                    <Select value={state.LeaveEncashment.value} disabled={readOnly} id="LeaveEncashment" onBlur={handleOnBlur} onChange={handleOnChange} name="LeaveEncashment"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.LeaveEncashment.error && <p style={errorStyle}>{state.LeaveEncashment.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="LeaveEncashmentComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.LeaveEncashmentComments.value} />
+                                <TextField margin="normal" name="LeaveEncashmentComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.LeaveEncashmentComments.value} />
                                 {state.LeaveEncashmentComments.error && <p style={errorStyle}>{state.LeaveEncashmentComments.error}</p>}
                             </td>
                         </tr>
@@ -260,14 +283,14 @@ const HrClearance = (props) => {
                             <td>Shift Allowance</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.ShiftAllowance.value} disabled={isDisable} id="ShiftAllowance" onBlur={handleOnBlur} onChange={handleOnChange} name="ShiftAllowance"  >
+                                    <Select value={state.ShiftAllowance.value} disabled={readOnly} id="ShiftAllowance" onBlur={handleOnBlur} onChange={handleOnChange} name="ShiftAllowance"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.ShiftAllowance.error && <p style={errorStyle}>{state.ShiftAllowance.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="ShiftAllowanceComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ShiftAllowanceComments.value} />
+                                <TextField margin="normal" name="ShiftAllowanceComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ShiftAllowanceComments.value} />
                                 {state.ShiftAllowanceComments.error && <p style={errorStyle}>{state.ShiftAllowanceComments.error}</p>}
                             </td>
                         </tr>
@@ -275,14 +298,14 @@ const HrClearance = (props) => {
                             <td>Telephone Allowance</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.TelephoneAllowance.value} disabled={isDisable} id="TelephoneAllowance" onBlur={handleOnBlur} onChange={handleOnChange} name="TelephoneAllowance"  >
+                                    <Select value={state.TelephoneAllowance.value} disabled={readOnly} id="TelephoneAllowance" onBlur={handleOnBlur} onChange={handleOnChange} name="TelephoneAllowance"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.TelephoneAllowance.error && <p style={errorStyle}>{state.TelephoneAllowance.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="TelephoneAllowanceComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.TelephoneAllowanceComments.value} />
+                                <TextField margin="normal" name="TelephoneAllowanceComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.TelephoneAllowanceComments.value} />
                                 {state.TelephoneAllowanceComments.error && <p style={errorStyle}>{state.TelephoneAllowanceComments.error}</p>}
                             </td>
                         </tr>
@@ -290,14 +313,14 @@ const HrClearance = (props) => {
                             <td>Terminate On Hr Systems</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.TerminateOnHRSystems.value} disabled={isDisable} id="TerminateOnHRSystems" onBlur={handleOnBlur} onChange={handleOnChange} name="TerminateOnHRSystems"  >
+                                    <Select value={state.TerminateOnHRSystems.value} disabled={readOnly} id="TerminateOnHRSystems" onBlur={handleOnBlur} onChange={handleOnChange} name="TerminateOnHRSystems"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.TerminateOnHRSystems.error && <p style={errorStyle}>{state.TerminateOnHRSystems.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="TerminateOnHRSystemsComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.TerminateOnHRSystemsComments.value} />
+                                <TextField margin="normal" name="TerminateOnHRSystemsComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.TerminateOnHRSystemsComments.value} />
                                 {state.TerminateOnHRSystemsComments.error && <p style={errorStyle}>{state.TerminateOnHRSystemsComments.error}</p>}
                             </td>
                         </tr>
@@ -305,14 +328,14 @@ const HrClearance = (props) => {
                             <td>Shortfall of Notice (Waiver if any)</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Waiver.value} disabled={isDisable} id="Waiver" onBlur={handleOnBlur} onChange={handleOnChange} name="Waiver"  >
+                                    <Select value={state.Waiver.value} disabled={readOnly} id="Waiver" onBlur={handleOnBlur} onChange={handleOnChange} name="Waiver"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Waiver.error && <p style={errorStyle}>{state.Waiver.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="WaiverComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.WaiverComments.value} />
+                                <TextField margin="normal" name="WaiverComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.WaiverComments.value} />
                                 {state.WaiverComments.error && <p style={errorStyle}>{state.WaiverComments.error}</p>}
                             </td>
                         </tr>
@@ -320,14 +343,14 @@ const HrClearance = (props) => {
                             <td>Service Letter</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.ServiceLetter.value} id="ServiceLetter" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="ServiceLetter"  >
+                                    <Select value={state.ServiceLetter.value} id="ServiceLetter" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="ServiceLetter"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.ServiceLetter.error && <p style={errorStyle}>{state.ServiceLetter.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="ServiceLetterComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ServiceLetterComments.value} />
+                                <TextField margin="normal" name="ServiceLetterComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ServiceLetterComments.value} />
                                 {state.ServiceLetterComments.error && <p style={errorStyle}>{state.ServiceLetterComments.error}</p>}
                             </td>
                         </tr>
@@ -335,14 +358,14 @@ const HrClearance = (props) => {
                             <td>Gratuity</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Gratuity.value} id="Gratuity" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Gratuity"  >
+                                    <Select value={state.Gratuity.value} id="Gratuity" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Gratuity"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Gratuity.error && <p style={errorStyle}>{state.Gratuity.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="GratuityComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.GratuityComments.value} />
+                                <TextField margin="normal" name="GratuityComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.GratuityComments.value} />
                                 {state.GratuityComments.error && <p style={errorStyle}>{state.GratuityComments.error}</p>}
                             </td>
                         </tr>
@@ -350,14 +373,14 @@ const HrClearance = (props) => {
                             <td>Deductions</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Deductions.value} id="Deductions" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Deductions"  >
+                                    <Select value={state.Deductions.value} id="Deductions" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Deductions"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Deductions.error && <p style={errorStyle}>{state.Deductions.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="DeductionsComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.DeductionsComments.value} />
+                                <TextField margin="normal" name="DeductionsComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.DeductionsComments.value} />
                                 {state.DeductionsComments.error && <p style={errorStyle}>{state.DeductionsComments.error}</p>}
                             </td>
                         </tr>
@@ -365,14 +388,14 @@ const HrClearance = (props) => {
                             <td>Insurance Deletion</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Insurance.value} id="Insurance" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Insurance"  >
+                                    <Select value={state.Insurance.value} id="Insurance" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Insurance"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Insurance.error && <p style={errorStyle}>{state.Insurance.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="InsuranceComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.InsuranceComments.value} />
+                                <TextField margin="normal" name="InsuranceComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.InsuranceComments.value} />
                                 {state.InsuranceComments.error && <p style={errorStyle}>{state.InsuranceComments.error}</p>}
                             </td>
                         </tr>
@@ -380,14 +403,14 @@ const HrClearance = (props) => {
                             <td>PF/ESI</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.PF_x002f_ESI.value} id="PF_x002f_ESI" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="PF_x002f_ESI"  >
+                                    <Select value={state.PF_x002f_ESI.value} id="PF_x002f_ESI" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="PF_x002f_ESI"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.PF_x002f_ESI.error && <p style={errorStyle}>{state.PF_x002f_ESI.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="PF_x002f_ESIComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.PF_x002f_ESIComments.value} />
+                                <TextField margin="normal" name="PF_x002f_ESIComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.PF_x002f_ESIComments.value} />
                                 {state.PF_x002f_ESIComments.error && <p style={errorStyle}>{state.PF_x002f_ESIComments.error}</p>}
                             </td>
                         </tr>
@@ -395,28 +418,49 @@ const HrClearance = (props) => {
                             <td>Others (Specify)</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.Others.value} id="Others" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} name="Others"  >
+                                    <Select value={state.Others.value} id="Others" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Others"  >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Others.error && <p style={errorStyle}>{state.Others.error}</p>}
                                 </FormControl>
                             </td>
                             <td>
-                                <TextField margin="normal" name="OthersComments" disabled={isDisable} onBlur={handleOnBlur} onChange={handleOnChange} value={state.OthersComments.value} />
+                                <TextField margin="normal" name="OthersComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.OthersComments.value} />
                                 {state.OthersComments.error && <p style={errorStyle}>{state.OthersComments.error}</p>}
                             </td>
                         </tr>
-                        {showButton ? <tr>
-                            <td colSpan={3} >
-                                {disable == true ? <div className="inlineBlock">
-                                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
-                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button></div> :
-                                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>}
-                            </td>
-
-                        </tr> : null}
                     </tbody>
                 </table>
+                <div className="noBoxShadow ">
+                    <RadioGroup aria-label="DuesPending" name="DuesPending" value={state.DuesPending.value} onChange={handleOnChange} onBlur={handleOnChange}>
+                        <FormControlLabel value="NotifyAssociate" control={<Radio disabled={readOnly} />} label="Message to Associate" />
+
+
+                        {state.DuesPending.value === 'NotifyAssociate' ?
+                            <div>
+                                <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Message To Associate" name="MessageToAssociate" disabled={readOnly} placeholder="Enter message here..." multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnChange} value={state.MessageToAssociate.value} />
+                                {state.MessageToAssociate.error && <p style={errorStyle}>{state.MessageToAssociate.error}</p>}
+                            </div>
+                            : ''}
+                        <FormControlLabel value="GrantClearance" control={<Radio disabled={readOnly} />} label="Grant Clearance" />
+
+                        {state.DuesPending.value === 'GrantClearance' ?
+                            <div>
+                                <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Additional Information" name="AdditionalInformation" disabled={readOnly} placeholder="Any additional information" multiline margin="normal" variant="outlined" value={state.AdditionalInformation.value} onChange={handleOnChange} onBlur={handleOnChange}
+                                />
+
+                            </div>
+                            : ''}
+                    </RadioGroup>
+                </div>
+                {showButton ? <div>
+                    {disable ? <div className="inlineBlock">
+                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>
+                    </div> :
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary">Submit</Button>}
+
+                </div> : null}
             </form>
         </div>
     );

@@ -8,7 +8,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
 
   // // Disable button in initial render.
   // useEffect(() => { setDisable(true); }, []);
-  
+
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
       const isInputFieldRequired = validationSchema[key].required;
@@ -21,8 +21,10 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       const stateError = state[key].error;
       if ((isInputFieldRequired && !stateValue) || stateError) {
       }
-      return (isInputFieldRequired && !stateValue) || stateError;
+      return (isInputFieldRequired && !stateValue) || stateError || state['DuesPending'].value === 'NotifyAssociate';
     });
+
+
 
     return hasErrorInState;
   }, [state, validationSchema]);
@@ -41,16 +43,19 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   useEffect(() => {
     if (validateState()) {
       setStatus("Pending");
+      console.log("status =", status);
     } else {
       setStatus("Approved");
+      console.log("status approved====", status);
     }
 
   }, [state]);
+
   let name: any;
   let value: any;
   const checkValidation = (event) => {
 
-   setIsDirty(true);
+    setIsDirty(true);
     if (event.target.type == "checkbox") {
       name = event.target.name;
       value = event.target.checked;
@@ -81,10 +86,10 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     //   error = "Dues Pending";
     // }
 
-      setState(prevState => ({
-        ...prevState,
-        [name]: { value, error }
-      }));
+    setState(prevState => ({
+      ...prevState,
+      [name]: { value, error }
+    }));
   };
 
 

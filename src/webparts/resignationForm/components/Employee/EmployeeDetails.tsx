@@ -4,7 +4,7 @@ import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/People
 import { Button, TextField, Grid, Container, Typography } from '@material-ui/core';
 import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
 // import { InputProps as MuiInputProps } from '@material-ui';
-import MaskedInput from 'react-text-mask'
+import MaskedInput from 'react-text-mask';
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
 import { element } from 'prop-types';
@@ -12,7 +12,6 @@ import DateFnsUtils from '@date-io/date-fns';
 
 const EmployeeDetails = (props) => {
     // Define your state schema
-    // const [isdisable, setDisable] = useState(false);
     const [employeeNameId, setEmployeeNameId] = useState();
     const formFields = [
         "EmployeeCode",
@@ -109,24 +108,10 @@ const EmployeeDetails = (props) => {
                 sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location }).then(response => {
                 });
                 setState(stateSchema);
-                window.location.href = "?component=employeeDashboard";
+                // window.location.href = "?component=employeeDashboard";
                 //  redirect to dashboard
             });
         }
-        // else {
-        //     list.items.add(elements).then((items: ItemAddResult): void => {
-        //         let item = items.data;
-        //         console.log("check here id value",item);
-        //         if (item) {
-        //             sp.web.lists.getByTitle("Employee%20Details").items.add({EmployeeNameId: item.ID}).then((item: ItemAddResult) => {
-        //             });
-
-        //             setState(stateSchema);
-        //         }
-        //     }, (error: any): void => {
-        //         console.log('Error while creating the item: ' + error);
-        //     });
-        // }
     };
 
     function onSubmitForm(state) {
@@ -173,7 +158,7 @@ const EmployeeDetails = (props) => {
                         <Grid item xs={12} sm={6}>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} >
                                 <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy"
-                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
+                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} autoFocus/>
                             </MuiPickersUtilsProvider>
                         </Grid>
                     </Grid>

@@ -345,17 +345,17 @@ const ResignationDetail = ({ props }) => {
                                         <table cellPadding="0" cellSpacing="0" >
                                             <tbody>
                                                 <tr>
-                                                    <td>SDFC License termination: <br />
+                                                    <td>SDFC License termination:
                                                         email to Katie.loescher@edifecs.com
                                                     </td>
                                                     <td>{salesForceClearance && salesForceClearance['LicenseTermination']} </td>
                                                     <td>{salesForceClearance['LicenseTerminationComment']}</td>
                                                 </tr>
 
-                                                <tr>
-                                                    {/* <td>Additional Comments</td>
-                                                    <td colSpan={2}>{salesForceClearance['AdditionalMessage']}</td> */}
-                                                </tr>
+                                                    {/*
+                                                <tr> <td>Additional Comments</td>
+                                                    <td colSpan={2}>{salesForceClearance['AdditionalMessage']}</td></tr> */}
+                                                
                                             </tbody>
                                         </table>
                                     </td>
@@ -405,10 +405,10 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{operationsClearance['Others']}</td>
                                                     <td>{operationsClearance['OthersComments']} </td>
                                                 </tr>
-                                                <tr>
-                                                    {/* <td>Additional Comments</td>
-                                                    <td colSpan={2}>{operationsClearance['AdditionalMessage']}</td> */}
-                                                </tr>
+                                                {/*    <tr>
+                                                    <td>Additional Comments</td>
+                                                    <td colSpan={2}>{operationsClearance['AdditionalMessage']}</td>
+                                                </tr> */}
                                             </tbody>
                                         </table>
                                     </td>
@@ -453,11 +453,8 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{financeClearance['HousingLoan']}</td>
                                                     <td>{financeClearance['HousingLoanComments']} </td>
                                                 </tr>
-                                                <tr>
-                                                    {/* <td>Additional Comments</td>
-                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> */}
-                                                </tr>
-
+                                                {/* <tr><td>Additional Comments</td>
+                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> </tr>*/}
                                             </tbody>
                                         </table>
                                     </td>
@@ -532,23 +529,20 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['Others']}</td>
                                                     <td>{hrClearance['OthersComments']} </td>
                                                 </tr>
-                                                <tr>
-                                                    {/* <td>Additional Comments</td>
-                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> */}
-                                                </tr>
-
+                                                {/*   <tr><td>Additional Comments</td>
+                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> </tr> */}
                                             </tbody>
                                         </table>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colSpan={4}></td>
+                                    <td colSpan={4}> </td>
                                 </tr>
                             </tbody>
                         </table>
                         {readOnly ? <div>
-                            <strong>Final Comments:</strong>
-                            <span>{employeeDetail['FinalComments']}</span>
+                            <strong>Final Comments: </strong>
+                            <span> {employeeDetail['FinalComments']}</span>
                         </div> :
                             <form onSubmit={handleOnSubmit} className="clearanceForm marginTop16">
                                 <div>
