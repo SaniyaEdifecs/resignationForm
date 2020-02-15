@@ -32,6 +32,7 @@ const ResignationDetail = ({ props }) => {
         validationStateSchema[formField].required = true;
     });
     stateSchema['selectFields'] = ["FinalComments"];
+
     const onSubmitForm = (value) => {
         // showLoader(true);
         let payload = {};
@@ -40,7 +41,6 @@ const ResignationDetail = ({ props }) => {
         }
 
         payload = { ...payload, 'Status': status };
-        console.log("payload", payload);
         sp.web.lists.getByTitle("ResignationList").items.getById(ID).update(payload).then(items => {
             // showLoader(false);
             // getEmployeeClearanceDetails(ID);
@@ -58,9 +58,7 @@ const ResignationDetail = ({ props }) => {
     const getEmployeeDetail = () => {
         sp.web.lists.getByTitle('ResignationList').items.getById(ID).get().then((response: any) => {
             setEmployeeDetail(response);
-            console.log("resignation details", response);
             if (response['Status'] === "Approved") {
-                console.log("here");
                 setReadOnly(true);
             }
         });
@@ -94,11 +92,10 @@ const ResignationDetail = ({ props }) => {
         });
         sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                console.log('HR clearance status', items);
                 setHrClearance(items[0]);
             }
         });
-    }
+    };
     useEffect(() => {
         getEmployeeDetail();
     }, []);
@@ -109,6 +106,7 @@ const ResignationDetail = ({ props }) => {
         fontSize: '13px',
         margin: '0',
     };
+
     const handleClick = (url, ID) => {
         event.preventDefault();
         if (ID) {
@@ -117,8 +115,7 @@ const ResignationDetail = ({ props }) => {
         else {
             window.location.href = "?component=" + url;
         }
-        console.info('You clicked a breadcrumb.');
-    }
+    };
     return (
         <Paper className="root">
             {employeeDetail['Status'] != "Approved" ?
@@ -286,10 +283,10 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{managerClearance['Others_x0028_specify_x0029_']} </td>
                                                     <td>{managerClearance['OtherComments']} </td>
                                                 </tr>
-                                                {/* <tr>
+                                                <tr>
                                                     <td>Additional Comments</td>
-                                                    <td colSpan={2}>{managerClearance.AdditionalMessage}</td>
-                                                </tr> */}
+                                                    <td colSpan={2}>{managerClearance['AdditionalInformation']}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </td>
@@ -333,7 +330,7 @@ const ResignationDetail = ({ props }) => {
                                                 </tr>
                                                 <tr>
                                                     <td>Additional Comments</td>
-                                                    <td colSpan={2}>{itDetail['AdditionalMessage']}</td>
+                                                    <td colSpan={2}>{itDetail['AdditionalInformation']}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -351,11 +348,9 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{salesForceClearance && salesForceClearance['LicenseTermination']} </td>
                                                     <td>{salesForceClearance['LicenseTerminationComment']}</td>
                                                 </tr>
-
-                                                    {/*
                                                 <tr> <td>Additional Comments</td>
-                                                    <td colSpan={2}>{salesForceClearance['AdditionalMessage']}</td></tr> */}
-                                                
+                                                    <td colSpan={2}>{salesForceClearance['AdditionalInformation']}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </td>
@@ -405,10 +400,10 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{operationsClearance['Others']}</td>
                                                     <td>{operationsClearance['OthersComments']} </td>
                                                 </tr>
-                                                {/*    <tr>
+                                                   <tr>
                                                     <td>Additional Comments</td>
-                                                    <td colSpan={2}>{operationsClearance['AdditionalMessage']}</td>
-                                                </tr> */}
+                                                    <td colSpan={2}>{operationsClearance['AdditionalInformation']}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </td>
@@ -453,8 +448,8 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{financeClearance['HousingLoan']}</td>
                                                     <td>{financeClearance['HousingLoanComments']} </td>
                                                 </tr>
-                                                {/* <tr><td>Additional Comments</td>
-                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> </tr>*/}
+                                                <tr><td>Additional Comments</td>
+                                                    <td colSpan={2}>{financeClearance['AdditionalInformation']}</td> </tr>
                                             </tbody>
                                         </table>
                                     </td>
@@ -529,8 +524,10 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['Others']}</td>
                                                     <td>{hrClearance['OthersComments']} </td>
                                                 </tr>
-                                                {/*   <tr><td>Additional Comments</td>
-                                                    <td colSpan={2}>{financeClearance['AdditionalMessage']}</td> </tr> */}
+                                                <tr>
+                                                    <td>Additional Comments</td>
+                                                    <td colSpan={2}>{financeClearance['AdditionalInformation']}</td>
+                                                </tr>
                                             </tbody>
                                         </table>
                                     </td>

@@ -7,10 +7,13 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 import Link from '@material-ui/core/Link';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import * as strings from 'ResignationFormWebPartStrings';
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
 const ManagerClearance = ({ props }) => {
     let ID = props;
     let detail: any;
+    let currentUser: any = [];
     let list = sp.web.lists.getByTitle("ManagersClearance");
     const [showButton, setButtonVisibility] = useState(true);
     const [readOnly, setReadOnly] = useState(false);
@@ -39,56 +42,9 @@ const ManagerClearance = ({ props }) => {
         };
 
     });
-
-    const onSubmitForm = (value) => {
-        showLoader(true);
-        let payload = {};
-        for (const key in value) {
-            payload[key] = value[key].value;
-        }
-
-        payload = { ...payload, 'Status': status };
-        console.log("payload", payload);
-        list.items.getById(ID).update(payload).then(items => {
-            showLoader(false);
-            getEmployeeClearanceDetails(ID);
-            // window.location.href = "?component=itClearanceDashboard";
-        }, (error: any): void => {
-            // console.log('Error while creating the item: ' + error);
-        });
-    }
-    const { state, setState, disable, setDisable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm
-    );
-
-    useEffect(() => {
-        if (ID) {
-            getEmployeeClearanceDetails(ID);
-        }
-    }, []);
-
-    const getStatusDetails = (status) => {
-        switch (status) {
-            case "null" || "Not Started" || "Pending":
-                setButtonVisibility(true);
-                break;
-            case "Approved":
-                setReadOnly(true);
-                setButtonVisibility(false);
-                break;
-            default:
-                setButtonVisibility(true);
-                break;
-        }
-    };
-
-
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            console.log("====", detail);
             getStatusDetails(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
@@ -106,7 +62,73 @@ const ManagerClearance = ({ props }) => {
             // console.log('Error while creating the item: ' + error);
         });
     };
+    const onSubmitForm = (value) => {
+        showLoader(true);
+        let payload = {};
+        for (const key in value) {
+            payload[key] = value[key].value;
+        }
 
+        payload = { ...payload, 'Status': status };
+        list.items.getById(ID).update(payload).then(items => {
+            showLoader(false);
+            getEmployeeClearanceDetails(ID);
+            // window.location.href = "?component=itClearanceDashboard";
+        }, (error: any): void => {
+            // console.log('Error while creating the item: ' + error);
+        });
+    };
+    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
+
+
+
+    const getStatusDetails = (status) => {
+        switch (status) {
+            case "null" || "Not Started" || "Pending":
+                setButtonVisibility(true);
+                break;
+            case "Approved":
+                setReadOnly(true);
+                setButtonVisibility(false);
+                break;
+            default:
+                setButtonVisibility(true);
+                break;
+        }
+    };
+
+
+    const setEditAccessPermissions = () => {
+        sp.web.currentUser.get().then((response) => {
+            currentUser = response;
+            if (currentUser) {
+                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('ManagersClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
+                    .then((response: SPHttpClientResponse): Promise<any> => {
+                        return response.json();
+                    }).then(permissionResponse => {
+                        console.log("permissions reponse", permissionResponse);
+                        let permissionLevel = permissionResponse;
+                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
+                            setReadOnly(false);
+                        } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
+                            setReadOnly(true);
+                        }
+                    });
+
+            }
+        });
+    }
+    useEffect(() => {
+        if (ID) {
+            getEmployeeClearanceDetails(ID);
+        }
+        setEditAccessPermissions();
+    }, []);
 
 
     useEffect(() => {
@@ -139,7 +161,7 @@ const ManagerClearance = ({ props }) => {
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = "?component=" + url;
+            window.location.href = window.location.pathname + url;
         }
     };
     const errorStyle = {
@@ -152,13 +174,13 @@ const ManagerClearance = ({ props }) => {
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             <Typography variant="h5" component="h5">
-                Manager Clearance
+                {strings.ManagerClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => handleClick('managerClearanceDashboard', "")}>
-                    Dashboard
-                    </Link>
-                <Typography color="textPrimary">Clearance Form</Typography>
+                <Link color="inherit" onClick={() => handleClick('', "")}>
+                    {strings.Dashboard}
+                </Link>
+                <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
                 <table cellSpacing="0" cellPadding="0">

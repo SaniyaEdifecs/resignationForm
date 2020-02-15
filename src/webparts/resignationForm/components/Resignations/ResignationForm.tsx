@@ -2,11 +2,10 @@ import * as React from 'react';
 import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
-import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { sp, ItemAddResult } from '@pnp/sp';
 import { useEffect, useState } from 'react';
-
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
     // Define your state schema
@@ -34,13 +33,14 @@ const ResignationForm = (props) => {
     let selectedOption = 0;
     formFields.forEach(formField => {
         stateSchema[formField] = {};
+        validationStateSchema[formField] = {};
         if (formField === "LastWorkingDate") {
             stateSchema[formField].value = new Date();
         } else {
             stateSchema[formField].value = "";
         }
         stateSchema[formField].error = "";
-        validationStateSchema[formField] = {};
+        
 
         if (formField === 'OtherReason') {
             validationStateSchema[formField].required = false;
@@ -54,7 +54,11 @@ const ResignationForm = (props) => {
         };
 
     });
-
+    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
     const handleDateChange = (event) => {
         setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: event, error: "" }) }));
         // console.log("=======", LastWorkingDate);
@@ -67,7 +71,6 @@ const ResignationForm = (props) => {
             let mFirstName = fullName[0];
             let mLastName = fullName[fullName.length - 1];
             let mEmail = peoplePickerValue.secondaryText;
-            console.log(mEmail, mLastName, mFirstName);
             setState(prevState => ({ ...prevState, ['ManagerFirstName']: ({ value: mFirstName, error: "" }), ['ManagerLastName']: ({ value: mLastName, error: "" }), ['ManagerEmail']: ({ value: mEmail, error: "" }) }));
         }
         else {
@@ -83,7 +86,6 @@ const ResignationForm = (props) => {
             let eFirstName = fullName[0];
             let eLastName = fullName[fullName.length - 1];
             let eEmail = peoplePickerValue.secondaryText;
-            console.log(eEmail, eLastName, eFirstName);
             setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
         }
         else {
@@ -91,11 +93,7 @@ const ResignationForm = (props) => {
         }
     };
 
-    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm
-    );
+  
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
@@ -144,7 +142,6 @@ const ResignationForm = (props) => {
         if (ID) {
             elements = { ...elements, 'ID': ID }; // remove ID
             list.items.getById(ID).update(elements).then(response => {
-                console.log("updated", response);
                 setState(stateSchema);
 
             });
@@ -152,25 +149,24 @@ const ResignationForm = (props) => {
             elements = { ...elements, 'Status': 'In Progress' };
             list.items.add(elements).then((response: ItemAddResult): void => {
                 let item = response.data;
-                console.log("check here id value", item);
                 if (item) {
                    
-                    sp.web.lists.getByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((itResponse: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((mngResponse: ItemAddResult) => {
                         
                     });
-                    sp.web.lists.getByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((OpsResponse: ItemAddResult) => {
                       
                     });
-                    sp.web.lists.getByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((finResponse: ItemAddResult) => {
                        
                     });
-                    sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((sfResponse: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("HrClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("HrClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((hrResponse: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate }).then((response: ItemAddResult) => {
+                    sp.web.lists.getByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate }).then((emplResponse: ItemAddResult) => {
                     });
                     setState(stateSchema);
                     // window.location.href = "?component=resignationDashboard";
@@ -181,11 +177,11 @@ const ResignationForm = (props) => {
         }
     };
 
-    function onSubmitForm(state) {
-        for (const key in state) {
-            state[key] = state[key].value;
+    function onSubmitForm(value) {
+        for (const key in value) {
+            value[key] = value[key].value;
         }
-        addListItem(state);
+        addListItem(value);
     }
 
     return (
@@ -197,7 +193,7 @@ const ResignationForm = (props) => {
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" autoFocus/>
+                            <TextField variant="outlined"   placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" autoFocus/>
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>

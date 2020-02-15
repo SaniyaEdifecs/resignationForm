@@ -1,7 +1,17 @@
 @import "../components/Variable.scss";
+
 .rightAlign {
   text-align: right;
   margin-bottom: 20px !important;
+}
+.removeBoxShadow {
+  box-shadow: none !important;
+  h5 {
+    margin-bottom: 5px;
+  }
+  .MuiTableCell-root{
+    border: 1px solid rgba(224, 224, 224, 1);
+  }
 }
 .formView {
   a {
@@ -20,8 +30,8 @@
 .MuiTypography-colorPrimary {
   color: $theme-color;
 }
-.MuiInputBase-root{
-  &.Mui-disabled{
+.MuiInputBase-root {
+  &.Mui-disabled {
     color: rgba(0, 0, 0, 0.5) !important;
   }
 }
@@ -96,7 +106,7 @@ h2 {
   width: "100%";
 }
 .tableWrapper {
-  max-height: 407px;
+  // max-height: 407px;
   margin-top: -30px;
   overflow: auto;
 }
@@ -377,10 +387,44 @@ table {
       td {
         padding: 2px 5px;
         max-width: 250px;
-        &:last-child{
+        &:last-child {
           border-right: 0;
         }
       }
     }
   }
+}
+input[type="text"][disabled] {
+  background-color: transparent;
+}
+.dashboardWrapper {
+  h1 {
+    text-align: center;
+    font-size: 28px;
+  }
+  a {
+    // &.ms-Link{
+    text-align: center;
+    display: block;
+    font-size: 26px;
+    color: $theme-color;
+    text-decoration: none;
+    // }
+    .ms-Icon {
+      font-size: 60px;
+      color: $black;
+    }
+  }
+}
+
+select option{
+  &:empty{
+    display: none;
+  }
+}
+
+.msSpinner {
+  height: 200px;
+  display: flex;
+  justify-content: center;
 }

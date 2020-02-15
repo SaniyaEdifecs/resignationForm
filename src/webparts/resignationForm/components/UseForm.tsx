@@ -17,15 +17,16 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       // if ((key === 'ResignationReason' || key === 'OtherReason') && state.ResignationReason.value !== 'Other') {
 
       // }
-
+      let validateStateValue: boolean;
       const stateError = state[key].error;
-      if ((isInputFieldRequired && !stateValue) || stateError) {
+      if (state.DuesPending) {
+        validateStateValue = (isInputFieldRequired && !stateValue) || stateError || state['DuesPending'].value === 'NotifyAssociate';
+      } else {
+        validateStateValue = (isInputFieldRequired && !stateValue) || stateError;
       }
-      return (isInputFieldRequired && !stateValue) || stateError || state['DuesPending'].value === 'NotifyAssociate';
+      return validateStateValue;
+      
     });
-
-
-
     return hasErrorInState;
   }, [state, validationSchema]);
 
@@ -43,10 +44,10 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   useEffect(() => {
     if (validateState()) {
       setStatus("Pending");
-      console.log("status =", status);
+      // console.log("Pending", status);
     } else {
       setStatus("Approved");
-      console.log("status approved====", status);
+      // console.log("app", status);
     }
 
   }, [state]);

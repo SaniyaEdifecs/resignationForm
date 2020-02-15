@@ -1,7 +1,9 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { withStyles, Theme, Typography, createStyles, Table, TableBody, TableCell, TableHead, TableRow, Paper } from '@material-ui/core';
+import { makeStyles, withStyles, Theme, Typography, createStyles, Table, TableBody, TableCell, TableHead, TableRow, Paper, Breadcrumbs, Link } from '@material-ui/core';
 import { sp } from '@pnp/sp';
+import HomeIcon from '@material-ui/icons/Home';
+import * as strings from 'ResignationFormWebPartStrings';
 import '../CommonStyleSheet.scss';
 
 const StyledTableCell = withStyles((theme: Theme) =>
@@ -31,8 +33,7 @@ const HrClearanceDashboard = (props) => {
     const [employeeData, setEmployeeDetail] = useState();
     const getClearanceList = () => {
         sp.web.lists.getByTitle("HrClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
-            if (items.length>0) {
-                console.log("items", items);
+            if (items.length > 0) {
                 setEmployeeDetail(items);
             }
         });
@@ -44,13 +45,38 @@ const HrClearanceDashboard = (props) => {
     const handleClick = (event) => {
         window.location.href = "?component=hrClearance&userId=" + event;
     };
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = strings.RootUrl + url;
+        }
+    };
+    const useStyles = makeStyles(theme => ({
+        link: {
+            display: 'flex',
+        },
+        icon: {
+            marginRight: theme.spacing(0.5),
+            width: 20,
+            height: 20,
+        },
+    }));
+    const classes = useStyles(0);
     return (
-        <Paper className="root">
-            <div className="formView">
-                <Typography variant="h5" component="h3">
-                    HR Clearance Dashboard
+        <Paper className="root removeBoxShadow">
+            <div className="">
+                <Typography variant="h5" component="h5">
+                    HR {strings.Dashboard}
                 </Typography>
-                <div className="tableWrapper">
+                <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                        <HomeIcon className={classes.icon} /> {strings.Home}
+                    </Link>
+                    <Typography color="textPrimary">HR {strings.Dashboard}</Typography>
+                </Breadcrumbs>
+                <div>
                     <Table >
                         <TableHead>
                             <TableRow>

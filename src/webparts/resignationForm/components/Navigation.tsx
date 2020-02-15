@@ -37,38 +37,39 @@ const NavigationItem = (props) => {
 
     let paramvalues = getParams(window.location.search);
     let currentUser: any;
-
+    let path = window.location.href;
     sp.web.currentUser.get().then((response) => {
         currentUser = response;
     });
-
+    // https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/HR-Dashboard.aspx
     const renderChilds = () => {
-        switch (paramvalues['component']) {
+        switch (paramvalues['component'] || path) {
             case "itClearance":
-                return <ItClearance props={paramvalues['userId']}/>;
-            case "itClearanceDashboard":
+                return <ItClearance Id={paramvalues['userId']} context ={context} />;
+            case "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/IT-Dashboard.aspx":
                 return <ITClearanceDashboard props={paramvalues['userId']} />;
             case "managerClearance":
                 return <ManagerClearance props={paramvalues['userId']} />;
-            case "managerClearanceDashboard":
+            case "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Manager-Dashboard.aspx":
                 return <ManagerClearanceDashboard props={paramvalues['userId']} />;
-            case "operationsAdminDashboard":
+            case "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Operations-Dashboard.aspx":
                 return <OperationsAdminDashboard props={paramvalues['userId']} />;
             case "operationsClearance":
                 return <OperationsAdminClearance props={paramvalues['userId']} />;
             case "financeClearance":
                 return <FinanceClearance props={paramvalues['userId']} />;
-            case "financeDashboard":
+            case "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Finance-Dashboard.aspx":
                 return <FinanceDashboard props={paramvalues['userId']} />;
             case "salesForceClearance":
                 return <SalesForceClearance props={paramvalues['userId']} />;
-            case "salesForceDashboard":
+            case "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/SalesForce-Dashboard.aspx":
                 return <SalesForceDashboard props={paramvalues['userId']} />;
             case "hrClearance":
                 return <HrClearance props={paramvalues['userId']} />;
-            case "hrClearanceDashboard":
+            case "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/HR-Dashboard.aspx":
                 return <HrClearanceDashboard props={paramvalues['userId']} />;
-            case "resignationDashboard":
+            case "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Resignation-Dashboard.aspx":
+            // case "resignationDashboard":
                 return <ResignationList props={props} />;
             case "employeeDetails":
                 return <EmployeeDetails props={paramvalues['userId']} context={context} />;
@@ -82,6 +83,7 @@ const NavigationItem = (props) => {
                 return <Dashboard context={context} />;
             // return <h1>No Page Found</h1>;
         }
+
     };
 
     return (

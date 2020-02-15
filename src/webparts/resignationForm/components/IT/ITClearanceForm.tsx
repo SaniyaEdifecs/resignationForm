@@ -3,14 +3,18 @@ import { useEffect, useState } from 'react';
 import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
+import { Spinner } from 'office-ui-fabric-react/lib/Spinner';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 import Link from '@material-ui/core/Link';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import * as strings from 'ResignationFormWebPartStrings';
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
-const ItClearance = ({ props }) => {
-    let ID = props;
+const ItClearance = (props) => {
+    let ID = props.Id;
     let detail: any;
+    let currentUser: any = [];
     let list = sp.web.lists.getByTitle("ItClearance");
     const [showButton, setButtonVisibility] = useState(true);
     const [readOnly, setReadOnly] = useState(false);
@@ -48,7 +52,7 @@ const ItClearance = ({ props }) => {
         }
 
         payload = { ...payload, 'Status': status };
-        console.log("payload", payload);
+        // console.log("payload", payload);
         list.items.getById(ID).update(payload).then(items => {
             showLoader(false);
             getEmployeeClearanceDetails(ID);
@@ -60,18 +64,11 @@ const ItClearance = ({ props }) => {
     };
 
 
-    const { state, setState, disable, setDisable, status, setStatus, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
     );
-
-    useEffect(() => {
-        if (ID) {
-            getEmployeeClearanceDetails(ID);
-        }
-    }, []);
-
 
 
     const getStatusDetails = (status) => {
@@ -91,7 +88,6 @@ const ItClearance = ({ props }) => {
     const getEmployeeClearanceDetails = (employeeID) => {
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
-            console.log("====", detail);
             getStatusDetails(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
@@ -109,8 +105,35 @@ const ItClearance = ({ props }) => {
             // console.log('Error while creating the item: ' + error);
         });
     };
+    const setEditAccessPermissions = () => {
+        sp.web.currentUser.get().then((response) => {
+            currentUser = response;
+            if (currentUser) {
+                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('ItClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
+                    .then((response: SPHttpClientResponse): Promise<any> => {
+                        return response.json();
+                    }).then(permissionResponse => {
+                        console.log("permissions reponse", permissionResponse);
+                        let permissionLevel = permissionResponse;
+                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
+                            setReadOnly(false);
+                        } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
+                            setReadOnly(true);
+                        }
+                    });
+
+            }
+        });
+    }
     useEffect(() => {
-        console.log(disable);
+        if (ID) {
+            getEmployeeClearanceDetails(ID);
+        }
+        setEditAccessPermissions();
+    }, []);
+
+    useEffect(() => {
         validationStateSchema['MessageToAssociate'].required = state.DuesPending.value === 'NotifyAssociate';
         validationStateSchema['AdditionalInformation'].required = false;
         // if (state.DuesPending.value === 'NotifyAssociate') {
@@ -168,20 +191,20 @@ const ItClearance = ({ props }) => {
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = "?component=" + url;
+            window.location.href = window.location.pathname + url;
         }
     };
     return (
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             <Typography variant="h5" component="h5">
-                IT Clearance
-             </Typography>
+                {strings.ItClearance}
+            </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => handleClick('itClearanceDashboard', "")}>
-                    Dashboard
-                    </Link>
-                <Typography color="textPrimary">Clearance Form</Typography>
+                <Link color="inherit" onClick={() => handleClick('', "")}>
+                    {strings.Dashboard}
+                </Link>
+                <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
 
@@ -198,7 +221,7 @@ const ItClearance = ({ props }) => {
                             <td>Mailbox and important data back-up</td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.DataBackup.value} disabled={readOnly} id="DataBackup" onBlur={handleOnBlur} onChange={handleOnChange} name="DataBackup"  autoFocus>
+                                    <Select value={state.DataBackup.value} disabled={readOnly} id="DataBackup" onBlur={handleOnBlur} onChange={handleOnChange} name="DataBackup" autoFocus>
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.DataBackup.error && <p style={errorStyle}>{state.DataBackup.error}</p>}

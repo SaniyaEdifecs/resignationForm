@@ -3,12 +3,13 @@ import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
 import { Button, TextField, Grid, Container, Typography } from '@material-ui/core';
 import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
+
 // import { InputProps as MuiInputProps } from '@material-ui';
 import MaskedInput from 'react-text-mask';
-import { sp, ItemAddResult } from '@pnp/sp';
+import { sp } from '@pnp/sp';
 import { useEffect, useState } from 'react';
-import { element } from 'prop-types';
 import DateFnsUtils from '@date-io/date-fns';
+import * as strings from 'ResignationFormWebPartStrings';
 
 const EmployeeDetails = (props) => {
     // Define your state schema
@@ -43,7 +44,11 @@ const EmployeeDetails = (props) => {
         };
 
     });
-
+    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
+        stateSchema,
+        validationStateSchema,
+        onSubmitForm
+    );
     const handleDateChange = (event) => {
         setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
         // console.log("=======", LastWorkingDate);
@@ -56,7 +61,7 @@ const EmployeeDetails = (props) => {
             let eFirstName = fullName[0];
             let eLastName = fullName[fullName.length - 1];
             let eEmail = peoplePickerValue.secondaryText;
-            console.log(eEmail, eLastName, eFirstName);
+            // console.log(eEmail, eLastName, eFirstName);
             setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }) }));
         }
         else {
@@ -64,11 +69,7 @@ const EmployeeDetails = (props) => {
         }
     };
 
-    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
-        stateSchema,
-        validationStateSchema,
-        onSubmitForm
-    );
+
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
@@ -77,7 +78,6 @@ const EmployeeDetails = (props) => {
 
     const getEmployeeDetails = (employeeID) => {
         sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeID).get().then((detail: any) => {
-            console.log("detail", detail);
             setEmployeeNameId(detail.EmployeeNameId);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
@@ -93,15 +93,13 @@ const EmployeeDetails = (props) => {
         });
     };
     useEffect(() => {
-        console.log(props.props);
-        if (props.props) {
+        if (props) {
             getEmployeeDetails(props.props);
         }
     }, []);
 
     const addListItem = (elements) => {
-        console.log("==", elements);
-        let ID = props.props;
+        let ID = props;
         let list = sp.web.lists.getByTitle("Employee%20Details");
         if (ID) {
             list.items.getById(ID).update(elements).then(item => {
@@ -114,18 +112,18 @@ const EmployeeDetails = (props) => {
         }
     };
 
-    function onSubmitForm(state) {
-        for (const key in state) {
-            state[key] = state[key].value;
+    function onSubmitForm(value) {
+        for (const key in value) {
+            value[key] = value[key].value;
         }
-        addListItem(state);
+        addListItem(value);
     }
-
+   
     return (
         <Container component="main">
             <div className="formView">
                 <Typography variant="h5" component="h3">
-                    Employee Details
+                    {strings.EmployeDetails}
                 </Typography>
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
@@ -158,7 +156,7 @@ const EmployeeDetails = (props) => {
                         <Grid item xs={12} sm={6}>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} >
                                 <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy"
-                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} autoFocus/>
+                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange}   />
                             </MuiPickersUtilsProvider>
                         </Grid>
                     </Grid>
