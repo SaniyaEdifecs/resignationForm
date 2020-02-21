@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { makeStyles, withStyles, Theme, Typography, createStyles, Table, TableBody, TableHead, Paper,TableCell,TableRow, Breadcrumbs, Link, TableFooter, TablePagination, useTheme } from '@material-ui/core';
+import { makeStyles, withStyles, Theme, Typography, createStyles, Table, TableBody, TableHead, Paper, TableCell, TableRow, Breadcrumbs, Link, TableFooter, TablePagination, useTheme } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import { FirstPage, LastPage, KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import { sp } from '@pnp/sp';
@@ -77,15 +77,22 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
 };
 
 const SalesForceDashboard = (props) => {
-    const [employeeData, setEmployeeDetail] = useState([]);
+    const [employeeDetails, setEmployeeDetails] = useState([]);
+    const [errorMsg, setErrorMsg] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-    const emptyRows = rowsPerPage - Math.min(rowsPerPage, employeeData.length - page * rowsPerPage);
+    const [loader, showLoader] = useState(false);
+
     const getClearanceList = () => {
-        sp.web.lists.getByTitle("SalesForceClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
-            if (items.length > 0) {
-                setEmployeeDetail(items);
+        showLoader(true);
+        sp.web.lists.getByTitle("SalesForceClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
+            showLoader(false);
+            if (items) {
+                setEmployeeDetails(items);
             }
+        }).catch(err => {
+            showLoader(false);
+            setErrorMsg("No Records Found");
         });
     };
     useEffect(() => {
@@ -141,65 +148,58 @@ const SalesForceDashboard = (props) => {
                     <Typography color="textPrimary">Salesforce {strings.Dashboard}</Typography>
                 </Breadcrumbs>
                 <div>
-                    <Table >
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>ID</TableCell>
-                                <TableCell >Employee Code</TableCell>
-                                <TableCell >Employee Name</TableCell>
-                                <TableCell >Manager name</TableCell>
-                                <TableCell >Status</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        {employeeData.length > 0 ? <TableBody>
-                            {(rowsPerPage > 0
-                                ? employeeData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : employeeData
-                            ).map((EmployeeDetail, index) => (
-                                <TableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
-                                    <TableCell component="th" scope="row">{EmployeeDetail.Id}</TableCell>
-                                    <TableCell> {EmployeeDetail.EmployeeName.EmployeeCode}</TableCell>
-                                    <TableCell >{EmployeeDetail.EmployeeName.EmployeeName}</TableCell>
-                                    <TableCell >{EmployeeDetail.EmployeeName.ManagerName}</TableCell>
-                                    <TableCell >{EmployeeDetail.Status}</TableCell>
+                    {loader ? <div className="msSpinner">
+                        <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
+                    </div> :
+                        <Table >
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell>ID</TableCell>
+                                    <TableCell >Employee Code</TableCell>
+                                    <TableCell >Employee Name</TableCell>
+                                    <TableCell >Manager name</TableCell>
+                                    <TableCell >Status</TableCell>
                                 </TableRow>
-                            ))}
-                         {/*    {emptyRows > 0 && (
-                                <TableRow style={{ height: 53 * emptyRows }}>
-                                    <TableCell colSpan={5} />
-                                </TableRow>
-                            )}
-                            )) : <TableRow >
-                                    <TableCell colSpan={5} align="center" component="th" scope="row" >No Results found</TableCell>
-                                </TableRow>} */}
-                        </TableBody> : <TableBody> <TableRow>
-                            <TableCell colSpan={5} >
-                                <div className="msSpinner">
-                                    <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                            </TableBody>
-                        }
-                        <TableFooter>
-                            <TableRow>
-                                <TablePagination
-                                    rowsPerPageOptions={[5, 10, 25, employeeData.length>25 && employeeData.length]}
-                                    colSpan={5}
-                                    count={employeeData.length}
-                                    rowsPerPage={rowsPerPage}
-                                    page={page}
-                                    SelectProps={{
-                                        inputProps: { 'aria-label': 'rows per page' },
-                                        native: true,
-                                    }}
-                                    onChangePage={handleChangePage}
-                                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                                    ActionsComponent={TablePaginationActions}
-                                />
+                            </TableHead>
+                            {employeeDetails.length > 0 ? <TableBody>
+                                {(rowsPerPage > 0
+                                    ? employeeDetails.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    : employeeDetails
+                                ).map((EmployeeDetail, index) => (
+                                    <TableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
+                                        <TableCell component="th" scope="row">{EmployeeDetail.Id}</TableCell>
+                                        <TableCell> {EmployeeDetail.EmployeeName.EmployeeCode}</TableCell>
+                                        <TableCell >{EmployeeDetail.EmployeeName.EmployeeName}</TableCell>
+                                        <TableCell >{EmployeeDetail.EmployeeName.ManagerName}</TableCell>
+                                        <TableCell >{EmployeeDetail.Status}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody> : <TableBody> <TableRow>
+                                <TableCell colSpan={5} >
+                                    {errorMsg ? <div>No Records Found</div> : "No Records Found"}
+                                </TableCell>
                             </TableRow>
-                        </TableFooter>
-                    </Table>
+                                </TableBody>
+                            }
+                            <TableFooter>
+                                <TableRow>
+                                    <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25, employeeDetails.length > 25 && employeeDetails.length]}
+                                        colSpan={5}
+                                        count={employeeDetails.length}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        SelectProps={{
+                                            inputProps: { 'aria-label': 'rows per page' },
+                                            native: true,
+                                        }}
+                                        onChangePage={handleChangePage}
+                                        onChangeRowsPerPage={handleChangeRowsPerPage}
+                                        ActionsComponent={TablePaginationActions}
+                                    />
+                                </TableRow>
+                            </TableFooter>
+                        </Table>}
                 </div>
             </div>
         </Paper>

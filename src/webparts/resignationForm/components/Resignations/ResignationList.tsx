@@ -76,10 +76,11 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
 };
 
 const ResignationList = (props) => {
-    const [employeeList, setEmployeeList] = useState([]);
+    const [employeeLists, setEmployeeLists] = useState([]);
+    const [errorMsg, setErrorMsg] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-
+    const [loader, showLoader] = useState(false);
     // Table Pagination
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -92,10 +93,15 @@ const ResignationList = (props) => {
     };
 
     const getResignationList = () => {
+        showLoader(true);
         sp.web.lists.getByTitle("ResignationList").items.get().then((items: any) => {
-            if (items.length > 0) {
-                setEmployeeList(items);
+            showLoader(false);
+            if (items) {
+                setEmployeeLists(items);
             }
+        }).catch(err =>{
+            showLoader(false);
+            setErrorMsg("No Records Found");
         });
     };
 
@@ -118,71 +124,85 @@ const ResignationList = (props) => {
         },
     }));
     const classes = useStyles(0);
-
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = strings.RootUrl + url;
+        }
+    };
     return (
         <Paper className="root removeBoxShadow">
             <div className="">
-                <Typography variant="h5" component="h3">
+                <Typography variant="h5" component="h5">
                     Resignation {strings.Dashboard}
                 </Typography>
+                <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                        <HomeIcon className={classes.icon} /> {strings.Home}
+                    </Link>
+                    <Typography color="textPrimary">Resignation {strings.Dashboard}</Typography>
+                </Breadcrumbs>
                 <div>
-                    <Table stickyHeader aria-label="sticky table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell >Employee Code</TableCell>
-                                <TableCell >Employee Name</TableCell>
-                                <TableCell >Work Email</TableCell>
-                                <TableCell >Personal Email</TableCell>
-                                <TableCell >Reason for Resignation</TableCell>
-                                <TableCell >Department</TableCell>
-                                <TableCell >Status</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        {employeeList.length > 0 ? <TableBody>
-                            {(rowsPerPage > 0
-                                ? employeeList.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : employeeList
-                            ).map((employeeDetail) => (
-                                <TableRow key={employeeDetail.ID} onClick={() => handleClick(employeeDetail.ID)}>
-                                    <TableCell component="th" scope="row"> {employeeDetail.EmployeeCode}</TableCell>
-                                    <TableCell >{employeeDetail.EmployeeName}</TableCell>
-                                    <TableCell >{employeeDetail.WorkEmail}</TableCell>
-                                    <TableCell >{employeeDetail.PersonalEmail}</TableCell>
-                                    <TableCell >{employeeDetail.ResignationReason}</TableCell>
-                                    <TableCell >{employeeDetail.Department}</TableCell>
-                                    <TableCell >{employeeDetail.Status}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody> :
-                            <TableBody>
+                    {loader ? <div className="msSpinner">
+                        <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
+                    </div> :
+                        <Table stickyHeader aria-label="sticky table">
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell colSpan={7} >
-                                        <div className="msSpinner">
-                                            <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
-                                        </div>
-                                    </TableCell>
+                                    <TableCell >Employee Code</TableCell>
+                                    <TableCell >Employee Name</TableCell>
+                                    <TableCell >Work Email</TableCell>
+                                    <TableCell >Personal Email</TableCell>
+                                    <TableCell >Reason for Resignation</TableCell>
+                                    <TableCell >Department</TableCell>
+                                    <TableCell >Status</TableCell>
                                 </TableRow>
-                            </TableBody>
-                        }
-                        <TableFooter>
-                            <TableRow>
-                                <TablePagination
-                                    rowsPerPageOptions={[5, 10, 25, employeeList.length > 25 && employeeList.length]}
-                                    colSpan={7}
-                                    count={employeeList.length}
-                                    rowsPerPage={rowsPerPage}
-                                    page={page}
-                                    SelectProps={{
-                                        inputProps: { 'aria-label': 'rows per page' },
-                                        native: true,
-                                    }}
-                                    onChangePage={handleChangePage}
-                                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                                    ActionsComponent={TablePaginationActions}
-                                />
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
+                            </TableHead>
+                            {employeeLists.length > 0 ? <TableBody>
+                                {(rowsPerPage > 0
+                                    ? employeeLists.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    : employeeLists
+                                ).map((employeeDetail) => (
+                                    <TableRow key={employeeDetail.ID} onClick={() => handleClick(employeeDetail.ID)}>
+                                        <TableCell component="th" scope="row"> {employeeDetail.EmployeeCode}</TableCell>
+                                        <TableCell >{employeeDetail.EmployeeName}</TableCell>
+                                        <TableCell >{employeeDetail.WorkEmail}</TableCell>
+                                        <TableCell >{employeeDetail.PersonalEmail}</TableCell>
+                                        <TableCell >{employeeDetail.ResignationReason}</TableCell>
+                                        <TableCell >{employeeDetail.Department}</TableCell>
+                                        <TableCell >{employeeDetail.Status}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody> :
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={7} >
+                                        {errorMsg ? <div>No Records Found</div>: "No Records Found"}
+                                    </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            }
+                            <TableFooter>
+                                <TableRow>
+                                    <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25, employeeLists.length > 25 && employeeLists.length]}
+                                        colSpan={7}
+                                        count={employeeLists.length}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        SelectProps={{
+                                            inputProps: { 'aria-label': 'rows per page' },
+                                            native: true,
+                                        }}
+                                        onChangePage={handleChangePage}
+                                        onChangeRowsPerPage={handleChangeRowsPerPage}
+                                        ActionsComponent={TablePaginationActions}
+                                    />
+                                </TableRow>
+                            </TableFooter>
+                        </Table>}
                 </div>
             </div>
         </Paper >

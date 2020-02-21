@@ -78,14 +78,23 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
 };
 
 const FinanceDashboard = (props) => {
-    const [employeeData, setEmployeeDetail] = useState([]);
+    const [employeeDetails, setEmployeeDetails] = useState([]);
+    const [errorMsg, setErrorMsg] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [loader, showLoader] = useState(false);
+
     const getClearanceList = () => {
-        sp.web.lists.getByTitle("Finance%20Clearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
-            if (items.length > 0) {
-                setEmployeeDetail(items);
+        console.log("2");
+        showLoader(true);
+        sp.web.lists.getByTitle("Finance%20Clearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
+            showLoader(false);
+            if (items) {
+                setEmployeeDetails(items);
             }
+        }).catch(err =>{
+            showLoader(false);
+            setErrorMsg("No Records Found");
         });
     };
     useEffect(() => {
@@ -138,6 +147,9 @@ const FinanceDashboard = (props) => {
                     <Typography color="textPrimary">Finance {strings.Dashboard}</Typography>
                 </Breadcrumbs>
                 <div >
+                {loader ? <div className="msSpinner">
+                        <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
+                    </div> :
                     <Table >
                         <TableHead>
                             <TableRow>
@@ -148,10 +160,10 @@ const FinanceDashboard = (props) => {
                                 <TableCell >Status</TableCell>
                             </TableRow>
                         </TableHead>
-                        {employeeData.length > 0 ? <TableBody>
+                        {employeeDetails.length > 0 ? <TableBody>
                             {(rowsPerPage > 0
-                                ? employeeData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : employeeData
+                                ? employeeDetails.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                : employeeDetails
                             ).map((EmployeeDetail, index) => (
                                 <TableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
                                     <TableCell component="th" scope="row">{EmployeeDetail.Id}</TableCell>
@@ -165,9 +177,7 @@ const FinanceDashboard = (props) => {
                             <TableBody>
                                 <TableRow>
                                     <TableCell colSpan={5} >
-                                        <div className="msSpinner">
-                                            <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
-                                        </div>
+                                        {errorMsg ? <div>No Records Found</div>: "No Records Found"}
                                     </TableCell>
                                 </TableRow>
                             </TableBody>
@@ -175,9 +185,9 @@ const FinanceDashboard = (props) => {
                         <TableFooter>
                             <TableRow>
                                 <TablePagination
-                                    rowsPerPageOptions={[5, 10, 25, employeeData.length > 25 && employeeData.length]}
+                                    rowsPerPageOptions={[5, 10, 25, employeeDetails.length > 25 && employeeDetails.length]}
                                     colSpan={5}
-                                    count={employeeData.length}
+                                    count={employeeDetails.length}
                                     rowsPerPage={rowsPerPage}
                                     page={page}
                                     SelectProps={{
@@ -190,7 +200,7 @@ const FinanceDashboard = (props) => {
                                 />
                             </TableRow>
                         </TableFooter>
-                    </Table>
+                    </Table>}
                 </div>
             </div>
         </Paper>

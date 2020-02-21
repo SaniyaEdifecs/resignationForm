@@ -62,7 +62,7 @@ const Dashboard = (props) => {
                     </a>
                 </Grid>
                 <Grid item xs={6} sm={4} className="marginTop16">
-                    <a href={strings.RootUrl + "SitePages/SalesForce-Dashboard.aspx"} target="_blank">
+                    <a href={strings.RootUrl + "/SitePages/SalesForce-Dashboard.aspx"} target="_blank">
                         <i className="ms-Icon ms-Icon--AzureAPIManagement" aria-hidden="true"></i> <br /> SalesForce {strings.Dashboard}
                     </a>
                 </Grid>

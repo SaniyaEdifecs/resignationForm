@@ -19,6 +19,7 @@ const ResignationDetail = ({ props }) => {
     const [operationsClearance, setOperationsClearance] = useState({});
     const [financeClearance, setFinanceClearance] = useState({});
     const [hrClearance, setHrClearance] = useState({});
+    const [errorMsg, setErrorMsg] = useState('');
     const formFields = [
         "FinalComments"
     ];
@@ -61,39 +62,52 @@ const ResignationDetail = ({ props }) => {
             if (response['Status'] === "Approved") {
                 setReadOnly(true);
             }
+        }, (error) => {
+            setErrorMsg("No Access");
         });
         sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setItDetail(items[0]);
                 // console.log("itclearance details", items[0]);
             }
+        }, (error) => {
+            setErrorMsg("No Access");
         });
         sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setManagerClearance(items[0]);
             }
+        }, (error) => {
+            setErrorMsg("No Access");
         });
         sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                // console.log('OPs clearance status', items[0]);
                 setOperationsClearance(items[0]);
             }
+        }, (error) => {
+            setErrorMsg("No Access");
         });
         sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setFinanceClearance(items[0]);
             }
+        }, (error) => {
+            setErrorMsg("No Access");
+            console.log("=ff====", errorMsg, error);
         });
         sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
-                // console.log('SF clearance status', items);
                 setSalesForceClearance(items[0]);
             }
+        }, (error) => {
+            setErrorMsg("No Access");
         });
         sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setHrClearance(items[0]);
             }
+        }, (error) => {
+            setErrorMsg("No Access");
         });
     };
     useEffect(() => {
@@ -160,46 +174,45 @@ const ResignationDetail = ({ props }) => {
                                 </tr>
                                 <tr>
                                     <td>Manager Clearance</td>
-                                    <td>
+                                    {managerClearance ? <td>
                                         {managerClearance && managerClearance['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('managerClearance', managerClearance['ID'])}>{managerClearance['Status']}</Link> : "Approved"}
-                                    </td>
+                                    </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>IT Clearance</td>
-                                    <td>
+                                    {itDetail ? <td>
                                         {itDetail && itDetail['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('itClearance', itDetail['ID'])}>{itDetail['Status']}</Link> : "Approved"}
-                                    </td>
+                                    </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>SalesForce Clearance</td>
-                                    <td>
+                                    {salesForceClearance ? <td>
                                         {salesForceClearance && salesForceClearance['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('salesForceClearance', salesForceClearance['ID'])}>{salesForceClearance['Status']}</Link> : "Approved"}
-                                    </td>
+                                    </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>Finance Clearance</td>
-                                    <td>
+                                    {errorMsg ?<td>No Access</td>: <td>
                                         {financeClearance && financeClearance['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('financeClearance', financeClearance['ID'])}>{financeClearance['Status']}</Link> : "Approved"}
-                                    </td>
+                                    </td> }
                                 </tr>
                                 <tr>
                                     <td>Operations/Admin Clearance</td>
-                                    <td>
+                                    {operationsClearance ? <td>
                                         {operationsClearance && operationsClearance['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('operationsClearance', operationsClearance['ID'])}>{operationsClearance['Status']}</Link> : "Approved"}
-                                    </td>
+                                    </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>HR Clearance</td>
-                                    <td>
+                                    {errorMsg ? <td>No Access</td> :<td>
                                         {hrClearance && hrClearance['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('hrClearance', hrClearance['ID'])}>{hrClearance['Status']}</Link> : "Approved"}
-
-                                    </td>
+                                    </td>}
                                 </tr>
                             </tbody>
                         </table> : null}
@@ -400,7 +413,7 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{operationsClearance['Others']}</td>
                                                     <td>{operationsClearance['OthersComments']} </td>
                                                 </tr>
-                                                   <tr>
+                                                <tr>
                                                     <td>Additional Comments</td>
                                                     <td colSpan={2}>{operationsClearance['AdditionalInformation']}</td>
                                                 </tr>

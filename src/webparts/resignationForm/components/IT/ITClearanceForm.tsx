@@ -120,6 +120,9 @@ const ItClearance = (props) => {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
+                        }else if(permissionResponse.error){
+                            console.log(permissionResponse.error);
+                            setReadOnly(true);
                         }
                     });
 
@@ -349,11 +352,11 @@ const ItClearance = (props) => {
                 {showButton ? <div>
                     {/* {disable == true || disableDuesPending == false ? <div className="inlineBlock"> */}
                     {disable ? <div className="inlineBlock">
-                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm} disabled={readOnly}>Save as draft</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button>
                         {/* <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || disableDuesPending == false}>Submit</Button> */}
                     </div> :
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary">Submit</Button>}
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}
 
                 </div> : null}
             </form>

@@ -77,14 +77,23 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
 
 
 const ManagerClearanceDashboard = (props) => {
-    const [employeeData, setEmployeeDetail] = useState([]);
+    const [employeeDetails, setEmployeeDetails] = useState([]);
+    const [errorMsg, setErrorMsg] = useState('');
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [loader, showLoader] = useState(false);
+
     const getClearanceList = () => {
-        sp.web.lists.getByTitle("ManagersClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items) => {
-            if (items.length > 0) {
-                setEmployeeDetail(items);
+        showLoader(true);
+        sp.web.lists.getByTitle("ManagersClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
+            showLoader(false);
+            if (items) {
+                setEmployeeDetails(items);
+                console.log("details ==", employeeDetails);
             }
+        }).catch(err =>{
+            showLoader(false);
+            setErrorMsg("No Records Found");
         });
     };
     useEffect(() => {
@@ -139,59 +148,60 @@ const ManagerClearanceDashboard = (props) => {
                     <Typography color="textPrimary">HR {strings.Dashboard}</Typography>
                 </Breadcrumbs>
                 <div >
-                    <Table >
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>ID</TableCell>
-                                <TableCell >Employee Code</TableCell>
-                                <TableCell >Employee Name</TableCell>
-                                <TableCell >Manager name</TableCell>
-                                <TableCell >Status</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        {employeeData.length > 0 ? <TableBody>
-                            {(rowsPerPage > 0
-                                ? employeeData.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                : employeeData
-                            ).map((EmployeeDetail, index) => (
-                                <TableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
-                                    <TableCell component="th" scope="row">{EmployeeDetail.Id}</TableCell>
-                                    <TableCell> {EmployeeDetail.EmployeeName.EmployeeCode}</TableCell>
-                                    <TableCell >{EmployeeDetail.EmployeeName.EmployeeName}</TableCell>
-                                    <TableCell >{EmployeeDetail.EmployeeName.ManagerName}</TableCell>
-                                    <TableCell >{EmployeeDetail.Status}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody> :
-                            <TableBody>
+                    {loader ? <div className="msSpinner">
+                        <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
+                    </div> :
+                        <Table >
+                            <TableHead>
                                 <TableRow>
-                                    <TableCell colSpan={5} >
-                                        <div className="msSpinner">
-                                            <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
-                                        </div>
-                                    </TableCell>
+                                    <TableCell>ID</TableCell>
+                                    <TableCell >Employee Code</TableCell>
+                                    <TableCell >Employee Name</TableCell>
+                                    <TableCell >Manager name</TableCell>
+                                    <TableCell >Status</TableCell>
                                 </TableRow>
-                            </TableBody>
-                        }
-                        <TableFooter>
-                            <TableRow>
-                                <TablePagination
-                                    rowsPerPageOptions={[5, 10, 25, employeeData.length > 25 && employeeData.length]}
-                                    colSpan={5}
-                                    count={employeeData.length}
-                                    rowsPerPage={rowsPerPage}
-                                    page={page}
-                                    SelectProps={{
-                                        inputProps: { 'aria-label': 'rows per page' },
-                                        native: true,
-                                    }}
-                                    onChangePage={handleChangePage}
-                                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                                    ActionsComponent={TablePaginationActions}
-                                />
-                            </TableRow>
-                        </TableFooter>
-                    </Table>
+                            </TableHead>
+                            {employeeDetails.length > 0 ? <TableBody>
+                                {(rowsPerPage > 0
+                                    ? employeeDetails.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                    : employeeDetails
+                                ).map((EmployeeDetail, index) => (
+                                    <TableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
+                                        <TableCell component="th" scope="row">{EmployeeDetail.Id}</TableCell>
+                                        <TableCell> {EmployeeDetail.EmployeeName.EmployeeCode}</TableCell>
+                                        <TableCell >{EmployeeDetail.EmployeeName.EmployeeName}</TableCell>
+                                        <TableCell >{EmployeeDetail.EmployeeName.ManagerName}</TableCell>
+                                        <TableCell >{EmployeeDetail.Status}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody> :
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={5} >
+                                        {errorMsg ? <div>No Records Found</div>: "No Records Found"}
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            }
+                            <TableFooter>
+                                <TableRow>
+                                    <TablePagination
+                                        rowsPerPageOptions={[5, 10, 25, employeeDetails.length > 25 && employeeDetails.length]}
+                                        colSpan={5}
+                                        count={employeeDetails.length}
+                                        rowsPerPage={rowsPerPage}
+                                        page={page}
+                                        SelectProps={{
+                                            inputProps: { 'aria-label': 'rows per page' },
+                                            native: true,
+                                        }}
+                                        onChangePage={handleChangePage}
+                                        onChangeRowsPerPage={handleChangeRowsPerPage}
+                                        ActionsComponent={TablePaginationActions}
+                                    />
+                                </TableRow>
+                            </TableFooter>
+                        </Table>}
                 </div>
             </div>
         </Paper>

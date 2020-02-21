@@ -10,8 +10,8 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
-const HrClearance = ({ props }) => {
-    let ID = props;
+const HrClearance = (props) => {
+    let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
     let list = sp.web.lists.getByTitle("HrClearance");
@@ -114,7 +114,12 @@ const HrClearance = ({ props }) => {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
+                        }else if(permissionResponse.error){
+                            console.log("===", permissionResponse.error);
+                            setReadOnly(true);
                         }
+                    },error=>{
+                        console.log("===", error);
                     });
 
             }
@@ -467,10 +472,10 @@ const HrClearance = ({ props }) => {
                 </div>
                 {showButton ? <div>
                     {disable ? <div className="inlineBlock">
-                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm} disabled={readOnly}>Save as draft</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button>
                     </div> :
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary">Submit</Button>}
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}
 
                 </div> : null}
             </form>

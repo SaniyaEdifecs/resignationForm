@@ -1,17 +1,23 @@
 import * as React from 'react';
-import useForm from '../UseForm';
-import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-import { Button, TextField, Grid, Container, Typography } from '@material-ui/core';
-import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
-
-// import { InputProps as MuiInputProps } from '@material-ui';
-import MaskedInput from 'react-text-mask';
-import { sp } from '@pnp/sp';
 import { useEffect, useState } from 'react';
-import DateFnsUtils from '@date-io/date-fns';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, Container, Grid } from '@material-ui/core';
+import { sp } from '@pnp/sp';
+import useForm from '../UseForm';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import '../CommonStyleSheet.scss';
+import Link from '@material-ui/core/Link';
+import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import * as strings from 'ResignationFormWebPartStrings';
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
+import MaskedInput from 'react-text-mask';
+import DateFnsUtils from '@date-io/date-fns';
+import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 
 const EmployeeDetails = (props) => {
+    let ID = props.Id;
+    const [readOnly, setReadOnly] = useState(false);
+    let currentUser: any = [];
     // Define your state schema
     const [employeeNameId, setEmployeeNameId] = useState();
     const formFields = [
@@ -92,22 +98,44 @@ const EmployeeDetails = (props) => {
             // setDisable(true);
         });
     };
+    const setEditAccessPermissions = () => {
+        sp.web.currentUser.get().then((response) => {
+            currentUser = response;
+            if (currentUser) {
+                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('ManagersClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
+                    .then((response: SPHttpClientResponse): Promise<any> => {
+                        return response.json();
+                    }).then(permissionResponse => {
+                        console.log("permissions reponse", permissionResponse);
+                        let permissionLevel = permissionResponse;
+                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
+                            setReadOnly(false);
+                        } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
+                            setReadOnly(true);
+                        }else if(permissionResponse.error){
+                            console.log(permissionResponse.error);
+                            setReadOnly(true);
+                        }
+                    });
+
+            }
+        });
+    }
     useEffect(() => {
         if (props) {
-            getEmployeeDetails(props.props);
+            getEmployeeDetails(ID);
         }
+        setEditAccessPermissions();
     }, []);
 
     const addListItem = (elements) => {
-        let ID = props;
         let list = sp.web.lists.getByTitle("Employee%20Details");
         if (ID) {
             list.items.getById(ID).update(elements).then(item => {
                 sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location }).then(response => {
                 });
                 setState(stateSchema);
-                // window.location.href = "?component=employeeDashboard";
-                //  redirect to dashboard
             });
         }
     };
@@ -179,7 +207,7 @@ const EmployeeDetails = (props) => {
                         </Grid>
                     </Grid>
 
-                    <Button type="submit" className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
+                    <Button type="submit" className="marginTop16" variant="contained" disabled={disable || readOnly} color="primary">Submit</Button>
                 </form>
             </div>
         </Container>

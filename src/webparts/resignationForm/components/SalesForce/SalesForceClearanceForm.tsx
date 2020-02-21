@@ -10,8 +10,8 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
-const SalesForceClearance = ({props}) => {
-    let ID = props;
+const SalesForceClearance = (props) => {
+    let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
     let list = sp.web.lists.getByTitle("SalesForceClearance");
@@ -78,6 +78,7 @@ const SalesForceClearance = ({props}) => {
 
 
     const getEmployeeClearanceDetails = (employeeID) => {
+       
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
@@ -120,6 +121,7 @@ const SalesForceClearance = ({props}) => {
     }, [state]);
 
     const setEditAccessPermissions = () => {
+    
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
@@ -133,6 +135,9 @@ const SalesForceClearance = ({props}) => {
                         if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
+                            setReadOnly(true);
+                        }else if(permissionResponse.error){
+                            console.log(permissionResponse.error);
                             setReadOnly(true);
                         }
                     });
@@ -218,10 +223,10 @@ const SalesForceClearance = ({props}) => {
                 </div>
                 {showButton ? <div>
                     {disable ? <div className="inlineBlock">
-                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm}>Save as draft</Button>
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" disabled ={readOnly} onClick={saveForm}>Save as draft</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button>
                     </div> :
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary">Submit</Button>}
+                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}
 
                 </div> : null}
 
