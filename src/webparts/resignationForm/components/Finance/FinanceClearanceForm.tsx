@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 import Link from '@material-ui/core/Link';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
@@ -79,7 +80,7 @@ const FinanceClearance = (props) => {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
-                        }else if(permissionResponse.error){
+                        } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
                             console.log(permissionResponse.error);
                             setReadOnly(true);
                         }
@@ -166,12 +167,34 @@ const FinanceClearance = (props) => {
             }
         }
     }, [state]);
+
+    const useStyles = makeStyles(theme => ({
+        link: {
+            display: 'flex',
+        },
+        icon: {
+            marginRight: theme.spacing(0.5),
+            width: 20,
+            height: 20,
+        },
+    }));
+    const classes = useStyles(0);
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = strings.RootUrl + url;
+        }
+    };
+
     const handleClick = (url, userId) => {
         event.preventDefault();
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = window.location.pathname + url;
+            window.location.href = url;
+            // window.location.href = window.location.pathname + url;
         }
     };
     return (
@@ -181,9 +204,12 @@ const FinanceClearance = (props) => {
                 {strings.FinanceClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => handleClick('', "")}>
-                {strings.Dashboard}
-                    </Link>
+                <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                    <HomeIcon className={classes.icon} /> {strings.Home}
+                </Link>
+                <Link color="inherit" onClick={() => handleClick(strings.FinanceDashboard, "")}>
+                 Finance {strings.Dashboard}
+                </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">

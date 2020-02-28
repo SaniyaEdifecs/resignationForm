@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 import Link from '@material-ui/core/Link';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
@@ -78,7 +79,7 @@ const SalesForceClearance = (props) => {
 
 
     const getEmployeeClearanceDetails = (employeeID) => {
-       
+
         list.items.getById(employeeID).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
@@ -121,7 +122,7 @@ const SalesForceClearance = (props) => {
     }, [state]);
 
     const setEditAccessPermissions = () => {
-    
+
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
@@ -136,7 +137,7 @@ const SalesForceClearance = (props) => {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
-                        }else if(permissionResponse.error){
+                        } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
                             console.log(permissionResponse.error);
                             setReadOnly(true);
                         }
@@ -152,12 +153,32 @@ const SalesForceClearance = (props) => {
         setEditAccessPermissions();
     }, []);
 
+
+    const useStyles = makeStyles(theme => ({
+        link: {
+            display: 'flex',
+        },
+        icon: {
+            marginRight: theme.spacing(0.5),
+            width: 20,
+            height: 20,
+        },
+    }));
+    const classes = useStyles(0);
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = strings.RootUrl + url;
+        }
+    };
     const handleClick = (url, userId) => {
         event.preventDefault();
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = window.location.pathname + url;
+            window.location.href = url;
         }
     };
     const errorStyle = {
@@ -169,12 +190,15 @@ const SalesForceClearance = (props) => {
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             <Typography variant="h5" component="h5">
-               {strings.SalesForceClearance}
+                {strings.SalesForceClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => handleClick('', "")}>
-                    {strings.Dashboard}
-                    </Link>
+                <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                    <HomeIcon className={classes.icon} /> {strings.Home}
+                </Link>
+                <Link color="inherit" onClick={() => handleClick(strings.SalesForceDashboard, "")}>
+                  SalesForce {strings.Dashboard}
+                </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
@@ -223,7 +247,7 @@ const SalesForceClearance = (props) => {
                 </div>
                 {showButton ? <div>
                     {disable ? <div className="inlineBlock">
-                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" disabled ={readOnly} onClick={saveForm}>Save as draft</Button>
+                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" disabled={readOnly} onClick={saveForm}>Save as draft</Button>
                         <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button>
                     </div> :
                         <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}

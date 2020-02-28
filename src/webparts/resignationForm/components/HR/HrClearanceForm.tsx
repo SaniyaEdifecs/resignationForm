@@ -114,7 +114,7 @@ const HrClearance = (props) => {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
-                        }else if(permissionResponse.error){
+                        }else if(permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)){
                             console.log("===", permissionResponse.error);
                             setReadOnly(true);
                         }

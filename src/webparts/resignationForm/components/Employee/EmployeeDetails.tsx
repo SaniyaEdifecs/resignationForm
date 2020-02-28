@@ -1,17 +1,15 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, Container, Grid } from '@material-ui/core';
+import { Typography, TextField, Button, Container, Grid, Breadcrumbs, Link, makeStyles } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
-import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
-import Link from '@material-ui/core/Link';
-import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
 import MaskedInput from 'react-text-mask';
 import DateFnsUtils from '@date-io/date-fns';
+import HomeIcon from '@material-ui/icons/Home';
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 
 const EmployeeDetails = (props) => {
@@ -113,7 +111,7 @@ const EmployeeDetails = (props) => {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
-                        }else if(permissionResponse.error){
+                        } else if (permissionResponse.error) {
                             console.log(permissionResponse.error);
                             setReadOnly(true);
                         }
@@ -146,13 +144,37 @@ const EmployeeDetails = (props) => {
         }
         addListItem(value);
     }
-   
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = strings.RootUrl + url;
+        }
+    };
+    const useStyles = makeStyles(theme => ({
+        link: {
+            display: 'flex',
+        },
+        icon: {
+            marginRight: theme.spacing(0.5),
+            width: 20,
+            height: 20,
+        },
+    }));
+    const classes = useStyles(0);
     return (
-        <Container component="main">
-            <div className="formView">
+         <Container component="main" className="root removeBoxShadow">
+            <div className="">
                 <Typography variant="h5" component="h3">
                     {strings.EmployeDetails}
                 </Typography>
+                <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                        <HomeIcon className={classes.icon} /> {strings.Home}
+                    </Link>
+                    <Typography color="textPrimary">Employee Details</Typography>
+                </Breadcrumbs>
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
@@ -184,7 +206,7 @@ const EmployeeDetails = (props) => {
                         <Grid item xs={12} sm={6}>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} >
                                 <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy"
-                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange}   />
+                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
                             </MuiPickersUtilsProvider>
                         </Grid>
                     </Grid>

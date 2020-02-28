@@ -1,12 +1,13 @@
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as strings from 'ResignationFormWebPartStrings';
 import { Grid, Button } from '@material-ui/core';
 import { MessageBar, Link } from 'office-ui-fabric-react';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
-import { typography } from '@material-ui/system';
 import '../components/CommonStyleSheet.scss';
 import ResignationList from "./Resignations/ResignationList";
+import { sp } from "@pnp/sp";
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -17,6 +18,35 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 const Dashboard = (props) => {
+    let currentUser: any;
+    const [hideButton, setHideButton] = useState(false);
+
+
+    const setEditAccessPermissions = () => {
+        sp.web.currentUser.get().then((response) => {
+            currentUser = response;
+            console.log("==", currentUser);
+            if (currentUser) {
+                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/sitegroups/getByName('Resignation  Owners')/Users?$filter=Id eq " + currentUser.Id;
+                props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
+                    .then((response: SPHttpClientResponse): Promise<any> => {
+                        return response.json();
+                    }).then(permissionResponse => {
+                        console.log("permissions reponse==", permissionResponse);
+                        let permissionLevel = permissionResponse;
+                        if (permissionLevel.value.length > 0) {
+                            setHideButton(false);
+                        } else {
+                            setHideButton(true);
+                        }
+                    });
+
+            }
+        });
+    };
+    useEffect(() => {
+        setEditAccessPermissions();
+    }, []);
     const handleClick = () => {
         window.location.href = "?component=resignationForm";
     };
@@ -29,11 +59,12 @@ const Dashboard = (props) => {
             </Grid>
             <Grid container spacing={3}>
                 <Grid item xs={12}>
-                    <MessageBar></MessageBar>
+                    <MessageBar>Click on Initiate Clearance Form button to initiate Clearance process for an associate.</MessageBar>
                 </Grid>
-                <Grid item xs={12} className="rightAlign marginTop16" >
-                    <Button type="button" variant="contained" color="primary" onClick={handleClick}>Initiate Clearance Form</Button>
-                </Grid>
+                {hideButton ? "" :
+                    <Grid item xs={12} className="rightAlign marginTop16" >
+                        <Button type="button" variant="contained" color="primary" onClick={handleClick}>Initiate Clearance Form</Button>
+                    </Grid>}
             </Grid>
             <Grid container spacing={3} className="marginTop16 ">
                 <Grid item xs={6} sm={4} justify="center" className="marginTop16">

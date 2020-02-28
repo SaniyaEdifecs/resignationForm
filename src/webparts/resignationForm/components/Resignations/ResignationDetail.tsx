@@ -1,13 +1,15 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Paper } from '@material-ui/core';
+import { Paper, makeStyles } from '@material-ui/core';
 import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox, RadioGroup, Radio } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import Link from '@material-ui/core/Link';
 import useForm from '../UseForm';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import HomeIcon from '@material-ui/icons/Home';
 import Moment from 'react-moment';
 import '../CommonStyleSheet.scss';
+import * as strings from 'ResignationFormWebPartStrings';
 
 const ResignationDetail = ({ props }) => {
     let ID = props;
@@ -120,7 +122,25 @@ const ResignationDetail = ({ props }) => {
         fontSize: '13px',
         margin: '0',
     };
-
+    const useStyles = makeStyles(theme => ({
+        link: {
+            display: 'flex',
+        },
+        icon: {
+            marginRight: theme.spacing(0.5),
+            width: 20,
+            height: 20,
+        },
+    }));
+    const classes = useStyles(0);
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = strings.RootUrl + url;
+        }
+    };
     const handleClick = (url, ID) => {
         event.preventDefault();
         if (ID) {
@@ -138,8 +158,11 @@ const ResignationDetail = ({ props }) => {
                         Clearance Details
                 </Typography>
                     <Breadcrumbs separator="›" aria-label="breadcrumb">
-                        <Link color="inherit" onClick={() => handleClick('resignationDashboard', "")}>
-                            Dashboard
+                        <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                            <HomeIcon className={classes.icon} /> {strings.Home}
+                        </Link>
+                        <Link color="inherit" onClick={() => handleClick(strings.ResigntionDashboard, "")}>
+                            Resignation Dashboard
                     </Link>
                         <Typography color="textPrimary">Clearance Details</Typography>
                     </Breadcrumbs>
@@ -195,10 +218,10 @@ const ResignationDetail = ({ props }) => {
                                 </tr>
                                 <tr>
                                     <td>Finance Clearance</td>
-                                    {errorMsg ?<td>No Access</td>: <td>
+                                    {financeClearance ? <td>
                                         {financeClearance && financeClearance['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('financeClearance', financeClearance['ID'])}>{financeClearance['Status']}</Link> : "Approved"}
-                                    </td> }
+                                    </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>Operations/Admin Clearance</td>
@@ -209,10 +232,10 @@ const ResignationDetail = ({ props }) => {
                                 </tr>
                                 <tr>
                                     <td>HR Clearance</td>
-                                    {errorMsg ? <td>No Access</td> :<td>
+                                    {hrClearance ? <td>
                                         {hrClearance && hrClearance['Status'] != "Approved" ?
                                             <Link onClick={() => handleClick('hrClearance', hrClearance['ID'])}>{hrClearance['Status']}</Link> : "Approved"}
-                                    </td>}
+                                    </td> : <td>No Access</td>}
                                 </tr>
                             </tbody>
                         </table> : null}

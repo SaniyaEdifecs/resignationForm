@@ -1,16 +1,34 @@
 import * as React from 'react';
 import useForm from '../UseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, InputLabel, Typography } from '@material-ui/core';
+import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, Breadcrumbs, Link, makeStyles, InputLabel, Typography, Collapse, IconButton } from '@material-ui/core';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { sp, ItemAddResult } from '@pnp/sp';
-import { useEffect, useState } from 'react';
+import Alert from '@material-ui/lab/Alert';
+import CloseIcon from '@material-ui/icons/Close';
+import { useEffect, useState, useRef } from 'react';
+import HomeIcon from '@material-ui/icons/Home';
+import * as strings from 'ResignationFormWebPartStrings';
+
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
     // Define your state schema
     const [isdisable, setDisable] = useState(false);
+    const [open, setOpen] = useState(false);
+    const [scrollTop, setScrollTop] = useState(false);
+    const scrollDiv = useRef(null);
     // const [LastWorkingDate, setLastWorkingDate] = useState(null);
+    const useStyles = makeStyles(theme => ({
+        link: {
+            display: 'flex',
+        },
+        icon: {
+            marginRight: theme.spacing(0.5),
+            width: 20,
+            height: 20,
+        },
+    }));
     const formFields = [
         "EmployeeCode",
         "FirstName",
@@ -40,7 +58,7 @@ const ResignationForm = (props) => {
             stateSchema[formField].value = "";
         }
         stateSchema[formField].error = "";
-        
+
 
         if (formField === 'OtherReason') {
             validationStateSchema[formField].required = false;
@@ -93,7 +111,7 @@ const ResignationForm = (props) => {
         }
     };
 
-  
+
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
@@ -142,25 +160,27 @@ const ResignationForm = (props) => {
         if (ID) {
             elements = { ...elements, 'ID': ID }; // remove ID
             list.items.getById(ID).update(elements).then(response => {
+                window.scrollTo(0, 0);
                 setState(stateSchema);
-
+                setOpen(true);
+                setTimeout(() => { setOpen(false) }, 3000);
             });
         } else {
             elements = { ...elements, 'Status': 'In Progress' };
             list.items.add(elements).then((response: ItemAddResult): void => {
                 let item = response.data;
                 if (item) {
-                   
+
                     sp.web.lists.getByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((itResponse: ItemAddResult) => {
                     });
                     sp.web.lists.getByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((mngResponse: ItemAddResult) => {
-                        
+
                     });
                     sp.web.lists.getByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((OpsResponse: ItemAddResult) => {
-                      
+
                     });
                     sp.web.lists.getByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((finResponse: ItemAddResult) => {
-                       
+
                     });
                     sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((sfResponse: ItemAddResult) => {
                     });
@@ -168,7 +188,11 @@ const ResignationForm = (props) => {
                     });
                     sp.web.lists.getByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate }).then((emplResponse: ItemAddResult) => {
                     });
+                    scrollToRef(scrollDiv);
                     setState(stateSchema);
+                    setOpen(true);
+
+
                     // window.location.href = "?component=resignationDashboard";
                 }
             }, (error: any): void => {
@@ -184,16 +208,56 @@ const ResignationForm = (props) => {
         addListItem(value);
     }
 
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = strings.RootUrl + url;
+        }
+    };
+ 
+
+
+    const scrollToRef = (ref) => {
+        console.log("scrolled");
+        
+        window.scrollTo(0, ref.current.offsetTop);
+        setTimeout(() => { setOpen(false); }, 3000);
+    };
+    const classes = useStyles(0);
     return (
-        <Container component="main">
-            <div className="formView">
+        <Container component="main" className="marginBottom16 root removeBoxShadow">
+            <div ref={scrollDiv}>
+                <Collapse in={open} >
+                    <Alert action={
+                        <IconButton
+                            aria-label="close"
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                                setOpen(false);
+                            }}
+                        >
+                            <CloseIcon fontSize="inherit" />
+                        </IconButton>
+                    } severity="success">Form Submitted Successfully!</Alert>
+                </Collapse>
+            </div>
+            <div className="">
                 <Typography variant="h5" component="h3">
                     Clearance Form
                 </Typography>
+                <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                        <HomeIcon className={classes.icon} /> {strings.Home}
+                    </Link>
+                    <Typography color="textPrimary">Clearance Form</Typography>
+                </Breadcrumbs>
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined"   placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" autoFocus/>
+                            <TextField variant="outlined" placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" autoFocus />
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
@@ -234,13 +298,13 @@ const ResignationForm = (props) => {
                     </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <FormControl variant="outlined" className="fullWidth">
+                            <FormControl variant="outlined" className="fluid MuiFormControl-marginNormal">
                                 <InputLabel htmlFor="reason">Reason for Resignation</InputLabel>
                                 <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} id="reason" onChange={handleOnChange} onBlur={handleOnChange} name="ResignationReason"  >
                                     {resignationReasonList.map((list, index) => <MenuItem key={index} value={list}>{list}</MenuItem>)}
                                 </Select>
-                                {state.ResignationReason.error && <p style={errorStyle}>{state.ResignationReason.error}</p>}
                             </FormControl>
+                            {state.ResignationReason.error && <p style={errorStyle}>{state.ResignationReason.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" fullWidth label="Specify(If other is selected)" disabled={isdisable} required={state.ResignationReason.value === 'Other'} value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
@@ -286,5 +350,5 @@ const ResignationForm = (props) => {
             </div>
         </Container>
     );
-};
+}
 export default ResignationForm;

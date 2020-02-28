@@ -15,6 +15,13 @@ define([], function () {
     "ClearanceForm": "Clearance Form",
     "Environment":"https://aristocraticlemmings.sharepoint.com/sites/Resignation?component=",
     "RootUrl":"https://aristocraticlemmings.sharepoint.com/sites/Resignation",
-    "Home": "Home"
+    "Home": "Home",
+    "ItDashboard":"https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/IT-Dashboard.aspx",
+    "OpsDashboard" :"https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Operations-Dashboard.aspx",
+    "ManagerDashboard": "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Manager-Dashboard.aspx",
+    "SalesForceDashboard": "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/SalesForce-Dashboard.aspx",
+    "HrDashboard": "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/HR-Dashboard.aspx",
+    "ResigntionDashboard": "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Resignation-Dashboard.aspx",
+    "FinanceDashboard": "https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/Finance-Dashboard.aspx"
   }
 });

@@ -145,7 +145,7 @@ const ManagerClearanceDashboard = (props) => {
                     <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
-                    <Typography color="textPrimary">HR {strings.Dashboard}</Typography>
+                    <Typography color="textPrimary">Manager {strings.Dashboard}</Typography>
                 </Breadcrumbs>
                 <div >
                     {loader ? <div className="msSpinner">

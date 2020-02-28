@@ -12,9 +12,16 @@ declare interface IResignationFormWebPartStrings {
   Dashboard: string;
   EmployeDetails: string;
   ClearanceForm: string;
-  Environment:string;
-  Home:string;
-  RootUrl:string
+  Environment: string;
+  Home: string;
+  RootUrl: string;
+  ItDashboard: string;
+  OpsDashboard: string;
+  ManagerDashboard: string;
+  SalesForceDashboard: string;
+  HrDashboard: string;
+  ResigntionDashboard: string;
+  FinanceDashboard: string;
 }
 
 declare module 'ResignationFormWebPartStrings' {
