@@ -58,9 +58,9 @@ const Dashboard = (props) => {
                 </Grid>
             </Grid>
             <Grid container spacing={3}>
-                <Grid item xs={12}>
+                {/* <Grid item xs={12}>
                     <MessageBar>Click on Initiate Clearance Form button to initiate Clearance process for an associate.</MessageBar>
-                </Grid>
+                </Grid> */}
                 {hideButton ? "" :
                     <Grid item xs={12} className="rightAlign marginTop16" >
                         <Button type="button" variant="contained" color="primary" onClick={handleClick}>Initiate Clearance Form</Button>

@@ -170,7 +170,7 @@ const OperationsAdminClearance = (props) => {
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = url;
         }
     };
 
@@ -197,7 +197,7 @@ const OperationsAdminClearance = (props) => {
                 {strings.OpsClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
                 <Link color="inherit" onClick={() => handleClick(strings.OpsDashboard, "")}>

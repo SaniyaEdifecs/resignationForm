@@ -120,7 +120,7 @@ const ManagerClearanceDashboard = (props) => {
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = url;
         }
     };
     const useStyles = makeStyles(theme => ({
@@ -142,7 +142,7 @@ const ManagerClearanceDashboard = (props) => {
                     Manager {strings.Dashboard}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Manager {strings.Dashboard}</Typography>

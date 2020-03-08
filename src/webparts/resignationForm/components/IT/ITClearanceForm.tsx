@@ -70,7 +70,6 @@ const ItClearance = (props) => {
         onSubmitForm
     );
 
-
     const getStatusDetails = (status) => {
         switch (status) {
             case "null" || "Not Started" || "Pending":
@@ -215,7 +214,7 @@ const ItClearance = (props) => {
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = window.location.pathname + url;
+            window.location.href =  url;
         }
     };
     return (
@@ -225,7 +224,7 @@ const ItClearance = (props) => {
                 {strings.ItClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
                 <Link color="inherit" onClick={() => handleClick(strings.ItDashboard, "")}>

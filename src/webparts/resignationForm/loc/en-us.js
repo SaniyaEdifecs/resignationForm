@@ -3,7 +3,7 @@ define([], function () {
     "PropertyPaneDescription": "Description",
     "BasicGroupName": "Group Name",
     "DescriptionFieldLabel": "Description Field",
-    "PageHeading": "Resignation Portal",
+    "PageHeading": "Clearance Portal",
     "ItClearance": "IT Clearance",
     "OpsClearance": "Operations Clearance",
     "FinanceClearance": "Finance Clearance",

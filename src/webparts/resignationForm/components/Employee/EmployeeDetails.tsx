@@ -26,7 +26,8 @@ const EmployeeDetails = (props) => {
         "PersonalPhone",
         "LastWorkingDate",
         "ResignationDate",
-        "Location"
+        "Location",
+        "WorkEmail"
     ];
     const mask = ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
     var stateSchema = {};
@@ -82,6 +83,7 @@ const EmployeeDetails = (props) => {
 
     const getEmployeeDetails = (employeeID) => {
         sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeID).get().then((detail: any) => {
+            console.log("detail", detail);
             setEmployeeNameId(detail.EmployeeNameId);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
@@ -100,7 +102,7 @@ const EmployeeDetails = (props) => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
-                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('ManagersClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('Employee%20Details')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
@@ -133,7 +135,10 @@ const EmployeeDetails = (props) => {
             list.items.getById(ID).update(elements).then(item => {
                 sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location }).then(response => {
                 });
-                setState(stateSchema);
+              if(item){
+                  window.location.reload();
+                //   getEmployeeDetails(ID);
+              }
             });
         }
     };
@@ -149,7 +154,7 @@ const EmployeeDetails = (props) => {
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = url;
         }
     };
     const useStyles = makeStyles(theme => ({
@@ -164,13 +169,13 @@ const EmployeeDetails = (props) => {
     }));
     const classes = useStyles(0);
     return (
-         <Container component="main" className="root removeBoxShadow">
+        <Container component="main" className="root removeBoxShadow">
             <div className="">
                 <Typography variant="h5" component="h3">
                     {strings.EmployeDetails}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Employee Details</Typography>
@@ -182,7 +187,7 @@ const EmployeeDetails = (props) => {
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>
-                            <PeoplePicker context={props.context} defaultSelectedUsers={[state.FirstName.value]} ensureUser={true} titleText="Employee Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={_getPeoplePickerItems} showHiddenInUI={false} principalTypes={[PrincipalType.User]} resolveDelay={100} />
+                            <PeoplePicker context={props.context} defaultSelectedUsers={[state.WorkEmail.value]} ensureUser={true} titleText="Employee Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={_getPeoplePickerItems} showHiddenInUI={false} principalTypes={[PrincipalType.User]} resolveDelay={100} />
                         </Grid>
                     </Grid>
 

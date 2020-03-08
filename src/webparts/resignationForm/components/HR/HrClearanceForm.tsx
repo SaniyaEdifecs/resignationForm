@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
 import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 import Link from '@material-ui/core/Link';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
+import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
@@ -20,7 +21,7 @@ const HrClearance = (props) => {
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-       "Resignationemailacceptance", "ResignationAcceptancecomments", "Deductions", "DeductionsComments", "ELBalance", "ELBalanceComments", "Ex_x002d_Gratia", "Ex_x002d_GratiaComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Insurance", "InsuranceComments", "LeaveEncashment", "LeaveEncashmentComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "ServiceLetter", "ServiceLetterComments", "ShiftAllowance", "ShiftAllowanceComments", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TelephoneAllowance", "TelephoneAllowanceComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "PF_x002f_ESI","PF_x002f_ESIComments","Others", "OthersComments"
+        "Resignationemailacceptance", "ResignationAcceptancecomments", "Deductions", "DeductionsComments", "ELBalance", "ELBalanceComments", "Ex_x002d_Gratia", "Ex_x002d_GratiaComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Insurance", "InsuranceComments", "LeaveEncashment", "LeaveEncashmentComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "ServiceLetter", "ServiceLetterComments", "ShiftAllowance", "ShiftAllowanceComments", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TelephoneAllowance", "TelephoneAllowanceComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "PF_x002f_ESI", "PF_x002f_ESIComments", "Others", "OthersComments"
     ];
     var stateSchema = {};
     var validationStateSchema = {};
@@ -57,7 +58,7 @@ const HrClearance = (props) => {
             // console.log('Error while creating the item: ' + error);
         });
     }
-    const { state, setState, disable,  status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+    const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
@@ -114,11 +115,11 @@ const HrClearance = (props) => {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
-                        }else if(permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)){
+                        } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
                             console.log("===", permissionResponse.error);
                             setReadOnly(true);
                         }
-                    },error=>{
+                    }, error => {
                         console.log("===", error);
                     });
 
@@ -135,7 +136,7 @@ const HrClearance = (props) => {
     useEffect(() => {
         validationStateSchema['MessageToAssociate'].required = state.DuesPending.value === 'NotifyAssociate';
         validationStateSchema['AdditionalInformation'].required = false;
- 
+
         if (validationStateSchema['MessageToAssociate'].required && !state.MessageToAssociate.value) {
             if (state.MessageToAssociate.error === '') {
                 setState(prevState => ({
@@ -160,6 +161,26 @@ const HrClearance = (props) => {
         fontSize: '13px',
         margin: '0',
     };
+
+    const useStyles = makeStyles(theme => ({
+        link: {
+            display: 'flex',
+        },
+        icon: {
+            marginRight: theme.spacing(0.5),
+            width: 20,
+            height: 20,
+        },
+    }));
+    const classes = useStyles(0);
+    const redirectHome = (url, userId) => {
+        event.preventDefault();
+        if (userId) {
+            window.location.href = "?component=" + url + "&userId=" + userId;
+        } else {
+            window.location.href = url;
+        }
+    };
     const handleClick = (url, userId) => {
         event.preventDefault();
         if (userId) {
@@ -173,12 +194,15 @@ const HrClearance = (props) => {
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             <Typography variant="h5" component="h5">
-              {strings.HrClearance}
+                {strings.HrClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
+                    <HomeIcon className={classes.icon} /> {strings.Home}
+                </Link>
                 <Link color="inherit" onClick={() => handleClick('', "")}>
-                {strings.Dashboard}
-                    </Link>
+                    {strings.Dashboard}
+                </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
             <form onSubmit={handleOnSubmit} className="clearanceForm">
@@ -251,21 +275,7 @@ const HrClearance = (props) => {
                                 {state.Sign_x002d_onBonusComments.error && <p style={errorStyle}>{state.Sign_x002d_onBonusComments.error}</p>}
                             </td>
                         </tr>
-                        <tr>
-                            <td>Ex-Gratia</td>
-                            <td>
-                                <FormControl>
-                                    <Select value={state.Ex_x002d_Gratia.value} id="Ex_x002d_Gratia" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Ex_x002d_Gratia"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
-                                    </Select>
-                                    {state.Ex_x002d_Gratia.error && <p style={errorStyle}>{state.Ex_x002d_Gratia.error}</p>}
-                                </FormControl>
-                            </td>
-                            <td>
-                                <TextField margin="normal" name="Ex_x002d_GratiaComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Ex_x002d_GratiaComments.value} />
-                                {state.Ex_x002d_GratiaComments.error && <p style={errorStyle}>{state.Ex_x002d_GratiaComments.error}</p>}
-                            </td>
-                        </tr>
+                        
                         <tr>
                             <td>EL Balance</td>
                             <td>
@@ -279,6 +289,22 @@ const HrClearance = (props) => {
                             <td>
                                 <TextField margin="normal" name="ELBalanceComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ELBalanceComments.value} />
                                 {state.ELBalanceComments.error && <p style={errorStyle}>{state.ELBalanceComments.error}</p>}
+                            </td>
+                        </tr>
+                        {/* 
+                            <tr>
+                            <td>Ex-Gratia</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.Ex_x002d_Gratia.value} id="Ex_x002d_Gratia" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Ex_x002d_Gratia"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.Ex_x002d_Gratia.error && <p style={errorStyle}>{state.Ex_x002d_Gratia.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="Ex_x002d_GratiaComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Ex_x002d_GratiaComments.value} />
+                                {state.Ex_x002d_GratiaComments.error && <p style={errorStyle}>{state.Ex_x002d_GratiaComments.error}</p>}
                             </td>
                         </tr>
                         <tr>
@@ -295,7 +321,7 @@ const HrClearance = (props) => {
                                 <TextField margin="normal" name="LeaveEncashmentComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.LeaveEncashmentComments.value} />
                                 {state.LeaveEncashmentComments.error && <p style={errorStyle}>{state.LeaveEncashmentComments.error}</p>}
                             </td>
-                        </tr>
+                        </tr> 
                         <tr>
                             <td>Shift Allowance</td>
                             <td>
@@ -326,37 +352,7 @@ const HrClearance = (props) => {
                                 {state.TelephoneAllowanceComments.error && <p style={errorStyle}>{state.TelephoneAllowanceComments.error}</p>}
                             </td>
                         </tr>
-                        <tr>
-                            <td>Terminate On Hr Systems</td>
-                            <td>
-                                <FormControl>
-                                    <Select value={state.TerminateOnHRSystems.value} disabled={readOnly} id="TerminateOnHRSystems" onBlur={handleOnBlur} onChange={handleOnChange} name="TerminateOnHRSystems"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
-                                    </Select>
-                                    {state.TerminateOnHRSystems.error && <p style={errorStyle}>{state.TerminateOnHRSystems.error}</p>}
-                                </FormControl>
-                            </td>
-                            <td>
-                                <TextField margin="normal" name="TerminateOnHRSystemsComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.TerminateOnHRSystemsComments.value} />
-                                {state.TerminateOnHRSystemsComments.error && <p style={errorStyle}>{state.TerminateOnHRSystemsComments.error}</p>}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Shortfall of Notice (Waiver if any)</td>
-                            <td>
-                                <FormControl>
-                                    <Select value={state.Waiver.value} disabled={readOnly} id="Waiver" onBlur={handleOnBlur} onChange={handleOnChange} name="Waiver"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
-                                    </Select>
-                                    {state.Waiver.error && <p style={errorStyle}>{state.Waiver.error}</p>}
-                                </FormControl>
-                            </td>
-                            <td>
-                                <TextField margin="normal" name="WaiverComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.WaiverComments.value} />
-                                {state.WaiverComments.error && <p style={errorStyle}>{state.WaiverComments.error}</p>}
-                            </td>
-                        </tr>
-                        <tr>
+                            <tr>
                             <td>Service Letter</td>
                             <td>
                                 <FormControl>
@@ -371,22 +367,7 @@ const HrClearance = (props) => {
                                 {state.ServiceLetterComments.error && <p style={errorStyle}>{state.ServiceLetterComments.error}</p>}
                             </td>
                         </tr>
-                        <tr>
-                            <td>Gratuity</td>
-                            <td>
-                                <FormControl>
-                                    <Select value={state.Gratuity.value} id="Gratuity" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Gratuity"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
-                                    </Select>
-                                    {state.Gratuity.error && <p style={errorStyle}>{state.Gratuity.error}</p>}
-                                </FormControl>
-                            </td>
-                            <td>
-                                <TextField margin="normal" name="GratuityComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.GratuityComments.value} />
-                                {state.GratuityComments.error && <p style={errorStyle}>{state.GratuityComments.error}</p>}
-                            </td>
-                        </tr>
-                        <tr>
+                         <tr>
                             <td>Deductions</td>
                             <td>
                                 <FormControl>
@@ -431,6 +412,54 @@ const HrClearance = (props) => {
                                 {state.PF_x002f_ESIComments.error && <p style={errorStyle}>{state.PF_x002f_ESIComments.error}</p>}
                             </td>
                         </tr>
+                        */}
+                        <tr>
+                            <td>Terminate On Hr Systems</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.TerminateOnHRSystems.value} disabled={readOnly} id="TerminateOnHRSystems" onBlur={handleOnBlur} onChange={handleOnChange} name="TerminateOnHRSystems"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.TerminateOnHRSystems.error && <p style={errorStyle}>{state.TerminateOnHRSystems.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="TerminateOnHRSystemsComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.TerminateOnHRSystemsComments.value} />
+                                {state.TerminateOnHRSystemsComments.error && <p style={errorStyle}>{state.TerminateOnHRSystemsComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Shortfall of Notice (Waiver if any)</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.Waiver.value} disabled={readOnly} id="Waiver" onBlur={handleOnBlur} onChange={handleOnChange} name="Waiver"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.Waiver.error && <p style={errorStyle}>{state.Waiver.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="WaiverComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.WaiverComments.value} />
+                                {state.WaiverComments.error && <p style={errorStyle}>{state.WaiverComments.error}</p>}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Gratuity</td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.Gratuity.value} id="Gratuity" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Gratuity"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.Gratuity.error && <p style={errorStyle}>{state.Gratuity.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="GratuityComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.GratuityComments.value} />
+                                {state.GratuityComments.error && <p style={errorStyle}>{state.GratuityComments.error}</p>}
+                            </td>
+                        </tr>
+
                         <tr>
                             <td>Others (Specify)</td>
                             <td>

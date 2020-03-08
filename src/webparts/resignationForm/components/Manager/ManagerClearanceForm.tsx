@@ -107,14 +107,14 @@ const ManagerClearance = (props) => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
-                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('ManagersClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('ManagersClearance')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
                         console.log("permissions reponse", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
+                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151 ) {
                             setReadOnly(false);
                         } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
                             setReadOnly(true);
@@ -176,7 +176,7 @@ const ManagerClearance = (props) => {
         if (userId) {
             window.location.href = "?component=" + url + "&userId=" + userId;
         } else {
-            window.location.href = url;
+            window.location.href = strings.RootUrl + url;
         }
     };
     const handleClick = (url, userId) => {
@@ -204,7 +204,7 @@ const ManagerClearance = (props) => {
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
                 <Link color="inherit" onClick={() => handleClick(strings.ManagerDashboard, "")}>
-                   Manager {strings.Dashboard}
+                    Manager {strings.Dashboard}
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
