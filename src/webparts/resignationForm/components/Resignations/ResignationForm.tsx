@@ -362,8 +362,8 @@ const ResignationForm = (props) => {
                     <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail" />
                     {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
 
-                    <TextField id="outlined-textarea" disabled={isdisable} className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Resignation Summary" name="ResignationSummary" required value={state.ResignationSummary.value} placeholder="Resignation Summary" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
-                    {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>}
+                    {/* <TextField id="outlined-textarea" disabled={isdisable} className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Resignation Summary" name="ResignationSummary" required value={state.ResignationSummary.value} placeholder="Resignation Summary" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
+                    {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>} */}
 
                     <Button type="submit" className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
                 </form>
