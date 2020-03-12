@@ -41,7 +41,7 @@ const EmployeeDashboard = (props) => {
     }, []);
 
     const handleClick = (event) => {
-        window.location.href = "?component=employeeDetails&userId=" + event;
+        window.location.href = "?component=employeeDetails&resignationId=" + event;
     };
 
     return (

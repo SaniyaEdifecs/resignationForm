@@ -113,12 +113,12 @@ const FinanceDashboard = (props) => {
     };
 
     const handleClick = (event) => {
-        window.location.href = "?component=financeClearance&userId=" + event;
+        window.location.href = "?component=financeClearance&resignationId=" + event;
     };
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = strings.RootUrl + url;
         }

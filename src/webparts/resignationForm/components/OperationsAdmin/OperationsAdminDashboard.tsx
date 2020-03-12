@@ -112,13 +112,13 @@ const OperationsAdminDashboard = (props) => {
     };
 
     const handleClick = (event) => {
-        window.location.href = "?component=operationsClearance&userId=" + event;
+        window.location.href = "?component=operationsClearance&resignationId=" + event;
     };
 
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = strings.RootUrl + url;
         }

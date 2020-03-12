@@ -112,13 +112,13 @@ const ManagerClearanceDashboard = (props) => {
     };
 
     const handleClick = (event) => {
-        window.location.href = "?component=managerClearance&userId=" + event;
+        window.location.href = "?component=managerClearance&resignationId=" + event;
     };
 
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = url;
         }

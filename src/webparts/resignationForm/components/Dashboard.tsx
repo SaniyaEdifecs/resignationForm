@@ -2,7 +2,6 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import * as strings from 'ResignationFormWebPartStrings';
 import { Grid, Button } from '@material-ui/core';
-import { MessageBar, Link } from 'office-ui-fabric-react';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import '../components/CommonStyleSheet.scss';
 import ResignationList from "./Resignations/ResignationList";
@@ -27,7 +26,7 @@ const Dashboard = (props) => {
             currentUser = response;
             console.log("==", currentUser);
             if (currentUser) {
-                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/sitegroups/getByName('Resignation  Owners')/Users?$filter=Id eq " + currentUser.Id;
+                const url = strings.RootUrl +"/_api/web/sitegroups/getByName('Resignation  Owners')/Users?$filter=Id eq " + currentUser.Id;
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
@@ -52,11 +51,6 @@ const Dashboard = (props) => {
     };
     return (
         <div className="dashboardWrapper">
-            <Grid container spacing={3}>
-                <Grid item xs={12} className="ms-fontSize-32">
-                    <h1>{strings.PageHeading}</h1>
-                </Grid>
-            </Grid>
             <Grid container spacing={3}>
                 {/* <Grid item xs={12}>
                     <MessageBar>Click on Initiate Clearance Form button to initiate Clearance process for an associate.</MessageBar>
@@ -103,17 +97,6 @@ const Dashboard = (props) => {
                     </a>
                 </Grid>
             </Grid>
-
-            {/* //  <Grid item xs={12}>
-            //     <Grid container justify="flex-end">
-            //         <Grid item xs={6} >
-            //         </Grid>
-            //         <Grid item xs={6} className="rightAlign" >
-            //             <Button type="button" variant="contained" color="primary" onClick={handleClick}>Initiate Offboarding Form</Button>
-            //         </Grid>
-            //     </Grid>
-            //     <ResignationList />
-            // </Grid>  */}
         </div>
     );
 };

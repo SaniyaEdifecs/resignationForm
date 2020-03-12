@@ -3,7 +3,7 @@ import * as ReactDom from 'react-dom';
 import { Version } from '@microsoft/sp-core-library';
 import { BaseClientSideWebPart, IPropertyPaneConfiguration, IWebPartContext, IPropertyPaneDropdownOption, PropertyPaneTextField, PropertyPaneDropdown } from '@microsoft/sp-webpart-base';
 import * as strings from 'ResignationFormWebPartStrings';
-import NavigationItem from './components/Navigation';
+import Navigation from './components/Navigation';
 import { sp } from "@pnp/sp";
 import { update, get } from '@microsoft/sp-lodash-subset';
 import { IResignationFormProps } from './components/Resignations/IResignationFormProps';
@@ -21,7 +21,7 @@ export default class ResignationFormWebPart extends BaseClientSideWebPart<IResig
   }
   public render(): void {
     const element: React.ReactElement<IResignationFormProps> = React.createElement(
-      NavigationItem,
+      Navigation,
       {
         context: this.context
       }

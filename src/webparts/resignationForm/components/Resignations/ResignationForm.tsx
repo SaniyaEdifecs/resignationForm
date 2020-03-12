@@ -10,17 +10,14 @@ import CloseIcon from '@material-ui/icons/Close';
 import { useEffect, useState, useRef } from 'react';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
-import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
     // Define your state schema
     const [isdisable, setDisable] = useState(false);
     const [open, setOpen] = useState(false);
-    const [scrollTop, setScrollTop] = useState(false);
     const scrollDiv = useRef(null);
     let isResignationOwner: boolean = false;
-    // const [LastWorkingDate, setLastWorkingDate] = useState(null);
     const useStyles = makeStyles(theme => ({
         link: {
             display: 'flex',
@@ -36,7 +33,6 @@ const ResignationForm = (props) => {
         "FirstName",
         "LastName",
         "WorkEmail",
-        // "PersonalEmail",
         "LastWorkingDate",
         "ResignationReason",
         "OtherReason",
@@ -45,7 +41,6 @@ const ResignationForm = (props) => {
         "ManagerFirstName",
         "ManagerLastName",
         "ManagerEmail",
-        "ResignationSummary",
     ];
 
     var stateSchema = {};
@@ -81,7 +76,6 @@ const ResignationForm = (props) => {
     );
     const handleDateChange = (event) => {
         setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: event, error: "" }) }));
-        // console.log("=======", LastWorkingDate);
     };
     const getPeoplePickerItems = (items) => {
         if (items[0]) {
@@ -113,7 +107,6 @@ const ResignationForm = (props) => {
         }
     };
 
-
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
@@ -136,10 +129,9 @@ const ResignationForm = (props) => {
 
             return isResignationOwner;
         });
-    }
-        ;
-    const getEmployeeResignationDetails = (employeeID) => {
-        sp.web.lists.getByTitle("ResignationList").items.getById(employeeID).get().then((detail: any) => {
+    };
+    const getEmployeeResignationDetails = (clearanceId) => {
+        sp.web.lists.getByTitle("ResignationList").items.getById(clearanceId).get().then((detail: any) => {
             formFields.forEach(formField => {
                 stateSchema[formField].value = detail[formField] + "";
             });
@@ -211,9 +203,6 @@ const ResignationForm = (props) => {
                     scrollToRef(scrollDiv);
                     setState(stateSchema);
                     setOpen(true);
-
-
-                    // window.location.href = "?component=resignationDashboard";
                 }
             }, (error: any): void => {
                 console.log('Error while creating the item: ' + error);
@@ -228,20 +217,17 @@ const ResignationForm = (props) => {
         addListItem(value);
     }
 
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = strings.RootUrl + url;
         }
     };
 
-
-
     const scrollToRef = (ref) => {
         console.log("scrolled");
-
         window.scrollTo(0, ref.current.offsetTop);
         setTimeout(() => { setOpen(false); }, 3000);
     };
@@ -296,9 +282,6 @@ const ResignationForm = (props) => {
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
-                    {/* <Hidden xsUp>
-                        <TextField variant="outlined" margin="normal" fullWidth label="ID" value={state.ID.value} name="ID" onBlur={handleOnBlur} onChange={handleOnChange} />
-                    </Hidden> */}
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
@@ -311,10 +294,6 @@ const ResignationForm = (props) => {
                                     value={state.LastWorkingDate.value} name="LastWorkingDate" onChange={handleDateChange} />
                             </MuiPickersUtilsProvider>
                         </Grid>
-                        {/* <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Personal Email" value={state.PersonalEmail.value} name="PersonalEmail" onBlur={handleOnBlur} autoComplete="personalEmail" onChange={handleOnChange} />
-                            {state.PersonalEmail.error && <p style={errorStyle}>{state.PersonalEmail.error}</p>}
-                        </Grid> */}
                     </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
@@ -361,10 +340,6 @@ const ResignationForm = (props) => {
 
                     <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail" />
                     {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
-
-                    {/* <TextField id="outlined-textarea" disabled={isdisable} className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Resignation Summary" name="ResignationSummary" required value={state.ResignationSummary.value} placeholder="Resignation Summary" multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnBlur} />
-                    {state.ResignationSummary.error && <p style={errorStyle}>{state.ResignationSummary.error}</p>} */}
-
                     <Button type="submit" className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
                 </form>
             </div>

@@ -5,6 +5,7 @@ import { sp } from '@pnp/sp';
 import IconButton from '@material-ui/core/IconButton';
 import { FirstPage, LastPage, KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import HomeIcon from '@material-ui/icons/Home';
+import ConfirmationDialog from '../ConfirmationDialog';
 import '../CommonStyleSheet.scss';
 import * as strings from 'ResignationFormWebPartStrings';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
@@ -81,6 +82,10 @@ const ResignationList = (props) => {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [loader, showLoader] = useState(false);
+    const [showActionButton, setShowActionButton] = useState(true);
+    const [dialogData, setDialogData] = useState([]);
+    const [openDialog, setOpenDialog] = useState(false);
+    let isResignationOwner: boolean = false;
     // Table Pagination
     const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, newPage: number) => {
         setPage(newPage);
@@ -99,7 +104,7 @@ const ResignationList = (props) => {
             if (items) {
                 setEmployeeLists(items);
             }
-        }).catch(err =>{
+        }).catch(err => {
             showLoader(false);
             setErrorMsg("No Records Found");
         });
@@ -107,11 +112,11 @@ const ResignationList = (props) => {
 
     useEffect(() => {
         getResignationList();
+        checkResignationOwner();
     }, []);
 
     const handleClick = (event) => {
-        // window.history.pushState({urlPath:'/"?component=resignationDetail&userId="' + event'},"",'/page1')
-        window.location.href = "?component=resignationDetail&userId=" + event;
+        window.location.href = "?component=resignationDetail&resignationId=" + event;
     };
     const useStyles = makeStyles(theme => ({
         link: {
@@ -124,16 +129,43 @@ const ResignationList = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = strings.RootUrl + url;
         }
     };
+
+    const checkResignationOwner = () => {
+        sp.web.currentUser.groups.get().then((groupAccess: any) => {
+            console.log(groupAccess);
+            groupAccess.forEach(groupName => {
+                if (groupName.Title == "Resignation  Owners") {
+                    isResignationOwner = true;
+                    setShowActionButton(true);
+                }
+                else {
+                    isResignationOwner = false;
+                    setShowActionButton(true);
+                }
+            });
+            console.log('owners', isResignationOwner);
+
+            return isResignationOwner;
+        });
+    };
+    const handleChildClick = (value: boolean) => {
+        setOpenDialog(value);
+    }
+    const openConfirmationDialog = (employeeDetail) => {
+        setDialogData(employeeDetail);
+        setOpenDialog(true);
+    }
     return (
         <Paper className="root removeBoxShadow">
+            <ConfirmationDialog props={openDialog} content={dialogData} onChildClick={handleChildClick} />
             <div className="">
                 <Typography variant="h5" component="h5">
                     Resignation {strings.Dashboard}
@@ -158,6 +190,7 @@ const ResignationList = (props) => {
                                     <TableCell >Reason for Resignation</TableCell>
                                     <TableCell >Department</TableCell>
                                     <TableCell >Status</TableCell>
+                                    {showActionButton ? <TableCell >Action</TableCell> : null}
                                 </TableRow>
                             </TableHead>
                             {employeeLists.length > 0 ? <TableBody>
@@ -165,22 +198,23 @@ const ResignationList = (props) => {
                                     ? employeeLists.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                     : employeeLists
                                 ).map((employeeDetail) => (
-                                    <TableRow key={employeeDetail.ID} onClick={() => handleClick(employeeDetail.ID)}>
-                                        <TableCell component="th" scope="row"> {employeeDetail.EmployeeCode}</TableCell>
-                                        <TableCell >{employeeDetail.EmployeeName}</TableCell>
-                                        <TableCell >{employeeDetail.WorkEmail}</TableCell>
-                                        <TableCell >{employeeDetail.PersonalEmail}</TableCell>
-                                        <TableCell >{employeeDetail.ResignationReason}</TableCell>
-                                        <TableCell >{employeeDetail.Department}</TableCell>
-                                        <TableCell >{employeeDetail.Status}</TableCell>
+                                    <TableRow key={employeeDetail.ID} >
+                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}> {employeeDetail.EmployeeCode}</TableCell>
+                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.EmployeeName}</TableCell>
+                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.WorkEmail}</TableCell>
+                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.PersonalEmail}</TableCell>
+                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.ResignationReason}</TableCell>
+                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Department}</TableCell>
+                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Status}</TableCell>
+                                        {showActionButton ? <TableCell ><a className={`link + ${employeeDetail.Status == 'Canceled' ? 'disableRevoke' : ''}`} onClick={() => openConfirmationDialog(employeeDetail)}>Revoke Resignation</a></TableCell> : null}
                                     </TableRow>
                                 ))}
                             </TableBody> :
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell colSpan={7} >
-                                        {errorMsg ? <div>No Records Found</div>: "No Records Found"}
-                                    </TableCell>
+                                        <TableCell colSpan={showActionButton ? 8 : 7} >
+                                            {errorMsg ? <div>No Records Found</div> : "No Records Found"}
+                                        </TableCell>
                                     </TableRow>
                                 </TableBody>
                             }
@@ -188,7 +222,7 @@ const ResignationList = (props) => {
                                 <TableRow>
                                     <TablePagination
                                         rowsPerPageOptions={[5, 10, 25, employeeLists.length > 25 && employeeLists.length]}
-                                        colSpan={7}
+                                        colSpan={showActionButton ? 8 : 7}
                                         count={employeeLists.length}
                                         rowsPerPage={rowsPerPage}
                                         page={page}

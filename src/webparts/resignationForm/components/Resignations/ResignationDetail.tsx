@@ -133,10 +133,10 @@ const ResignationDetail = ({ props }) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = strings.RootUrl + url;
         }
@@ -144,7 +144,7 @@ const ResignationDetail = ({ props }) => {
     const handleClick = (url, ID) => {
         event.preventDefault();
         if (ID) {
-            window.location.href = "?component=" + url + "&userId=" + ID;
+            window.location.href = "?component=" + url + "&resignationId=" + ID;
         }
         else {
             window.location.href = "?component=" + url;

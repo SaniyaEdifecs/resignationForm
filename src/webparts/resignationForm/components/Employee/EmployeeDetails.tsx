@@ -81,8 +81,8 @@ const EmployeeDetails = (props) => {
         margin: '0',
     };
 
-    const getEmployeeDetails = (employeeID) => {
-        sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeID).get().then((detail: any) => {
+    const getEmployeeDetails = (clearanceId) => {
+        sp.web.lists.getByTitle("Employee%20Details").items.getById(clearanceId).get().then((detail: any) => {
             console.log("detail", detail);
             setEmployeeNameId(detail.EmployeeNameId);
             formFields.forEach(formField => {
@@ -149,10 +149,10 @@ const EmployeeDetails = (props) => {
         }
         addListItem(value);
     }
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = url;
         }

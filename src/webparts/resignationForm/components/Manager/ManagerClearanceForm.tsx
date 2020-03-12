@@ -43,8 +43,8 @@ const ManagerClearance = (props) => {
         };
 
     });
-    const getEmployeeClearanceDetails = (employeeID) => {
-        list.items.getById(employeeID).get().then((response: any) => {
+    const getEmployeeClearanceDetails = (clearanceId) => {
+        list.items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
             formFields.forEach(formField => {
@@ -171,18 +171,18 @@ const ManagerClearance = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = strings.RootUrl + url;
         }
     };
-    const handleClick = (url, userId) => {
+    const handleClick = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = url;
         }

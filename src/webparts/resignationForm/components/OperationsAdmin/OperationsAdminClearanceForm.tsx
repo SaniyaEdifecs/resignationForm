@@ -80,8 +80,8 @@ const OperationsAdminClearance = (props) => {
     };
 
 
-    const getEmployeeClearanceDetails = (employeeID) => {
-        list.items.getById(employeeID).get().then((response: any) => {
+    const getEmployeeClearanceDetails = (clearanceId) => {
+        list.items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
             formFields.forEach(formField => {
@@ -165,19 +165,19 @@ const OperationsAdminClearance = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, userId) => {
+    const redirectHome = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = url;
         }
     };
 
-    const handleClick = (url, userId) => {
+    const handleClick = (url, resignationId) => {
         event.preventDefault();
-        if (userId) {
-            window.location.href = "?component=" + url + "&userId=" + userId;
+        if (resignationId) {
+            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
             window.location.href = url;
             // window.location.href = window.location.pathname + url;
