@@ -45,21 +45,21 @@ const ItClearance = (props) => {
     // stateSchema['selectFields'] = ["DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices"];
 
     const onSubmitForm = (value) => {
+        console.log('clieck submit', value);
         showLoader(true);
         let payload = {};
         for (const key in value) {
             payload[key] = value[key].value;
         }
-
+  
         payload = { ...payload, 'Status': status };
-        // console.log("payload", payload);
-        list.items.getById(ID).update(payload).then(items => {
-            showLoader(false);
-            getEmployeeClearanceDetails(ID);
-            // window.location.href = "?component=itClearanceDashboard";
-        }, (error: any): void => {
-            // console.log('Error while creating the item: ' + error);
-        });
+        console.log("payload", payload);
+        // list.items.getById(ID).update(payload).then(items => {
+        //     showLoader(false);
+        //     getEmployeeClearanceDetails(ID);
+        // }, (error: any): void => {
+        //     console.log('Error while creating the item: ' + error);
+        // });
 
     };
 
@@ -138,15 +138,6 @@ const ItClearance = (props) => {
     useEffect(() => {
         validationStateSchema['MessageToAssociate'].required = state.DuesPending.value === 'NotifyAssociate';
         validationStateSchema['AdditionalInformation'].required = false;
-        // if (state.DuesPending.value === 'NotifyAssociate') {
-        //     setDisable(true);
-        //     setStatus("Pending");
-        // }
-        // else {
-        //     if (disable != true && state.DuesPending.value === 'GrantClearance') {
-        //         setStatus("Approved");
-        //     }
-        // }
         if (validationStateSchema['MessageToAssociate'].required && !state.MessageToAssociate.value) {
             if (state.MessageToAssociate.error === '') {
                 setState(prevState => ({
@@ -214,7 +205,7 @@ const ItClearance = (props) => {
         if (resignationId) {
             window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
-            window.location.href =  url;
+            window.location.href = url;
         }
     };
     return (
@@ -361,6 +352,7 @@ const ItClearance = (props) => {
                                 {state.MessageToAssociate.error && <p style={errorStyle}>{state.MessageToAssociate.error}</p>}
                             </div>
                             : ''}
+
                         <FormControlLabel value="GrantClearance" control={<Radio disabled={readOnly} />} label="Grant Clearance" />
 
                         {state.DuesPending.value === 'GrantClearance' ?
@@ -370,18 +362,20 @@ const ItClearance = (props) => {
 
                             </div>
                             : ''}
-                    </RadioGroup>
-                </div>
-                {showButton ? <div>
-                    {/* {disable == true || disableDuesPending == false ? <div className="inlineBlock"> */}
-                    {disable ? <div className="inlineBlock">
-                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm} disabled={readOnly}>Save as draft</Button>
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button>
-                        {/* <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || disableDuesPending == false}>Submit</Button> */}
-                    </div> :
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}
 
-                </div> : null}
+                    </RadioGroup>
+                        {state.DuesPending.error ? <p style={errorStyle}>{state.DuesPending.error}</p>:''}
+                </div>
+                {/* {showButton ? <div> */}
+                {/* {disable == true || disableDuesPending == false ? <div className="inlineBlock"> */}
+                {disable ? <div className="inlineBlock">
+                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm} disabled={readOnly}>Save</Button>
+                    {/* <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button> */}
+                    {/* <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || disableDuesPending == false}>Submit</Button> */}
+                </div> :
+                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}
+
+                {/* </div> : null} */}
             </form>
         </div >
     );

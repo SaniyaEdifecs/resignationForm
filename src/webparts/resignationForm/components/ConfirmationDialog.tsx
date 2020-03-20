@@ -10,6 +10,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import { sp } from '@pnp/sp';
+import './CommonStyleSheet.scss';
 
 const styles = (theme: Theme) =>
     createStyles({
@@ -59,45 +60,49 @@ const DialogActions = withStyles((theme: Theme) => ({
 }))(MuiDialogActions);
 
 const ConfirmationDialog = ({ props, content, onChildClick }) => {
-    console.log('dialog', content);
+    const [open, setOpen] = useState(false);
+    const [showSuccessMsg, setShowSuccessMsg] = useState(false);
     const revokeResignation = () => {
-        let payload: any = { 'Status': 'Canceled', 'HrStatus': 'Canceled', 'FinanceStatus': 'Canceled', 'ItStatus': 'Canceled', 'ManagerStatus': 'Canceled', 'SalesforceStatus': 'Canceled', 'Operations_x002f_AdminStatus':'Canceled' }
+        let payload: any = { 'Status': 'Canceled', 'HrStatus': 'Canceled', 'FinanceStatus': 'Canceled', 'ItStatus': 'Canceled', 'ManagerStatus': 'Canceled', 'SalesforceStatus': 'Canceled', 'Operations_x002f_AdminStatus': 'Canceled' };
         sp.web.lists.getByTitle("ResignationList").items.getById(content.ID).update(payload).then(items => {
             if (items) {
                 console.log(items);
-                handleClose();
-                window.location.reload();
+                setShowSuccessMsg(true);
+                // setTimeout(() => { handleClose(); }, 5000);
+
+                // window.location.reload();
             }
 
         });
     }
 
-    const [open, setOpen] = useState(false);
     const handleClose = () => {
         setOpen(false);
         onChildClick(false);
     };
-    useEffect(() => {
-        setOpen(props);
-    }, [props]);
+    const cancelRevoke = ()=>{
+        setOpen(false);
+    }
+    useEffect(() => { setOpen(props); }, [props]);
 
     return (
         <div>
             <Dialog aria-labelledby="customized-dialog-title" open={open}>
-                {/* <DialogTitle id="customized-dialog-title" onClose={handleClose}>
-                    {ReactHtmlParser(content.mrTITLE && content.mrTITLE)}
-                </DialogTitle> */}
-                <DialogContent >
-                        Are you sure to revoke <b>{content.Title}'s</b> resignation?
-                </DialogContent>
-                <DialogActions>
-                    <Button  onClick={revokeResignation} color="primary" className="descLink">
-                        Yes
+                {showSuccessMsg ?
+                    <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+                        Clearance revoked successfully!
+                </DialogTitle> : <div>
+                        <DialogContent >
+                            Are you sure to revoke <b>{content.Title}'s</b> clearance?
+                      </DialogContent>
+                        <DialogActions>
+                            <Button  variant="contained" onClick={revokeResignation} color="primary" className="descLink">
+                                Yes
                     </Button>
-                    <Button  onClick={handleClose} color="secondary" className="descLink">
-                        No
+                            <Button variant="contained" onClick={cancelRevoke} >
+                                No
                     </Button>
-                </DialogActions>
+                        </DialogActions></div>}
             </Dialog>
         </div>
     );

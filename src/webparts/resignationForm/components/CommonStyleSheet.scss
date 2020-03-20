@@ -12,9 +12,9 @@
   .MuiTableCell-root {
     border: 1px solid rgba(224, 224, 224, 1);
   }
-  tr{
-    &:hover{
-      background: $gray;
+  tr {
+    &:hover {
+      background: $hover-gray;
     }
   }
 }
@@ -266,16 +266,16 @@ table {
     min-width: 250px;
     max-width: 250px;
     padding: 0 5px;
-    .MuiInput-underline:before{
+    .MuiInput-underline:before {
       border-bottom: 0;
     }
-    .MuiInput-underline:hover:not(.Mui-disabled):before{
+    .MuiInput-underline:hover:not(.Mui-disabled):before {
       border-bottom: 0;
     }
   }
-  td{
-    &:nth-child(2){
-      max-width:250px !important;
+  td {
+    &:nth-child(2) {
+      max-width: 250px !important;
     }
   }
   button {
@@ -343,7 +343,8 @@ table {
 }
 
 .MuiButton-contained {
-  &.MuiButton-containedPrimary, &.MuiButton-containedSecondary {
+  &.MuiButton-containedPrimary,
+  &.MuiButton-containedSecondary {
     background-color: $theme-color;
   }
   &.MuiButton-root {
@@ -384,7 +385,7 @@ table {
     margin-top: 0;
     margin-bottom: 8px;
     margin-left: 33px;
-    width: calc(100% - 33px )!important;
+    width: calc(100% - 33px) !important;
   }
   p {
     margin-left: 33px !important;
@@ -420,7 +421,7 @@ input[type="text"][disabled] {
   background-color: transparent;
 }
 .dashboardWrapper {
-  .MuiGrid-container{
+  .MuiGrid-container {
     justify-content: center;
   }
   h1 {
@@ -465,15 +466,34 @@ select option {
     padding: 0 5px;
   }
 }
-.MuiRadio-colorSecondary.Mui-checked{
+.MuiRadio-colorSecondary.Mui-checked {
   color: $theme-color !important;
 }
 
 .link,
-.descLink{
+.descLink {
   color: $theme-color;
 }
-.disableRevoke{
-  color: rgba(0, 0, 0, 0.38) !important;
-  pointer-events: none;
+.disableRevoke {
+  cursor: not-allowed;
+  a {
+    color: rgba(0, 0, 0, 0.38) !important;
+    pointer-events: none;
+  }
+}
+.MuiDialog-paperWidthSm{
+  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-size: 20px;
+  .MuiDialogActions-root{
+    padding: 20px;
+  }
+}
+#customized-dialog-title {
+  min-width: 500px;
+  background: #4caf50;
+  color: #fff;
+  button[aria-label="close"]{
+    color:#fff
+  }
+
 }

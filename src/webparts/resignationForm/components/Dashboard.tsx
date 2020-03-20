@@ -63,7 +63,7 @@ const Dashboard = (props) => {
             <Grid container spacing={3} className="marginTop16 ">
                 <Grid item xs={6} sm={4} justify="center" className="marginTop16">
                     <a href={strings.RootUrl + "/SitePages/Resignation-Dashboard.aspx"} target="_blank">
-                        <i className='ms-Icon ms-Icon--BulletedList' aria-hidden="true"></i> <br /> Resignation {strings.Dashboard}
+                        <i className='ms-Icon ms-Icon--BulletedList' aria-hidden="true"></i> <br /> Clearance {strings.Dashboard}
                     </a>
                 </Grid>
                 <Grid item xs={6} sm={4} justify="center" className="marginTop16">

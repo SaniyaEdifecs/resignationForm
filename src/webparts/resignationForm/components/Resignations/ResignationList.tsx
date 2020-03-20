@@ -110,10 +110,6 @@ const ResignationList = (props) => {
         });
     };
 
-    useEffect(() => {
-        getResignationList();
-        checkResignationOwner();
-    }, []);
 
     const handleClick = (event) => {
         window.location.href = "?component=resignationDetail&resignationId=" + event;
@@ -158,88 +154,104 @@ const ResignationList = (props) => {
     };
     const handleChildClick = (value: boolean) => {
         setOpenDialog(value);
+        console.log("child click", openDialog, value);
+        if (openDialog) {
+            getResignationList();
+        }
     }
     const openConfirmationDialog = (employeeDetail) => {
         setDialogData(employeeDetail);
         setOpenDialog(true);
     }
+
+    useEffect(() => {
+        getResignationList();
+        checkResignationOwner();
+    }, []);
+
+    useEffect(() => {
+    }, [openDialog]);
+
     return (
-        <Paper className="root removeBoxShadow">
+        <div>
             <ConfirmationDialog props={openDialog} content={dialogData} onChildClick={handleChildClick} />
-            <div className="">
-                <Typography variant="h5" component="h5">
-                    Resignation {strings.Dashboard}
-                </Typography>
-                <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
-                        <HomeIcon className={classes.icon} /> {strings.Home}
-                    </Link>
-                    <Typography color="textPrimary">Resignation {strings.Dashboard}</Typography>
-                </Breadcrumbs>
-                <div>
-                    {loader ? <div className="msSpinner">
-                        <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
-                    </div> :
-                        <Table stickyHeader aria-label="sticky table">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell >Employee Code</TableCell>
-                                    <TableCell >Employee Name</TableCell>
-                                    <TableCell >Work Email</TableCell>
-                                    <TableCell >Personal Email</TableCell>
-                                    <TableCell >Reason for Resignation</TableCell>
-                                    <TableCell >Department</TableCell>
-                                    <TableCell >Status</TableCell>
-                                    {showActionButton ? <TableCell >Action</TableCell> : null}
-                                </TableRow>
-                            </TableHead>
-                            {employeeLists.length > 0 ? <TableBody>
-                                {(rowsPerPage > 0
-                                    ? employeeLists.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    : employeeLists
-                                ).map((employeeDetail) => (
-                                    <TableRow key={employeeDetail.ID} >
-                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}> {employeeDetail.EmployeeCode}</TableCell>
-                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.EmployeeName}</TableCell>
-                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.WorkEmail}</TableCell>
-                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.PersonalEmail}</TableCell>
-                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.ResignationReason}</TableCell>
-                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Department}</TableCell>
-                                        <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Status}</TableCell>
-                                        {showActionButton ? <TableCell ><a className={`link + ${employeeDetail.Status == 'Canceled' ? 'disableRevoke' : ''}`} onClick={() => openConfirmationDialog(employeeDetail)}>Revoke Resignation</a></TableCell> : null}
-                                    </TableRow>
-                                ))}
-                            </TableBody> :
-                                <TableBody>
+            <Paper className="root removeBoxShadow">
+
+                <div className="">
+                    <Typography variant="h5" component="h5">
+                        Clearance {strings.Dashboard}
+                    </Typography>
+                    <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
+                        <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                            <HomeIcon className={classes.icon} /> {strings.Home}
+                        </Link>
+                        <Typography color="textPrimary">Clearance {strings.Dashboard}</Typography>
+                    </Breadcrumbs>
+                    <div>
+                        {loader ? <div className="msSpinner">
+                            <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
+                        </div> :
+                            <Table stickyHeader aria-label="sticky table">
+                                <TableHead>
                                     <TableRow>
-                                        <TableCell colSpan={showActionButton ? 8 : 7} >
-                                            {errorMsg ? <div>No Records Found</div> : "No Records Found"}
-                                        </TableCell>
+                                        <TableCell >Employee Code</TableCell>
+                                        <TableCell >Employee Name</TableCell>
+                                        <TableCell >Work Email</TableCell>
+                                        <TableCell >Personal Email</TableCell>
+                                        <TableCell >Reason for Resignation</TableCell>
+                                        <TableCell >Department</TableCell>
+                                        <TableCell >Status</TableCell>
+                                        {showActionButton ? <TableCell >Action</TableCell> : null}
                                     </TableRow>
-                                </TableBody>
-                            }
-                            <TableFooter>
-                                <TableRow>
-                                    <TablePagination
-                                        rowsPerPageOptions={[5, 10, 25, employeeLists.length > 25 && employeeLists.length]}
-                                        colSpan={showActionButton ? 8 : 7}
-                                        count={employeeLists.length}
-                                        rowsPerPage={rowsPerPage}
-                                        page={page}
-                                        SelectProps={{
-                                            inputProps: { 'aria-label': 'rows per page' },
-                                            native: true,
-                                        }}
-                                        onChangePage={handleChangePage}
-                                        onChangeRowsPerPage={handleChangeRowsPerPage}
-                                        ActionsComponent={TablePaginationActions}
-                                    />
-                                </TableRow>
-                            </TableFooter>
-                        </Table>}
+                                </TableHead>
+                                {employeeLists.length > 0 ? <TableBody>
+                                    {(rowsPerPage > 0
+                                        ? employeeLists.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                        : employeeLists
+                                    ).map((employeeDetail) => (
+                                        <TableRow key={employeeDetail.ID} >
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}> {employeeDetail.EmployeeCode}</TableCell>
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.EmployeeName}</TableCell>
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.WorkEmail}</TableCell>
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.PersonalEmail}</TableCell>
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.ResignationReason}</TableCell>
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Department}</TableCell>
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Status}</TableCell>
+                                            {showActionButton ? <TableCell className={employeeDetail.Status == 'Canceled' ? 'disableRevoke' : ''}><a className="link" onClick={() => openConfirmationDialog(employeeDetail)}>Revoke Clearance</a></TableCell> : null}
+                                        </TableRow>
+                                    ))}
+                                </TableBody> :
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell colSpan={showActionButton ? 8 : 7} >
+                                                {errorMsg ? <div>No Records Found</div> : "No Records Found"}
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                }
+                                <TableFooter>
+                                    <TableRow>
+                                        <TablePagination
+                                            rowsPerPageOptions={[5, 10, 25, employeeLists.length > 25 && employeeLists.length]}
+                                            colSpan={showActionButton ? 8 : 7}
+                                            count={employeeLists.length}
+                                            rowsPerPage={rowsPerPage}
+                                            page={page}
+                                            SelectProps={{
+                                                inputProps: { 'aria-label': 'rows per page' },
+                                                native: true,
+                                            }}
+                                            onChangePage={handleChangePage}
+                                            onChangeRowsPerPage={handleChangeRowsPerPage}
+                                            ActionsComponent={TablePaginationActions}
+                                        />
+                                    </TableRow>
+                                </TableFooter>
+                            </Table>}
+                    </div>
                 </div>
-            </div>
-        </Paper >
+            </Paper >
+        </div>
     );
 };
 
