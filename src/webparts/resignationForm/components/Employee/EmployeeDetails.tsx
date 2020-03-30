@@ -11,6 +11,7 @@ import MaskedInput from 'react-text-mask';
 import DateFnsUtils from '@date-io/date-fns';
 import HomeIcon from '@material-ui/icons/Home';
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
+import SharePointService from '../SharePointServices';
 
 const EmployeeDetails = (props) => {
     let ID = props.Id;

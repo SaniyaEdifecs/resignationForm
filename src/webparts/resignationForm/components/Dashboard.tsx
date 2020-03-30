@@ -26,7 +26,7 @@ const Dashboard = (props) => {
             currentUser = response;
             console.log("==", currentUser);
             if (currentUser) {
-                const url = strings.RootUrl +"/_api/web/sitegroups/getByName('Resignation  Owners')/Users?$filter=Id eq " + currentUser.Id;
+                const url = strings.RootUrl +"/_api/web/sitegroups/getByName('Resignation Group - Owners')/Users?$filter=Id eq " + currentUser.Id;
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();

@@ -10,14 +10,14 @@ import CloseIcon from '@material-ui/icons/Close';
 import { useEffect, useState, useRef } from 'react';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
+import SharePointService from '../SharePointServices';
 
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
     // Define your state schema
-    const [isdisable, setDisable] = useState(false);
+    const [isdisable, setIsDisable] = useState(false);
     const [open, setOpen] = useState(false);
     const scrollDiv = useRef(null);
-    let isResignationOwner: boolean = false;
     const useStyles = makeStyles(theme => ({
         link: {
             display: 'flex',
@@ -113,36 +113,22 @@ const ResignationForm = (props) => {
         margin: '0',
     };
 
-    const checkResignationOwner = () => {
-        sp.web.currentUser.groups.get().then((groupAccess: any) => {
-            groupAccess.forEach(groupName => {
-                if (groupName.Title === "Resignation  Owners") {
-                    isResignationOwner = true;
-                    setDisable(false);
-                }
-                else {
-                    isResignationOwner = false;
-                    setDisable(true);
-                }
-            });
-            console.log('owners', isResignationOwner);
-
-            return isResignationOwner;
-        });
-    };
     const getEmployeeResignationDetails = (clearanceId) => {
         sp.web.lists.getByTitle("ResignationList").items.getById(clearanceId).get().then((detail: any) => {
             formFields.forEach(formField => {
                 stateSchema[formField].value = detail[formField] + "";
             });
             setState(prevState => ({ ...prevState, stateSchema }));
-            checkResignationOwner();
         });
     };
+
     useEffect(() => {
         if (props.props) {
             getEmployeeResignationDetails(props.props);
         }
+        SharePointService.checkResignationOwner().then((groups: any) => {
+            setIsDisable(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
+        });
     }, []);
 
     useEffect(() => {
@@ -263,7 +249,7 @@ const ResignationForm = (props) => {
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" autoFocus />
+                            <TextField variant="outlined" placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleOnChange} onBlur={handleOnBlur} helperText="Please write code as written on pay slip" autoFocus inputProps={{ min: "0", max: "9999", step: "1" }} />
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                         </Grid>
                         <Grid item xs={12} sm={6}>

@@ -10,13 +10,14 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import SharePointService from '../SharePointServices';
 
 const SalesForceClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
     let list = sp.web.lists.getByTitle("SalesForceClearance");
-    const [showButton, setButtonVisibility] = useState(true);
+    const [buttonVisibility, setButtonVisibility] = useState(true);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
@@ -133,13 +134,21 @@ const SalesForceClearance = (props) => {
                     }).then(permissionResponse => {
                         console.log("permissions reponse", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
-                            setReadOnly(false);
-                        } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
-                            setReadOnly(true);
-                        } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
-                            console.log(permissionResponse.error);
-                            setReadOnly(true);
+                        if (detail.Status != 'Approved') {
+                            if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
+                                setReadOnly(false);
+                            } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
+                                setReadOnly(true);
+                            } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
+                                console.log(permissionResponse.error);
+                                setReadOnly(true);
+                            }
+                        }
+                        else{                            
+                            SharePointService.checkResignationOwner().then((groups: any) => {
+                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
+                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
+                            });
                         }
                     });
 
@@ -245,13 +254,17 @@ const SalesForceClearance = (props) => {
                             : ''}
                     </RadioGroup>
                 </div>
-                {showButton ? <div>
-                    {disable ? <div className="inlineBlock">
-                        <Button type="submit" className="marginTop16" variant="contained" color="secondary" disabled={readOnly} onClick={saveForm}>Save as draft</Button>
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button>
-                    </div> :
-                        <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}
-
+                {buttonVisibility ? <div>
+                    {!disable || state.DuesPending.value === 'NotifyAssociate' ?
+                        (
+                            state.DuesPending.value === 'NotifyAssociate' ?
+                                <Button type="submit" className="marginTop16" variant="contained" color="primary" onClick={saveForm} disabled={readOnly}>Submit</Button> :
+                                <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>
+                        )
+                        :
+                        <div className="inlineBlock">
+                            <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm} disabled={readOnly}>Save</Button>
+                        </div>}
                 </div> : null}
 
             </form>

@@ -10,13 +10,14 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import SharePointService from '../SharePointServices';
 
 const ItClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
     let list = sp.web.lists.getByTitle("ItClearance");
-    const [showButton, setButtonVisibility] = useState(true);
+    const [buttonVisibility, setButtonVisibility] = useState(true);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
@@ -34,6 +35,8 @@ const ItClearance = (props) => {
             validationStateSchema[formField].required = false;
         } else {
             validationStateSchema[formField].required = true;
+            validationStateSchema[formField].preRequired = true;
+
         }
 
         validationStateSchema[formField].validator = {
@@ -51,15 +54,14 @@ const ItClearance = (props) => {
         for (const key in value) {
             payload[key] = value[key].value;
         }
-  
+
         payload = { ...payload, 'Status': status };
-        console.log("payload", payload);
-        // list.items.getById(ID).update(payload).then(items => {
-        //     showLoader(false);
-        //     getEmployeeClearanceDetails(ID);
-        // }, (error: any): void => {
-        //     console.log('Error while creating the item: ' + error);
-        // });
+        list.items.getById(ID).update(payload).then(items => {
+            showLoader(false);
+            getEmployeeClearanceDetails(ID);
+        }, (error: any): void => {
+            console.log('Error while creating the item: ' + error);
+        });
 
     };
 
@@ -87,6 +89,7 @@ const ItClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         list.items.getById(clearanceId).get().then((response: any) => {
             detail = response;
+            // console.log("getdetail", detail);
             getStatusDetails(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
@@ -104,6 +107,7 @@ const ItClearance = (props) => {
             // console.log('Error while creating the item: ' + error);
         });
     };
+
     const setEditAccessPermissions = () => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
@@ -115,13 +119,21 @@ const ItClearance = (props) => {
                     }).then(permissionResponse => {
                         console.log("permissions reponse", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
-                            setReadOnly(false);
-                        } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
-                            setReadOnly(true);
-                        } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
-                            console.log(permissionResponse.error);
-                            setReadOnly(true);
+                        if (detail.Status != 'Approved') {
+                            if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
+                                setReadOnly(false);
+                            } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
+                                setReadOnly(true);
+                            } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
+                                console.log(permissionResponse.error);
+                                setReadOnly(true);
+                            }
+                        }
+                        else{                            
+                            SharePointService.checkResignationOwner().then((groups: any) => {
+                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
+                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
+                            });
                         }
                     });
 
@@ -364,18 +376,20 @@ const ItClearance = (props) => {
                             : ''}
 
                     </RadioGroup>
-                        {state.DuesPending.error ? <p style={errorStyle}>{state.DuesPending.error}</p>:''}
+                    {state.DuesPending.error ? <p style={errorStyle}>{state.DuesPending.error}</p> : ''}
                 </div>
-                {/* {showButton ? <div> */}
-                {/* {disable == true || disableDuesPending == false ? <div className="inlineBlock"> */}
-                {disable ? <div className="inlineBlock">
-                    <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm} disabled={readOnly}>Save</Button>
-                    {/* <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || readOnly}>Submit</Button> */}
-                    {/* <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable || disableDuesPending == false}>Submit</Button> */}
-                </div> :
-                    <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>}
-
-                {/* </div> : null} */}
+                {buttonVisibility ? <div>
+                    {!disable || state.DuesPending.value === 'NotifyAssociate' ?
+                        (
+                            state.DuesPending.value === 'NotifyAssociate' ?
+                                <Button type="submit" className="marginTop16" variant="contained" color="primary" onClick={saveForm} disabled={readOnly}>Submit</Button> :
+                                <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={readOnly}>Submit</Button>
+                        )
+                        :
+                        <div className="inlineBlock">
+                            <Button type="submit" className="marginTop16" variant="contained" color="secondary" onClick={saveForm} disabled={readOnly}>Save</Button>
+                        </div>}
+                </div> : null}
             </form>
         </div >
     );

@@ -138,7 +138,7 @@ const ResignationList = (props) => {
         sp.web.currentUser.groups.get().then((groupAccess: any) => {
             console.log(groupAccess);
             groupAccess.forEach(groupName => {
-                if (groupName.Title == "Resignation  Owners") {
+                if (groupName.Title == "Resignation Group - Owners") {
                     isResignationOwner = true;
                     setShowActionButton(true);
                 }

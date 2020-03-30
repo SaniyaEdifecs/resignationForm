@@ -6,31 +6,18 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   const [disable, setDisable] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
 
-  // // Disable button in initial render.
-  // useEffect(() => { setDisable(true); }, []);
-
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
-      const isInputFieldRequired = validationSchema[key].required;
-      const stateValue = state[key].value;
-      let validateStateValue: boolean;
-      const stateError = state[key].error;
-      // if (state.DuesPending) {
-      //   validateStateValue =  state['DuesPending'].value === 'NotifyAssociate';
-      // } else {
-      validateStateValue = (isInputFieldRequired && !stateValue) || stateError;
-      // }
-      return validateStateValue;
-
+      return (validationSchema[key].required && !state[key].value) || state[key].error;
     });
     return hasErrorInState;
   }, [state, validationSchema]);
 
 
   useEffect(() => {
-    if (isDirty ) {
+    if (isDirty) {
       setDisable(validateState());
-    } 
+    }
   }, [state, isDirty]);
 
   useEffect(() => {
@@ -42,21 +29,30 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       setStatus("Pending");
     } else {
       Object.keys(state).forEach(name => {
-        let duesValue = state['DuesPending'].value;
-        console.log('check dues value', duesValue);
-        if (duesValue === 'NotifyAssociate') {
-          setStatus('Pending');
-          
-        }
-        else {
-          setStatus("Approved");
-        }
+        setStatus( state['DuesPending'].value === 'NotifyAssociate' ? 'Pending' : 'Approved');
       });
-
     }
-
   }, [state]);
-
+  // const toggleValidations = () => {
+  //   let hasError = false;
+  //   Object.keys(state).forEach(name => {
+  //     let error = '';
+  //     let value = state[name].value;
+  //     if (validationSchema[name] && validationSchema[name].preRequired) {
+  //       validationSchema[name].required = !validationSchema[name].required;
+  //     }
+  //     if (validationSchema[name] && validationSchema[name].required) {
+  //       if (!value && name != 'DuesPending') {
+  //         hasError = true;
+  //         error = 'This is required field.';
+  //       }
+  //     }
+  //     setState(prevState => ({
+  //       ...prevState,
+  //       [name]: { value, error }
+  //     }));
+  //   });
+  // }
   let name: any;
   let value: any;
   const checkValidation = (state) => {
@@ -66,11 +62,8 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       let value = state[name].value;
       if (validationSchema[name] && validationSchema[name].required) {
         if (!value && name != 'DuesPending') {
-          console.log(name, value)
           hasError = true;
           error = 'This is required field.';
-          console.log(name, value, error)
-
         }
       }
       setState(prevState => ({
@@ -80,8 +73,6 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
     });
     return hasError;
   };
-
-
 
   // Used to handle every changes in every input
   const setInputValues = (event) => {
@@ -98,9 +89,11 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
           [name]: { value, error }
         }));
       }
-      //  ;
 
-    } else if (event.target.type == "checkbox") {
+    }
+
+    else if (event.target.type == "checkbox") {
+
       name = event.target.name;
       value = event.target.checked;
     } else {
