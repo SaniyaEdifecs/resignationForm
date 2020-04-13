@@ -61,6 +61,8 @@ const ResignationDetail = ({ props }) => {
     const getEmployeeDetail = () => {
         sp.web.lists.getByTitle('ResignationList').items.getById(ID).get().then((response: any) => {
             setEmployeeDetail(response);
+            console.log('response', response);
+            
             if (response['Status'] === "Approved") {
                 setReadOnly(true);
             }
@@ -138,7 +140,7 @@ const ResignationDetail = ({ props }) => {
         if (resignationId) {
             window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href =  url;
         }
     };
     const handleClick = (url, ID) => {
@@ -158,11 +160,11 @@ const ResignationDetail = ({ props }) => {
                         Clearance Details
                 </Typography>
                     <Breadcrumbs separator="›" aria-label="breadcrumb">
-                        <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                        <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                             <HomeIcon className={classes.icon} /> {strings.Home}
                         </Link>
                         <Link color="inherit" onClick={() => handleClick(strings.ResigntionDashboard, "")}>
-                            Resignation Dashboard
+                        Clearance Dashboard
                     </Link>
                         <Typography color="textPrimary">Clearance Details</Typography>
                     </Breadcrumbs>

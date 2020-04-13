@@ -43,7 +43,6 @@ const Navigation = (props) => {
     //     currentUser = response;
     // });
 
-    // https://aristocraticlemmings.sharepoint.com/sites/Resignation/SitePages/HR-Dashboard.aspx
     const renderChilds = () => {
         // switch (paramvalues['component']) {
         //     case "itClearance":
@@ -83,14 +82,14 @@ const Navigation = (props) => {
         //     default:
         //         return <Dashboard context={context} />;
 
-        switch (paramvalues['component'] || path) {
+        switch (paramvalues['component']) {
             case "itClearance":
                 return <ItClearance Id={paramvalues['resignationId']} context={context} />;
-            case strings.ItDashboard:
+            case "https://edifecs.sharepoint.com/sites/PC/SitePages/IT-Dashboard.aspx":
                 return <ITClearanceDashboard props={paramvalues['resignationId']} />;
             case "managerClearance":
                 return <ManagerClearance Id={paramvalues['resignationId']} context={context} />;
-            case strings.ManagerDashboard:
+            case "https://edifecs.sharepoint.com/sites/PC/SitePages/Manager-Dashboard.aspx":
                 return <ManagerClearanceDashboard props={paramvalues['resignationId']} />;
             case strings.OpsDashboard:
                 return <OperationsAdminDashboard props={paramvalues['resignationId']} />;

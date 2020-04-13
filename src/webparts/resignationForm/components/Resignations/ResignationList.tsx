@@ -130,7 +130,7 @@ const ResignationList = (props) => {
         if (resignationId) {
             window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = url;
         }
     };
 
@@ -154,7 +154,6 @@ const ResignationList = (props) => {
     };
     const handleChildClick = (value: boolean) => {
         setOpenDialog(value);
-        console.log("child click", openDialog, value);
         if (openDialog) {
             getResignationList();
         }
@@ -182,7 +181,7 @@ const ResignationList = (props) => {
                         Clearance {strings.Dashboard}
                     </Typography>
                     <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                        <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                        <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                             <HomeIcon className={classes.icon} /> {strings.Home}
                         </Link>
                         <Typography color="textPrimary">Clearance {strings.Dashboard}</Typography>

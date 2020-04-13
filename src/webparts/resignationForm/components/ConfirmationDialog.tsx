@@ -67,7 +67,50 @@ const ConfirmationDialog = ({ props, content, onChildClick }) => {
         sp.web.lists.getByTitle("ResignationList").items.getById(content.ID).update(payload).then(items => {
             if (items) {
                 console.log(items);
-                setShowSuccessMsg(true);
+                // setShowSuccessMsg(true);
+                sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((ITList:any)=>{
+                    if(ITList.length){
+                        sp.web.lists.getByTitle("ItClearance").items.getById(ITList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                        });
+                    }
+                });
+                sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((managerList:any)=>{
+                    if(managerList.length){
+                        sp.web.lists.getByTitle("ManagersClearance").items.getById(managerList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                        });
+                    }
+                });
+                sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((opsList:any)=>{
+                    if(opsList.length){
+                        sp.web.lists.getByTitle("OperationsClearance").items.getById(opsList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                        });
+                    }
+                });
+                sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq '+content.ID).get().then((financeList:any)=>{
+                    if(financeList.length){
+                        sp.web.lists.getByTitle("Finance%20Clearance").items.getById(financeList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                        });
+                    }
+                });
+                sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((sfList:any)=>{
+                    if(sfList.length){
+                        sp.web.lists.getByTitle("SalesForceClearance").items.getById(sfList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                        });
+                    }
+                });
+                sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((hrList:any)=>{
+                    if(hrList.length){
+                        sp.web.lists.getByTitle("HrClearance").items.getById(hrList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                        });
+                    }
+                });
+                sp.web.lists.getByTitle("Employee%20Details").items.filter('EmployeeNameId eq '+content.ID).get().then((employeeList:any)=>{
+                    if(employeeList.length){
+                        sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                        });
+                    }
+                });
+
                 // setTimeout(() => { handleClose(); }, 5000);
 
                 // window.location.reload();

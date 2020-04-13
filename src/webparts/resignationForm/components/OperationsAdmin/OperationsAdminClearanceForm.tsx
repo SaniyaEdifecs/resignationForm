@@ -10,6 +10,7 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import * as strings from 'ResignationFormWebPartStrings';
 import HomeIcon from '@material-ui/icons/Home';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
 
 const OperationsAdminClearance = (props) => {
@@ -18,6 +19,7 @@ const OperationsAdminClearance = (props) => {
     let detail: any;
     let list = sp.web.lists.getByTitle("OperationsClearance");
     const [buttonVisibility, setButtonVisibility] = useState(true);
+    const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
@@ -49,12 +51,10 @@ const OperationsAdminClearance = (props) => {
         for (const key in value) {
             payload[key] = value[key].value;
         }
-
         payload = { ...payload, 'Status': status };
         list.items.getById(ID).update(payload).then(items => {
             showLoader(false);
             getEmployeeClearanceDetails(ID);
-            // window.location.href = "?component=itClearanceDashboard";
         }, (error: any): void => {
             // console.log('Error while creating the item: ' + error);
         });
@@ -73,6 +73,11 @@ const OperationsAdminClearance = (props) => {
             case "Approved":
                 setReadOnly(true);
                 setButtonVisibility(false);
+                setEditAccessPermissions('Approved');
+                break;
+            case "Canceled":
+                setShowMsg(true);
+                setEditAccessPermissions('Canceled');
                 break;
             default:
                 setButtonVisibility(true);
@@ -85,6 +90,7 @@ const OperationsAdminClearance = (props) => {
         list.items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
+            setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
@@ -102,18 +108,18 @@ const OperationsAdminClearance = (props) => {
         });
     };
 
-    const setEditAccessPermissions = () => {
+    const setEditAccessPermissions = (statusValue) => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
-                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('OperationsClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('OperationsClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
                         console.log("permissions reponse", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (detail.Status != 'Approved') {
+                        if (statusValue != 'Approved' && statusValue != 'Canceled') {
                             if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
                                 setReadOnly(false);
                             } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
@@ -122,10 +128,15 @@ const OperationsAdminClearance = (props) => {
                                 console.log(permissionResponse.error);
                                 setReadOnly(true);
                             }
-                        }
-                        else{                            
+                        } else if (statusValue == 'Approved') {
                             SharePointService.checkResignationOwner().then((groups: any) => {
                                 setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
+                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
+                            });
+                        }
+                        else if (statusValue == 'Canceled') {
+                            SharePointService.checkResignationOwner().then((groups: any) => {
+                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                                 setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                             });
                         }
@@ -138,7 +149,6 @@ const OperationsAdminClearance = (props) => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
         }
-        setEditAccessPermissions();
     }, []);
 
     useEffect(() => {
@@ -171,6 +181,12 @@ const OperationsAdminClearance = (props) => {
             marginRight: theme.spacing(0.5),
             width: 20,
             height: 20,
+        },
+        root: {
+            width: '100%',
+            '& > * + *': {
+                marginTop: theme.spacing(2),
+            },
         },
     }));
     const classes = useStyles(0);
@@ -214,6 +230,9 @@ const OperationsAdminClearance = (props) => {
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
+            {showMsg && <div className={classes.root}>
+                <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
+            </div>}
             <form onSubmit={handleOnSubmit} className="clearanceForm">
                 <table cellSpacing="0" cellPadding="0">
                     <thead>

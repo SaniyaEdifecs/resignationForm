@@ -142,7 +142,7 @@ const ManagerClearanceDashboard = (props) => {
                     Manager {strings.Dashboard}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Manager {strings.Dashboard}</Typography>

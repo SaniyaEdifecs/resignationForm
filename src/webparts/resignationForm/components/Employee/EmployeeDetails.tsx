@@ -38,7 +38,11 @@ const EmployeeDetails = (props) => {
 
         validationStateSchema[formField] = {};
         if (formField === "ResignationDate") {
-            stateSchema[formField].value = new Date();
+            let date = new Date();
+            console.log("default = ",date)
+            stateSchema[formField].value =date// [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-');
+            // console.log(stateSchema[formField].value)
+
         } else {
             stateSchema[formField].value = "";
         }
@@ -56,6 +60,7 @@ const EmployeeDetails = (props) => {
         onSubmitForm
     );
     const handleDateChange = (event) => {
+        console.log(event)
         setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
         // console.log("=======", LastWorkingDate);
     };
@@ -103,7 +108,7 @@ const EmployeeDetails = (props) => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
-                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('Employee%20Details')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('Employee%20Details')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
@@ -134,12 +139,12 @@ const EmployeeDetails = (props) => {
         let list = sp.web.lists.getByTitle("Employee%20Details");
         if (ID) {
             list.items.getById(ID).update(elements).then(item => {
-                sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location }).then(response => {
+                sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location, 'emplStatus': 'Approved' }).then(response => {
                 });
-              if(item){
-                  window.location.reload();
-                //   getEmployeeDetails(ID);
-              }
+                if (item) {
+                    window.location.href = "?component=resignationDetail&resignationId=" + employeeNameId;
+                    //   getEmployeeDetails(ID);
+                }
             });
         }
     };
@@ -176,7 +181,7 @@ const EmployeeDetails = (props) => {
                     {strings.EmployeDetails}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Employee Details</Typography>

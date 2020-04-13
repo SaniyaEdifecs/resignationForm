@@ -27,8 +27,9 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   useEffect(() => {
     if (validateState()) {
       setStatus("Pending");
-    } else {
+    } else if(state['DuesPending']){
       Object.keys(state).forEach(name => {
+
         setStatus( state['DuesPending'].value === 'NotifyAssociate' ? 'Pending' : 'Approved');
       });
     }

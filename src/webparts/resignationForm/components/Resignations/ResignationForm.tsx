@@ -11,6 +11,7 @@ import { useEffect, useState, useRef } from 'react';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import SharePointService from '../SharePointServices';
+import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
 const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
@@ -94,16 +95,63 @@ const ResignationForm = (props) => {
 
     const _getPeoplePickerItems = (items) => {
         if (items[0]) {
-            setIsDirty(true);
-            let peoplePickerValue = items[0];
-            let fullName = peoplePickerValue.text.split(' ');
-            let eFirstName = fullName[0];
-            let eLastName = fullName[fullName.length - 1];
-            let eEmail = peoplePickerValue.secondaryText;
-            setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }), ['WorkEmail']: ({ value: eEmail, error: "" }), ['ID']: ({ value: peoplePickerValue.id, error: "" }) }));
-        }
-        else {
-            setState(prevState => ({ ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }), ['WorkEmail']: ({ value: "", error: "" }), ['ID']: ({ value: "", error: "" }) }));
+            let url = props.context.pageContext.site.absoluteUrl + "/_api/Web/SiteUsers?$filter=Email eq '" + items[0]['secondaryText'] + "'";
+            props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
+                .then((response: SPHttpClientResponse): Promise<any> => {
+                    return response.json();
+                }).then(response => {
+                    const loginName = response.value[0]['LoginName'];
+                    let url2 = props.context.pageContext.site.absoluteUrl + "/_api/sp.userprofiles.peoplemanager/getpropertiesfor(@v)?@v='" + encodeURIComponent(loginName) + "'";
+                    props.context.spHttpClient.get(url2, SPHttpClient.configurations.v1)
+                        .then((response: SPHttpClientResponse): Promise<any> => {
+                            return response.json();
+                        }).then((profileProps) => {
+                            let departmentDetails: any = {};
+                            let managerDetails: any = {};
+                            if (profileProps) {
+                                let peoplePickerValue = items[0];
+                                let fullName = peoplePickerValue.text.split(' ');
+                                let eFirstName = fullName.shift();
+                                let eLastName = fullName.pop();
+                                let eEmail = peoplePickerValue.secondaryText;
+                                profileProps.UserProfileProperties.map(prop => {
+                                    if (prop.Key === 'Manager') {
+                                        prop.Value = prop.Value.split('|').pop();
+                                        managerDetails = prop;
+                                    }
+                                    if (prop.Key === 'Department') {
+                                        departmentDetails = prop;
+                                    }
+                                });
+
+                                sp.web.ensureUser(managerDetails.Value).then(({ data }) => {
+                                    let name = data.Title.split(' ');
+                                    managerDetails.FirstName = name.shift();
+                                    managerDetails.LastName = name.pop();
+                                    setState(prevState => ({
+                                        ...prevState,
+                                        ['FirstName']: ({ value: eFirstName, error: "" }),
+                                        ['LastName']: ({ value: eLastName, error: "" }),
+                                        ['WorkEmail']: ({ value: eEmail, error: "" }),
+                                        ['ID']: ({ value: peoplePickerValue.id, error: "" }),
+                                        ['JobTitle']: ({ value: profileProps['Title'], error: "" }),
+                                        ['Department']: ({ value: departmentDetails.Value, error: "" }),
+                                        ['ManagerEmail']: ({ value: managerDetails.Value, error: "" }),
+                                        ['ManagerFirstName']: ({ value: managerDetails.FirstName, error: "" }),
+                                        ['ManagerLastName']: ({ value: managerDetails.LastName, error: "" })
+                                    }));
+                                    setIsDirty(true);
+
+                                });
+
+
+                            }
+                        });
+                });
+        } else {
+            setState(prevState => ({
+                ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }), ['WorkEmail']: ({ value: "", error: "" }), ['ID']: ({ value: "", error: "" }), ['JobTitle']: ({ value: "", error: "" }), ['ManagerEmail']: ({ value: "", error: "" }), ['Department']: ({ value: "", error: "" }), ['ManagerFirstName']: ({ value: "", error: "" }), ['ManagerLastName']: ({ value: "", error: "" })
+            }));
         }
     };
 
@@ -208,7 +256,7 @@ const ResignationForm = (props) => {
         if (resignationId) {
             window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = url;
         }
     };
 
@@ -218,6 +266,7 @@ const ResignationForm = (props) => {
         setTimeout(() => { setOpen(false); }, 3000);
     };
     const classes = useStyles(0);
+
     return (
         <Container component="main" className="marginBottom16 root removeBoxShadow">
             <div ref={scrollDiv}>
@@ -241,7 +290,7 @@ const ResignationForm = (props) => {
                     Clearance Form
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Clearance Form</Typography>
@@ -268,6 +317,36 @@ const ResignationForm = (props) => {
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
+
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Department" disabled={isdisable}
+                                value={state.Department.value} name="Department" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            {state.Department.error && <p style={errorStyle}>{state.Department.error}</p>}
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Title" disabled={isdisable}
+                                value={state.JobTitle.value} name="JobTitle" onChange={handleOnChange} onBlur={handleOnBlur} />
+                            {state.JobTitle.error && <p style={errorStyle}>{state.JobTitle.error}</p>}
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item sm={4}>
+                            <PeoplePicker context={props.context} disabled={isdisable} defaultSelectedUsers={[state.ManagerEmail.value]} ensureUser={true} titleText="Manager Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
+                                principalTypes={[PrincipalType.User]} resolveDelay={100} />
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={state.ManagerFirstName.value} onChange={handleOnChange} onBlur={handleOnBlur} disabled={isdisable} name="ManagerFirstName" />
+                            {state.ManagerFirstName.error && <p style={errorStyle}>{state.ManagerFirstName.error}</p>}
+                        </Grid>
+                        <Grid item xs={12} sm={4}>
+                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" disabled={isdisable} value={state.ManagerLastName.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerLastName" autoComplete="lastName" />
+                            {state.ManagerLastName.error && <p style={errorStyle}>{state.ManagerLastName.error}</p>}
+
+                        </Grid>
+                    </Grid>
+                    <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail" />
+                    {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
@@ -296,36 +375,6 @@ const ResignationForm = (props) => {
                             {state.OtherReason.error && <p style={errorStyle}>{state.OtherReason.error}</p>}
                         </Grid>
                     </Grid>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Department" disabled={isdisable}
-                                value={state.Department.value} name="Department" onChange={handleOnChange} onBlur={handleOnBlur} />
-                            {state.Department.error && <p style={errorStyle}>{state.Department.error}</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Title" disabled={isdisable}
-                                value={state.JobTitle.value} name="JobTitle" onChange={handleOnChange} onBlur={handleOnBlur} />
-                            {state.JobTitle.error && <p style={errorStyle}>{state.JobTitle.error}</p>}
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={2}>
-                        <Grid item sm={4}>
-                            <PeoplePicker context={props.context} disabled={isdisable} defaultSelectedUsers={[state.ManagerEmail.value]} ensureUser={true} titleText="Manager Name" isRequired={true} errorMessage="This field is required." personSelectionLimit={1} showtooltip={true} selectedItems={getPeoplePickerItems} showHiddenInUI={false}
-                                principalTypes={[PrincipalType.User]} resolveDelay={100} />
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="First Name" value={state.ManagerFirstName.value} onChange={handleOnChange} onBlur={handleOnBlur} disabled={isdisable} name="ManagerFirstName" />
-                            {state.ManagerFirstName.error && <p style={errorStyle}>{state.ManagerFirstName.error}</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={4}>
-                            <TextField variant="outlined" margin="normal" required fullWidth label="Last Name" disabled={isdisable} value={state.ManagerLastName.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerLastName" autoComplete="lastName" />
-                            {state.ManagerLastName.error && <p style={errorStyle}>{state.ManagerLastName.error}</p>}
-
-                        </Grid>
-                    </Grid>
-
-                    <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail" />
-                    {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
                     <Button type="submit" className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
                 </form>
             </div>

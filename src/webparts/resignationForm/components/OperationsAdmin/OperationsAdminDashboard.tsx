@@ -120,7 +120,7 @@ const OperationsAdminDashboard = (props) => {
         if (resignationId) {
             window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = url;
         }
     };
     const useStyles = makeStyles(theme => ({
@@ -142,7 +142,7 @@ const OperationsAdminDashboard = (props) => {
                     Operations/Admin {strings.Dashboard}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Operations {strings.Dashboard}</Typography>

@@ -14,6 +14,7 @@ declare interface IResignationFormWebPartStrings {
   ClearanceForm: string;
   Environment: string;
   Home: string;
+  HomeUrl:string;
   RootUrl: string;
   ItDashboard: string;
   OpsDashboard: string;

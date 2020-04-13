@@ -10,6 +10,7 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
 
 const HrClearance = (props) => {
@@ -18,6 +19,7 @@ const HrClearance = (props) => {
     let currentUser: any = [];
     let list = sp.web.lists.getByTitle("HrClearance");
     const [buttonVisibility, setButtonVisibility] = useState(true);
+    const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
@@ -65,25 +67,13 @@ const HrClearance = (props) => {
         onSubmitForm
     );
 
-    const getStatusDetails = (status) => {
-        switch (status) {
-            case "null" || "Not Started" || "Pending":
-                setButtonVisibility(true);
-                break;
-            case "Approved":
-                setReadOnly(true);
-                setButtonVisibility(false);
-                break;
-            default:
-                setButtonVisibility(true);
-                break;
-        }
-    };
+
 
     const getEmployeeClearanceDetails = (clearanceId) => {
         list.items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
+            setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
@@ -101,18 +91,18 @@ const HrClearance = (props) => {
         });
     };
 
-    const setEditAccessPermissions = () => {
+    const setEditAccessPermissions = (statusValue) => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
-                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('HrClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('HrClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
                         console.log("permissions reponse", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (detail.Status != 'Approved') {
+                        if (statusValue != 'Approved' && statusValue != 'Canceled') {
                             if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
                                 setReadOnly(false);
                             } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
@@ -121,10 +111,17 @@ const HrClearance = (props) => {
                                 console.log(permissionResponse.error);
                                 setReadOnly(true);
                             }
-                        }
-                        else{                            
+                        } else if (statusValue == 'Approved') {
                             SharePointService.checkResignationOwner().then((groups: any) => {
                                 setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
+                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
+                                console.log(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length, 'button');
+
+                            });
+                        }
+                        else if (statusValue == 'Canceled') {
+                            SharePointService.checkResignationOwner().then((groups: any) => {
+                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                                 setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                             });
                         }
@@ -135,11 +132,30 @@ const HrClearance = (props) => {
             }
         });
     }
+
+    const getStatusDetails = (status) => {
+        switch (status) {
+            case "null" || "Not Started" || "Pending":
+                setButtonVisibility(true);
+                break;
+            case "Approved":
+                setReadOnly(true);
+                setButtonVisibility(false);
+                setEditAccessPermissions('Approved');
+                break;
+            case "Canceled":
+                setShowMsg(true);
+                setEditAccessPermissions('Canceled');
+                break;
+            default:
+                setButtonVisibility(true);
+                break;
+        }
+    };
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
         }
-        setEditAccessPermissions();
     }, []);
 
     useEffect(() => {
@@ -180,6 +196,12 @@ const HrClearance = (props) => {
             width: 20,
             height: 20,
         },
+        root: {
+            width: '100%',
+            '& > * + *': {
+                marginTop: theme.spacing(2),
+            },
+        },
     }));
     const classes = useStyles(0);
     const redirectHome = (url, resignationId) => {
@@ -206,7 +228,7 @@ const HrClearance = (props) => {
                 {strings.HrClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectHome(strings.RootUrl, "")} className={classes.link}>
+                <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
                 <Link color="inherit" onClick={() => handleClick('', "")}>
@@ -214,6 +236,9 @@ const HrClearance = (props) => {
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
+            {showMsg && <div className={classes.root}>
+                <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
+            </div>}
             <form onSubmit={handleOnSubmit} className="clearanceForm">
                 <table cellSpacing="0" cellPadding="0">
                     <thead>

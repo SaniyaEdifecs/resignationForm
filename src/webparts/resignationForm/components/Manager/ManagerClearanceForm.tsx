@@ -10,6 +10,7 @@ import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
 
 const ManagerClearance = (props) => {
@@ -18,6 +19,7 @@ const ManagerClearance = (props) => {
     let currentUser: any = [];
     let list = sp.web.lists.getByTitle("ManagersClearance");
     const [buttonVisibility, setButtonVisibility] = useState(true);
+    const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
@@ -48,6 +50,7 @@ const ManagerClearance = (props) => {
         list.items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
+            setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
@@ -86,8 +89,6 @@ const ManagerClearance = (props) => {
         onSubmitForm
     );
 
-
-
     const getStatusDetails = (status) => {
         switch (status) {
             case "null" || "Not Started" || "Pending":
@@ -96,6 +97,11 @@ const ManagerClearance = (props) => {
             case "Approved":
                 setReadOnly(true);
                 setButtonVisibility(false);
+                setEditAccessPermissions('Approved');
+                break;
+            case "Canceled":
+                setShowMsg(true);
+                setEditAccessPermissions('Canceled');
                 break;
             default:
                 setButtonVisibility(true);
@@ -103,19 +109,18 @@ const ManagerClearance = (props) => {
         }
     };
 
-
-    const setEditAccessPermissions = () => {
+    const setEditAccessPermissions = (statusValue) => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             if (currentUser) {
-                const url = "https://aristocraticlemmings.sharepoint.com/sites/Resignation/_api/web/lists/getbytitle('ManagersClearance')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
+                const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('ManagersClearance')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
                         console.log("permissions reponse", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (detail.Status != 'Approved') {
+                        if (statusValue != 'Approved' && statusValue != 'Canceled') {
                             if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
                                 setReadOnly(false);
                             } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
@@ -124,10 +129,15 @@ const ManagerClearance = (props) => {
                                 console.log(permissionResponse.error);
                                 setReadOnly(true);
                             }
-                        }
-                        else{                            
+                        } else if (statusValue == 'Approved') {
                             SharePointService.checkResignationOwner().then((groups: any) => {
                                 setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
+                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
+                            });
+                        }
+                        else if (statusValue == 'Canceled') {
+                            SharePointService.checkResignationOwner().then((groups: any) => {
+                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                                 setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                             });
                         }
@@ -140,17 +150,12 @@ const ManagerClearance = (props) => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
         }
-        setEditAccessPermissions();
     }, []);
 
 
     useEffect(() => {
         validationStateSchema['MessageToAssociate'].required = state.DuesPending.value === 'NotifyAssociate';
         validationStateSchema['AdditionalInformation'].required = false;
-
-        // if (state.DuesPending.value === 'NotifyAssociate') {
-        //     setDisable(true);
-        // }
         if (validationStateSchema['MessageToAssociate'].required && !state.MessageToAssociate.value) {
             if (state.MessageToAssociate.error === '') {
                 setState(prevState => ({
@@ -178,6 +183,12 @@ const ManagerClearance = (props) => {
             width: 20,
             height: 20,
         },
+        root: {
+            width: '100%',
+            '& > * + *': {
+                marginTop: theme.spacing(2),
+            },
+        },
     }));
     const classes = useStyles(0);
     const redirectHome = (url, resignationId) => {
@@ -185,7 +196,7 @@ const ManagerClearance = (props) => {
         if (resignationId) {
             window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = url;
         }
     };
     const handleClick = (url, resignationId) => {
@@ -209,7 +220,7 @@ const ManagerClearance = (props) => {
                 {strings.ManagerClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
                 <Link color="inherit" onClick={() => handleClick(strings.ManagerDashboard, "")}>
@@ -217,6 +228,9 @@ const ManagerClearance = (props) => {
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
             </Breadcrumbs>
+            {showMsg && <div className={classes.root}>
+                <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
+            </div>}
             <form onSubmit={handleOnSubmit} className="clearanceForm">
                 <table cellSpacing="0" cellPadding="0">
                     <thead>

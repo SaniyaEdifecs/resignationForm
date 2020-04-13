@@ -120,7 +120,7 @@ const FinanceDashboard = (props) => {
         if (resignationId) {
             window.location.href = "?component=" + url + "&resignationId=" + resignationId;
         } else {
-            window.location.href = strings.RootUrl + url;
+            window.location.href = strings.HomeUrl + url;
         }
     };
     const useStyles = makeStyles(theme => ({
@@ -141,7 +141,7 @@ const FinanceDashboard = (props) => {
                     Finance {strings.Dashboard}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome("/", "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Finance {strings.Dashboard}</Typography>
