@@ -134,7 +134,7 @@ const ResignationList = (props) => {
         }
     };
 
-    const checkResignationOwner = () => {
+    const getCurrentUserGroups = () => {
         sp.web.currentUser.groups.get().then((groupAccess: any) => {
             console.log(groupAccess);
             groupAccess.forEach(groupName => {
@@ -165,7 +165,7 @@ const ResignationList = (props) => {
 
     useEffect(() => {
         getResignationList();
-        checkResignationOwner();
+        getCurrentUserGroups();
     }, []);
 
     useEffect(() => {

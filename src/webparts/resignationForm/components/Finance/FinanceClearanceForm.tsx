@@ -90,13 +90,13 @@ const FinanceClearance = (props) => {
                                 setReadOnly(true);
                             }
                         } else if (statusValue == 'Approved') {
-                            SharePointService.checkResignationOwner().then((groups: any) => {
+                            SharePointService.getCurrentUserGroups().then((groups: any) => {
                                 setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
                                 setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                             });
                         }
                         else if (statusValue == 'Canceled') {
-                            SharePointService.checkResignationOwner().then((groups: any) => {
+                            SharePointService.getCurrentUserGroups().then((groups: any) => {
                                 setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                                 setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
                             });

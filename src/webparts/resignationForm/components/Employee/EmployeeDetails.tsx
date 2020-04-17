@@ -12,6 +12,8 @@ import DateFnsUtils from '@date-io/date-fns';
 import HomeIcon from '@material-ui/icons/Home';
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 import SharePointService from '../SharePointServices';
+import * as moment from 'moment';
+import { dateAdd } from '@pnp/common';
 
 const EmployeeDetails = (props) => {
     let ID = props.Id;
@@ -19,17 +21,7 @@ const EmployeeDetails = (props) => {
     let currentUser: any = [];
     // Define your state schema
     const [employeeNameId, setEmployeeNameId] = useState();
-    const formFields = [
-        "EmployeeCode",
-        "FirstName",
-        "LastName",
-        "PersonalEmail",
-        "PersonalPhone",
-        "LastWorkingDate",
-        "ResignationDate",
-        "Location",
-        "WorkEmail"
-    ];
+    const formFields = [ "EmployeeCode", "FirstName","LastName","PersonalEmail","PersonalPhone","LastWorkingDate","ResignationDate","Location","WorkEmail" ];
     const mask = ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
     var stateSchema = {};
     var validationStateSchema = {};
@@ -37,15 +29,7 @@ const EmployeeDetails = (props) => {
         stateSchema[formField] = {};
 
         validationStateSchema[formField] = {};
-        if (formField === "ResignationDate") {
-            let date = new Date();
-            console.log("default = ",date)
-            stateSchema[formField].value =date// [date.getDate(), date.getMonth() + 1, date.getFullYear()].join('-');
-            // console.log(stateSchema[formField].value)
-
-        } else {
-            stateSchema[formField].value = "";
-        }
+        stateSchema[formField].value = "";
         stateSchema[formField].error = "";
         validationStateSchema[formField].required = true;
         validationStateSchema[formField].validator = {
@@ -62,7 +46,6 @@ const EmployeeDetails = (props) => {
     const handleDateChange = (event) => {
         console.log(event)
         setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
-        // console.log("=======", LastWorkingDate);
     };
     const _getPeoplePickerItems = (items) => {
         if (items[0]) {
@@ -72,7 +55,6 @@ const EmployeeDetails = (props) => {
             let eFirstName = fullName[0];
             let eLastName = fullName[fullName.length - 1];
             let eEmail = peoplePickerValue.secondaryText;
-            // console.log(eEmail, eLastName, eFirstName);
             setState(prevState => ({ ...prevState, ['FirstName']: ({ value: eFirstName, error: "" }), ['LastName']: ({ value: eLastName, error: "" }) }));
         }
         else {
@@ -95,7 +77,11 @@ const EmployeeDetails = (props) => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
                     stateSchema[formField].error = "";
-                } else {
+                    if (detail['ResignationDate'] == null) {
+                        stateSchema['ResignationDate'].value = new Date();
+                        stateSchema['ResignationDate'].error = "";
+                    }
+                } else   {
                     stateSchema[formField].value = detail[formField] + "";
                     stateSchema[formField].error = "";
                 }
@@ -216,8 +202,7 @@ const EmployeeDetails = (props) => {
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} >
-                                <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy"
-                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
+                                <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy" value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
                             </MuiPickersUtilsProvider>
                         </Grid>
                     </Grid>

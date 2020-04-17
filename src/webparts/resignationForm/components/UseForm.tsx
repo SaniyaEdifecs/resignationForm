@@ -27,10 +27,10 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
   useEffect(() => {
     if (validateState()) {
       setStatus("Pending");
-    } else if(state['DuesPending']){
+    } else if (state['DuesPending']) {
       Object.keys(state).forEach(name => {
 
-        setStatus( state['DuesPending'].value === 'NotifyAssociate' ? 'Pending' : 'Approved');
+        setStatus(state['DuesPending'].value === 'NotifyAssociate' ? 'Pending' : 'Approved');
       });
     }
   }, [state]);
@@ -90,11 +90,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
           [name]: { value, error }
         }));
       }
-
-    }
-
-    else if (event.target.type == "checkbox") {
-
+    } else if (event.target.type == "checkbox") {
       name = event.target.name;
       value = event.target.checked;
     } else {

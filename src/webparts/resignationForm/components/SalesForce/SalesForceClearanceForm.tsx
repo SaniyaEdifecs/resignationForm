@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
-import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
@@ -17,7 +16,7 @@ const SalesForceClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
-    let list = sp.web.lists.getByTitle("SalesForceClearance");
+    let list = SharePointService.getListByTitle("SalesForceClearance");
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
@@ -89,13 +88,8 @@ const SalesForceClearance = (props) => {
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
-                if (detail[formField] == null) {
-                    stateSchema[formField].value = "";
-                    stateSchema[formField].error = "";
-                } else {
-                    stateSchema[formField].value = detail[formField];
-                    stateSchema[formField].error = "";
-                }
+                stateSchema[formField].value = detail[formField] ? detail[formField] : "";
+                stateSchema[formField].error = "";
             });
             // console.log("getdetail", stateSchema);
             setState(prevState => ({ ...prevState, stateSchema }));
@@ -127,7 +121,7 @@ const SalesForceClearance = (props) => {
     }, [state]);
 
     const setEditAccessPermissions = (statusValue) => {
-        sp.web.currentUser.get().then((response) => {
+        SharePointService.getCurrentUser().then((response) => {
             currentUser = response;
             if (currentUser) {
                 const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('SalesForceClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
@@ -135,28 +129,27 @@ const SalesForceClearance = (props) => {
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
-                        console.log("permissions reponse", permissionResponse);
+                        console.log("permissionResponse:", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (statusValue != 'Approved' && statusValue != 'Canceled') {
-                            if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
+                        if (statusValue == 'Approved' || statusValue == 'Canceled') {
+                            SharePointService.getCurrentUserGroups().then((groups: any) => {
+                                let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
+                                if (statusValue == 'Approved') {
+                                    setReadOnly(isGroupOwner ? false : true);
+                                } else {
+                                    setReadOnly(isGroupOwner ? true : false);
+                                }
+                                setButtonVisibility(isGroupOwner ? true : false);
+                            });
+                        } else {
+                            if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
                                 setReadOnly(false);
-                            } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
-                                setReadOnly(true);
-                            } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
-                                console.log(permissionResponse.error);
+                            } else if (permissionResponse.error ||
+                                (permissionLevel.High == 176 && permissionLevel.Low == 138612833) ||
+                                (permissionLevel.High == 48 && permissionLevel.Low == 134287360)) {
+                                console.log("permissionResponse.error:", permissionResponse.error);
                                 setReadOnly(true);
                             }
-                        } else if (statusValue == 'Approved') {
-                            SharePointService.checkResignationOwner().then((groups: any) => {
-                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
-                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                            });
-                        }
-                        else if (statusValue == 'Canceled') {
-                            SharePointService.checkResignationOwner().then((groups: any) => {
-                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                            });
                         }
                     });
 
@@ -187,21 +180,9 @@ const SalesForceClearance = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, resignationId) => {
+    const redirectTo = (url, resignationId) => {
         event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
-    };
-    const handleClick = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
+        window.location.href = resignationId ? "?component=" + url + "&resignationId=" + resignationId : url;
     };
     const errorStyle = {
         color: 'red',
@@ -215,10 +196,10 @@ const SalesForceClearance = (props) => {
                 {strings.SalesForceClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                <Link color="inherit" onClick={() => redirectTo(strings.HomeUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
-                <Link color="inherit" onClick={() => handleClick(strings.SalesForceDashboard, "")}>
+                <Link color="inherit" onClick={() => redirectTo(strings.SalesForceDashboard, "")}>
                     SalesForce {strings.Dashboard}
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>

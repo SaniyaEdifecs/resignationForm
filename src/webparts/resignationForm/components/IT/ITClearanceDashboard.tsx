@@ -77,7 +77,7 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
     );
 };
 
-const ITClearanceDashboard = (props) => {
+const ITClearanceDashboard = () => {
     const [employeeDetails, setEmployeeDetails] = useState([]);
     const [errorMsg, setErrorMsg] = useState('');
     const [page, setPage] = useState(0);

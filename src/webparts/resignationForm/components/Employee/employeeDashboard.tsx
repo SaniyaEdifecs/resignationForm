@@ -28,7 +28,7 @@ const StyledTableRow = withStyles((theme: Theme) =>
 )(TableRow);
 
 const EmployeeDashboard = (props) => {
-    const [employeeData, setEmployeeDetail] = useState();
+    const [employeeData, setEmployeeDetail] = useState([]);
     const getClearanceList = () => {
         sp.web.lists.getByTitle("Employee%20Details").items.select('Id', 'Status', 'EmployeeName/Id', 'FirstName','LastName').expand("EmployeeName").get().then((items) => {
             if (items.length > 0) {

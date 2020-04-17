@@ -63,11 +63,10 @@ const ConfirmationDialog = ({ props, content, onChildClick }) => {
     const [open, setOpen] = useState(false);
     const [showSuccessMsg, setShowSuccessMsg] = useState(false);
     const revokeResignation = () => {
-        let payload: any = { 'Status': 'Canceled', 'HrStatus': 'Canceled', 'FinanceStatus': 'Canceled', 'ItStatus': 'Canceled', 'ManagerStatus': 'Canceled', 'SalesforceStatus': 'Canceled', 'Operations_x002f_AdminStatus': 'Canceled' };
+        let payload: any = { 'Status': 'Canceled', 'HrStatus': 'Canceled', 'FinanceStatus': 'Canceled', 'ItStatus': 'Canceled', 'ManagerStatus': 'Canceled', 'SalesforceStatus': 'Canceled', 'Operations_x002f_AdminStatus': 'Canceled', 'emplStatus':'Canceled' };
         sp.web.lists.getByTitle("ResignationList").items.getById(content.ID).update(payload).then(items => {
             if (items) {
-                console.log(items);
-                // setShowSuccessMsg(true);
+                setShowSuccessMsg(true);
                 sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((ITList:any)=>{
                     if(ITList.length){
                         sp.web.lists.getByTitle("ItClearance").items.getById(ITList[0]['ID']).update({'Status':'Canceled'}).then(items => {
@@ -111,7 +110,7 @@ const ConfirmationDialog = ({ props, content, onChildClick }) => {
                     }
                 });
 
-                // setTimeout(() => { handleClose(); }, 5000);
+                setTimeout(() => { handleClose(); }, 5000);
 
                 // window.location.reload();
             }
