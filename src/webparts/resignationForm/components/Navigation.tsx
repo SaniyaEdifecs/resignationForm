@@ -11,7 +11,6 @@ import ManagerClearance from './Manager/ManagerClearanceForm';
 import ManagerClearanceDashboard from './Manager/ManagerClearanceDashboard';
 import ResignationDetail from './Resignations/ResignationDetail';
 import FinanceDashboard from './Finance/FinanceDashboard';
-import { sp } from '@pnp/sp';
 import * as strings from 'ResignationFormWebPartStrings';
 import ResignationForm from './Resignations/ResignationForm';
 import ResignationList from './Resignations/ResignationList';
@@ -38,89 +37,89 @@ const Navigation = (props) => {
     let path = window.location.href;
 
     const renderChilds = () => {
-        switch (paramvalues['component']) {
-            case "itClearance":
-                return <ItClearance Id={paramvalues['resignationId']} context={context} />;
-            case "itClearanceDashboard":
-                return <ITClearanceDashboard  />;
-            case "managerClearance":
-                return <ManagerClearance Id={paramvalues['resignationId']} context={context} />;
-            case "managerClearanceDashboard":
-                return <ManagerClearanceDashboard props={paramvalues['resignationId']} />;
-            case "operationClearanceDashboard":
-                return <OperationsAdminDashboard props={paramvalues['resignationId']} />;
-            case "operationsClearance":
-                return <OperationsAdminClearance Id={paramvalues['resignationId']} context={context} />;
-            case "financeClearance":
-                return <FinanceClearance Id={paramvalues['resignationId']} context={context} />;
-            case "financeClearanceDashboard":
-                return <FinanceDashboard props={paramvalues['resignationId']} />;
-            case "salesForceClearance":
-                return <SalesForceClearance Id={paramvalues['resignationId']} context={context} />;
-            case "salesForceClearanceDashboard":
-                return <SalesForceDashboard props={paramvalues['resignationId']} />;
-            case "hrClearance":
-                return <HrClearance Id={paramvalues['resignationId']} context={context} />;
-            case "hrClearanceDashboard":
-                return <HrClearanceDashboard props={paramvalues['resignationId']} />;
-            case "resignationDashboard":
-                return <ResignationList props={props} />;
-            case "employeeDetails":
-                return <EmployeeDetails Id={paramvalues['resignationId']} context={context} />;
-            case "employeeDashboard":
-                return <EmployeeDashboard props={paramvalues['resignationId']} />;
-            case "resignationForm":
-                return <ResignationForm context={context} props={paramvalues['resignationId']} />;
-            case "resignationDetail":
-                return <ResignationDetail props={paramvalues['resignationId']} />;
-            default:
-                return <Dashboard context={context} />;
-        // if (paramvalues['component']) {
-        //     switch (paramvalues['component']) {
-        //         case "itClearance":
-        //             return <ItClearance Id={paramvalues['resignationId']} context={context} />;
-        //         case "managerClearance":
-        //             return <ManagerClearance Id={paramvalues['resignationId']} context={context} />;
-        //         case "operationsClearance":
-        //             return <OperationsAdminClearance Id={paramvalues['resignationId']} context={context} />;
-        //         case "financeClearance":
-        //             return <FinanceClearance Id={paramvalues['resignationId']} context={context} />;
-        //         case "salesForceClearance":
-        //             return <SalesForceClearance Id={paramvalues['resignationId']} context={context} />;
-        //         case "hrClearance":
-        //             return <HrClearance Id={paramvalues['resignationId']} context={context} />;
-        //         case "employeeDetails":
-        //             return <EmployeeDetails Id={paramvalues['resignationId']} context={context} />;
-        //         case "resignationForm":
-        //             return <ResignationForm context={context} props={paramvalues['resignationId']} />;
-        //         case "resignationDetail":
-        //             return <ResignationDetail props={paramvalues['resignationId']} />;
-        //         default:
-        //             return <Dashboard context={context} />;
-        //     }
-        // }
-        // else {
-        //     console.log('here path');
-        //     switch (path) {
-        //         case strings.ResigntionDashboard:
-        //             return <ResignationList props={props} />;
-        //         case strings.RootUrl + strings.ItDashboard:
-        //             return <ITClearanceDashboard />;
-        //         case "https://edifecs.sharepoint.com/sites/PC/SitePages/Manager-Dashboard.aspx":
-        //             return <ManagerClearanceDashboard />;
-        //         case "employeeDashboard":
-        //             return <EmployeeDashboard />;
-        //         case strings.HrDashboard:
-        //             return <HrClearanceDashboard />;
-        //         case strings.SalesForceDashboard:
-        //             return <SalesForceDashboard />;
-        //         case strings.FinanceDashboard:
-        //             return <FinanceDashboard />;
-        //         case strings.OpsDashboard:
-        //             return <OperationsAdminDashboard />;
-        //         default:
-        //             return <Dashboard context={context} />;
-        //     }
+        // switch (paramvalues['component']) {
+        //     case "itClearance":
+        //         return <ItClearance Id={paramvalues['resignationId']} context={context} />;
+        //     case "itClearanceDashboard":
+        //         return <ITClearanceDashboard  />;
+        //     case "managerClearance":
+        //         return <ManagerClearance Id={paramvalues['resignationId']} context={context} />;
+        //     case "managerClearanceDashboard":
+        //         return <ManagerClearanceDashboard props={paramvalues['resignationId']} />;
+        //     case "operationClearanceDashboard":
+        //         return <OperationsAdminDashboard props={paramvalues['resignationId']} />;
+        //     case "operationsClearance":
+        //         return <OperationsAdminClearance Id={paramvalues['resignationId']} context={context} />;
+        //     case "financeClearance":
+        //         return <FinanceClearance Id={paramvalues['resignationId']} context={context} />;
+        //     case "financeClearanceDashboard":
+        //         return <FinanceDashboard props={paramvalues['resignationId']} />;
+        //     case "salesForceClearance":
+        //         return <SalesForceClearance Id={paramvalues['resignationId']} context={context} />;
+        //     case "salesForceClearanceDashboard":
+        //         return <SalesForceDashboard props={paramvalues['resignationId']} />;
+        //     case "hrClearance":
+        //         return <HrClearance Id={paramvalues['resignationId']} context={context} />;
+        //     case "hrClearanceDashboard":
+        //         return <HrClearanceDashboard props={paramvalues['resignationId']} />;
+        //     case "resignationDashboard":
+        //         return <ResignationList props={props} />;
+        //     case "employeeDetails":
+        //         return <EmployeeDetails Id={paramvalues['resignationId']} context={context} />;
+        //     case "employeeDashboard":
+        //         return <EmployeeDashboard props={paramvalues['resignationId']} />;
+        //     case "resignationForm":
+        //         return <ResignationForm context={context} props={paramvalues['resignationId']} />;
+        //     case "resignationDetail":
+        //         return <ResignationDetail props={paramvalues['resignationId']} />;
+        //     default:
+        //         return <Dashboard context={context} />;
+        if (paramvalues['component']) {
+            switch (paramvalues['component']) {
+                case "itClearance":
+                    return <ItClearance Id={paramvalues['resignationId']} context={context} />;
+                case "managerClearance":
+                    return <ManagerClearance Id={paramvalues['resignationId']} context={context} />;
+                case "operationsClearance":
+                    return <OperationsAdminClearance Id={paramvalues['resignationId']} context={context} />;
+                case "financeClearance":
+                    return <FinanceClearance Id={paramvalues['resignationId']} context={context} />;
+                case "salesForceClearance":
+                    return <SalesForceClearance Id={paramvalues['resignationId']} context={context} />;
+                case "hrClearance":
+                    return <HrClearance Id={paramvalues['resignationId']} context={context} />;
+                case "employeeDetails":
+                    return <EmployeeDetails Id={paramvalues['resignationId']} context={context} />;
+                case "resignationForm":
+                    return <ResignationForm context={context} props={paramvalues['resignationId']} />;
+                case "resignationDetail":
+                    return <ResignationDetail props={paramvalues['resignationId']} />;
+                default:
+                    return <Dashboard context={context} />;
+            }
+        }
+        else {
+            console.log('here path');
+            switch (path) {
+                case strings.ResigntionDashboard:
+                    return <ResignationList props={props} />;
+                case strings.RootUrl + strings.ItDashboard:
+                    return <ITClearanceDashboard />;
+                case "https://edifecs.sharepoint.com/sites/PC/SitePages/Manager-Dashboard.aspx":
+                    return <ManagerClearanceDashboard />;
+                case "employeeDashboard":
+                    return <EmployeeDashboard />;
+                case strings.HrDashboard:
+                    return <HrClearanceDashboard />;
+                case strings.SalesForceDashboard:
+                    return <SalesForceDashboard />;
+                case strings.FinanceDashboard:
+                    return <FinanceDashboard />;
+                case strings.OpsDashboard:
+                    return <OperationsAdminDashboard />;
+                default:
+                    return <Dashboard context={context} />;
+            }
         }
     };
 

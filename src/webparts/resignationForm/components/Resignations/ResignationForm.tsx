@@ -11,6 +11,7 @@ import { useEffect, useState, useRef } from 'react';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
 import SharePointService from '../SharePointServices';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 
 const ResignationForm = (props) => {
@@ -18,6 +19,7 @@ const ResignationForm = (props) => {
     const [isdisable, setIsDisable] = useState(false);
     const [open, setOpen] = useState(false);
     const scrollDiv = useRef(null);
+    const [loader, showLoader] = useState(false);
     const useStyles = makeStyles(theme => ({
         link: {
             display: 'flex',
@@ -164,7 +166,7 @@ const ResignationForm = (props) => {
     };
 
     const getEmployeeResignationDetails = (clearanceId) => {
-        sp.web.lists.getByTitle("ResignationList").items.getById(clearanceId).get().then((detail: any) => {
+        SharePointService.getListByTitle("ResignationList").items.getById(clearanceId).get().then((detail: any) => {
             formFields.forEach(formField => {
                 stateSchema[formField].value = detail[formField] + "";
             });
@@ -203,39 +205,41 @@ const ResignationForm = (props) => {
     const addListItem = (elements) => {
         let ID = props.props;
         elements = { ...elements, EmployeeName: state.FirstName + " " + state.LastName, ManagerName: state.ManagerFirstName + " " + state.ManagerLastName };
-        let list = sp.web.lists.getByTitle("ResignationList");
+        
         if (ID) {
             elements = { ...elements, 'ID': ID };
-            list.items.getById(ID).update(elements).then(response => {
+            SharePointService.getListByTitle("ResignationList").items.getById(ID).update(elements).then(response => {
                 window.scrollTo(0, 0);
                 setState(stateSchema);
                 setOpen(true);
                 setTimeout(() => { setOpen(false) }, 3000);
             });
         } else {
+            showLoader(true);
             elements = { ...elements, 'Status': 'In Progress' };
-            list.items.add(elements).then((response: ItemAddResult): void => {
+            SharePointService.getListByTitle("ResignationList").items.add(elements).then((response: ItemAddResult): void => {
                 let item = response.data;
                 if (item) {
-
-                    sp.web.lists.getByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((itResponse: ItemAddResult) => {
+                    
+                    SharePointService.getListByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((itResponse: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((mngResponse: ItemAddResult) => {
-
-                    });
-                    sp.web.lists.getByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((OpsResponse: ItemAddResult) => {
+                    SharePointService.getListByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((mngResponse: ItemAddResult) => {
 
                     });
-                    sp.web.lists.getByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((finResponse: ItemAddResult) => {
+                    SharePointService.getListByTitle("OperationsClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((OpsResponse: ItemAddResult) => {
 
                     });
-                    sp.web.lists.getByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((sfResponse: ItemAddResult) => {
+                    SharePointService.getListByTitle("Finance%20Clearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((finResponse: ItemAddResult) => {
+
                     });
-                    sp.web.lists.getByTitle("HrClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((hrResponse: ItemAddResult) => {
+                    SharePointService.getListByTitle("SalesForceClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((sfResponse: ItemAddResult) => {
                     });
-                    sp.web.lists.getByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate, WorkEmail: elements.WorkEmail, Status: "Not Started" }).then((emplResponse: ItemAddResult) => {
+                    SharePointService.getListByTitle("HrClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((hrResponse: ItemAddResult) => {
+                    });
+                    SharePointService.getListByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate, WorkEmail: elements.WorkEmail, Status: "Not Started" }).then((emplResponse: ItemAddResult) => {
                     });
                     scrollToRef(scrollDiv);
+                    showLoader(false);
                     setState(stateSchema);
                     setOpen(true);
                 }
@@ -252,17 +256,8 @@ const ResignationForm = (props) => {
         addListItem(value);
     }
 
-    const redirectHome = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
-    };
 
     const scrollToRef = (ref) => {
-        console.log("scrolled");
         window.scrollTo(0, ref.current.offsetTop);
         setTimeout(() => { setOpen(false); }, 3000);
     };
@@ -270,6 +265,7 @@ const ResignationForm = (props) => {
 
     return (
         <Container component="main" className="marginBottom16 root removeBoxShadow">
+            {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
             <div ref={scrollDiv}>
                 <Collapse in={open} >
                     <Alert action={
@@ -291,7 +287,7 @@ const ResignationForm = (props) => {
                     Clearance Form
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Clearance Form</Typography>

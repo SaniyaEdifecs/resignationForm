@@ -1,15 +1,13 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { withStyles, Theme, Typography, createStyles, Table, TableBody, TableCell, TableHead, TableRow, Paper, TablePagination, Breadcrumbs, Link, makeStyles, useTheme, TableFooter } from '@material-ui/core';
-import { sp } from '@pnp/sp';
 import IconButton from '@material-ui/core/IconButton';
 import { FirstPage, LastPage, KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import HomeIcon from '@material-ui/icons/Home';
 import '../CommonStyleSheet.scss';
 import * as strings from 'ResignationFormWebPartStrings';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
-
-
+import SharePointService from '../SharePointServices';
 
 const useStyles1 = makeStyles((theme: Theme) =>
     createStyles({
@@ -85,9 +83,8 @@ const FinanceDashboard = (props) => {
     const [loader, showLoader] = useState(false);
 
     const getClearanceList = () => {
-        console.log("2");
         showLoader(true);
-        sp.web.lists.getByTitle("Finance%20Clearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
+        SharePointService.getListByTitle("Finance%20Clearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
             showLoader(false);
             if (items) {
                 setEmployeeDetails(items);
@@ -115,14 +112,7 @@ const FinanceDashboard = (props) => {
     const handleClick = (event) => {
         window.location.href = "?component=financeClearance&resignationId=" + event;
     };
-    const redirectHome = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = strings.HomeUrl + url;
-        }
-    };
+
     const useStyles = makeStyles(theme => ({
         link: {
             display: 'flex',
@@ -141,7 +131,7 @@ const FinanceDashboard = (props) => {
                     Finance {strings.Dashboard}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Finance {strings.Dashboard}</Typography>

@@ -1,13 +1,13 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { withStyles, Theme, Typography, createStyles, Table, TableBody, TableCell, TableHead, TableRow, Paper, TablePagination, Breadcrumbs, Link, makeStyles, useTheme, TableFooter } from '@material-ui/core';
-import { sp } from '@pnp/sp';
 import IconButton from '@material-ui/core/IconButton';
 import { FirstPage, LastPage, KeyboardArrowLeft, KeyboardArrowRight } from '@material-ui/icons';
 import HomeIcon from '@material-ui/icons/Home';
 import ConfirmationDialog from '../ConfirmationDialog';
 import '../CommonStyleSheet.scss';
 import * as strings from 'ResignationFormWebPartStrings';
+import SharePointService from '../SharePointServices';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
 const useStyles1 = makeStyles((theme: Theme) =>
@@ -99,7 +99,7 @@ const ResignationList = (props) => {
 
     const getResignationList = () => {
         showLoader(true);
-        sp.web.lists.getByTitle("ResignationList").items.get().then((items: any) => {
+        SharePointService.getListByTitle("ResignationList").items.get().then((items: any) => {
             showLoader(false);
             if (items) {
                 setEmployeeLists(items);
@@ -125,20 +125,11 @@ const ResignationList = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
-    };
-
+  
     const getCurrentUserGroups = () => {
-        sp.web.currentUser.groups.get().then((groupAccess: any) => {
-            console.log(groupAccess);
-            groupAccess.forEach(groupName => {
-                if (groupName.Title == "Resignation Group - Owners") {
+        SharePointService.getCurrentUserGroups().then((groupAccess: any) => {
+            groupAccess.forEach(group => {
+                if (group.Title == "Resignation Group - Owners") {
                     isResignationOwner = true;
                     setShowActionButton(true);
                 }
@@ -181,7 +172,7 @@ const ResignationList = (props) => {
                         Clearance {strings.Dashboard}
                     </Typography>
                     <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                        <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                        <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                             <HomeIcon className={classes.icon} /> {strings.Home}
                         </Link>
                         <Typography color="textPrimary">Clearance {strings.Dashboard}</Typography>

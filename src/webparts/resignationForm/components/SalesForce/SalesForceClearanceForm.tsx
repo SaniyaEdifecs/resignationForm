@@ -16,7 +16,6 @@ const SalesForceClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
-    let list = SharePointService.getListByTitle("SalesForceClearance");
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
@@ -49,7 +48,7 @@ const SalesForceClearance = (props) => {
         }
 
         payload = { ...payload, 'Status': status };
-        list.items.getById(ID).update(payload).then(items => {
+        SharePointService.getListByTitle("SalesForceClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
             getEmployeeClearanceDetails(ID);
         }, (error: any): void => {
@@ -83,7 +82,7 @@ const SalesForceClearance = (props) => {
     };
 
     const getEmployeeClearanceDetails = (clearanceId) => {
-        list.items.getById(clearanceId).get().then((response: any) => {
+        SharePointService.getListByTitle("SalesForceClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
@@ -180,10 +179,6 @@ const SalesForceClearance = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectTo = (url, resignationId) => {
-        event.preventDefault();
-        window.location.href = resignationId ? "?component=" + url + "&resignationId=" + resignationId : url;
-    };
     const errorStyle = {
         color: 'red',
         fontSize: '13px',
@@ -196,10 +191,10 @@ const SalesForceClearance = (props) => {
                 {strings.SalesForceClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectTo(strings.HomeUrl, "")} className={classes.link}>
+                <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
-                <Link color="inherit" onClick={() => redirectTo(strings.SalesForceDashboard, "")}>
+                <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.SalesForceDashboard, "")}>
                     SalesForce {strings.Dashboard}
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>

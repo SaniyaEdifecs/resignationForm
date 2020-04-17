@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
-import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
@@ -17,15 +16,16 @@ const HrClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
-    let list = sp.web.lists.getByTitle("HrClearance");
+
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "Resignationemailacceptance", "ResignationAcceptancecomments", "Deductions", "DeductionsComments", "ELBalance", "ELBalanceComments", "Ex_x002d_Gratia", "Ex_x002d_GratiaComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Insurance", "InsuranceComments", "LeaveEncashment", "LeaveEncashmentComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "ServiceLetter", "ServiceLetterComments", "ShiftAllowance", "ShiftAllowanceComments", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TelephoneAllowance", "TelephoneAllowanceComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "PF_x002f_ESI", "PF_x002f_ESIComments", "Others", "OthersComments"
+        "Resignationemailacceptance", "ResignationAcceptancecomments", "ELBalance", "ELBalanceComments",  "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments",  "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments",  "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "Others", "OthersComments"
     ];
+
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -53,7 +53,7 @@ const HrClearance = (props) => {
         }
 
         payload = { ...payload, 'Status': status };
-        list.items.getById(ID).update(payload).then(items => {
+        SharePointService.getListByTitle("HrClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
             getEmployeeClearanceDetails(ID);
             // window.location.href = "?component=itClearanceDashboard";
@@ -66,11 +66,8 @@ const HrClearance = (props) => {
         validationStateSchema,
         onSubmitForm
     );
-
-
-
     const getEmployeeClearanceDetails = (clearanceId) => {
-        list.items.getById(clearanceId).get().then((response: any) => {
+        SharePointService.getListByTitle("HrClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
@@ -92,7 +89,7 @@ const HrClearance = (props) => {
     };
 
     const setEditAccessPermissions = (statusValue) => {
-        sp.web.currentUser.get().then((response) => {
+        SharePointService.getCurrentUser().then((response) => {
             currentUser = response;
             if (currentUser) {
                 const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('HrClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
@@ -100,33 +97,30 @@ const HrClearance = (props) => {
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
-                        console.log("permissions reponse", permissionResponse);
+                        console.log("permissionResponse:", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (statusValue != 'Approved' && statusValue != 'Canceled') {
-                            if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
+                        if (statusValue == 'Approved' || statusValue == 'Canceled') {
+                            SharePointService.getCurrentUserGroups().then((groups: any) => {
+                                let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
+                                if (statusValue == 'Approved') {
+                                    setReadOnly(isGroupOwner ? false : true);
+                                } else {
+                                    setReadOnly(isGroupOwner ? true : false);
+                                }
+                                setButtonVisibility(isGroupOwner ? true : false);
+                            });
+                        } else {
+                            if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
                                 setReadOnly(false);
-                            } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
-                                setReadOnly(true);
-                            } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
-                                console.log(permissionResponse.error);
+                            } else if (permissionResponse.error ||
+                                (permissionLevel.High == 176 && permissionLevel.Low == 138612833) ||
+                                (permissionLevel.High == 48 && permissionLevel.Low == 134287360)) {
+                                console.log("permissionResponse.error:", permissionResponse.error);
                                 setReadOnly(true);
                             }
-                        } else if (statusValue == 'Approved') {
-                            SharePointService.getCurrentUserGroups().then((groups: any) => {
-                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
-                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                                console.log(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length, 'button');
-
-                            });
-                        }
-                        else if (statusValue == 'Canceled') {
-                            SharePointService.getCurrentUserGroups().then((groups: any) => {
-                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                            });
                         }
                     }, error => {
-                        console.log("===", error);
+                        console.log('err', error);
                     });
 
             }
@@ -204,22 +198,6 @@ const HrClearance = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
-    };
-    const handleClick = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = window.location.pathname + url;
-        }
-    };
 
     return (
         <div>
@@ -228,10 +206,10 @@ const HrClearance = (props) => {
                 {strings.HrClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
-                <Link color="inherit" onClick={() => handleClick('', "")}>
+                <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HrDashboard, "")}>
                     {strings.Dashboard}
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>
@@ -309,7 +287,7 @@ const HrClearance = (props) => {
                                 {state.Sign_x002d_onBonusComments.error && <p style={errorStyle}>{state.Sign_x002d_onBonusComments.error}</p>}
                             </td>
                         </tr>
-                        
+
                         <tr>
                             <td>EL Balance</td>
                             <td>

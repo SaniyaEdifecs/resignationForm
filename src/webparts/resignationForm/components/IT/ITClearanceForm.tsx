@@ -1,7 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
-import { sp } from '@pnp/sp';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
@@ -17,7 +16,6 @@ const ItClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
-    let list = sp.web.lists.getByTitle("ItClearance");
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
@@ -54,7 +52,7 @@ const ItClearance = (props) => {
         }
 
         payload = { ...payload, 'Status': status };
-        list.items.getById(ID).update(payload).then(items => {
+        SharePointService.getListByTitle("ItClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
             getEmployeeClearanceDetails(ID);
         }, (error: any): void => {
@@ -74,7 +72,6 @@ const ItClearance = (props) => {
         switch (status) {
             case "null" || "Not Started" || "Pending":
                 setButtonVisibility(true);
-
                 break;
             case "Approved":
                 setReadOnly(true);
@@ -91,9 +88,8 @@ const ItClearance = (props) => {
         }
     };
     const getEmployeeClearanceDetails = (clearanceId) => {
-        list.items.getById(clearanceId).get().then((response: any) => {
+        SharePointService.getListByTitle("ItClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
-            console.log("getdetail", detail);
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
@@ -114,7 +110,7 @@ const ItClearance = (props) => {
     };
 
     const setEditAccessPermissions = (statusValue) => {
-        sp.web.currentUser.get().then((response) => {
+        SharePointService.getCurrentUser().then((response) => {
             currentUser = response;
             if (currentUser) {
                 const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('ItClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
@@ -122,28 +118,27 @@ const ItClearance = (props) => {
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
-                        console.log("permissions reponse", permissionResponse);
+                        console.log("permissionResponse:", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (statusValue != 'Approved' && statusValue != 'Canceled') {
-                            if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151)) {
+                        if (statusValue == 'Approved' || statusValue == 'Canceled') {
+                            SharePointService.getCurrentUserGroups().then((groups: any) => {
+                                let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
+                                if (statusValue == 'Approved') {
+                                    setReadOnly(isGroupOwner ? false : true);
+                                } else {
+                                    setReadOnly(isGroupOwner ? true : false);
+                                }
+                                setButtonVisibility(isGroupOwner ? true : false);
+                            });
+                        } else {
+                            if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
                                 setReadOnly(false);
-                            } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
-                                setReadOnly(true);
-                            } else if (permissionResponse.error || (permissionLevel.High == 176 && permissionLevel.Low == 138612833)) {
-                                console.log(permissionResponse.error);
+                            } else if (permissionResponse.error ||
+                                (permissionLevel.High == 176 && permissionLevel.Low == 138612833) ||
+                                (permissionLevel.High == 48 && permissionLevel.Low == 134287360)) {
+                                console.log("permissionResponse.error:", permissionResponse.error);
                                 setReadOnly(true);
                             }
-                        } else if (statusValue == 'Approved') {
-                            SharePointService.getCurrentUserGroups().then((groups: any) => {
-                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? false : true);
-                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                            });
-                        }
-                        else if (statusValue == 'Canceled') {
-                            SharePointService.getCurrentUserGroups().then((groups: any) => {
-                                setReadOnly(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                                setButtonVisibility(groups.filter(groupName => groupName.Title === "Resignation Group - Owners").length ? true : false);
-                            });
                         }
                     });
 
@@ -218,23 +213,6 @@ const ItClearance = (props) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
-    };
-
-    const handleClick = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
-    };
     return (
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
@@ -242,10 +220,10 @@ const ItClearance = (props) => {
                 {strings.ItClearance}
             </Typography>
             <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                     <HomeIcon className={classes.icon} /> {strings.Home}
                 </Link>
-                <Link color="inherit" onClick={() => handleClick(strings.ItDashboard, "")}>
+                <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ItDashboard, "")}>
                     {strings.Dashboard}
                 </Link>
                 <Typography color="textPrimary">{strings.ClearanceForm}</Typography>

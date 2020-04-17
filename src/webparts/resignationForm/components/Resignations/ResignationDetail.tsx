@@ -1,19 +1,20 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Paper, makeStyles } from '@material-ui/core';
-import { Typography, TextField, Button, InputLabel, MenuItem, FormControl, Select, FormControlLabel, Checkbox, RadioGroup, Radio } from '@material-ui/core';
-import { sp } from '@pnp/sp';
+import { Paper, makeStyles, CircularProgress } from '@material-ui/core';
+import { Typography, TextField, Button} from '@material-ui/core';
 import Link from '@material-ui/core/Link';
-import useForm from '../UseForm';
+import resignationUseForm from './ResignationUseForm';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import Moment from 'react-moment';
-import '../CommonStyleSheet.scss';
+import SharePointService from '../SharePointServices';
 import * as strings from 'ResignationFormWebPartStrings';
+import '../CommonStyleSheet.scss';
 
 const ResignationDetail = ({ props }) => {
     let ID = props;
     const [readOnly, setReadOnly] = useState(false);
+    const [loader, showLoader] = useState(false);
     const [employeeDetail, setEmployeeDetail] = useState({});
     const [itDetail, setItDetail] = useState({});
     const [managerClearance, setManagerClearance] = useState({});
@@ -22,9 +23,7 @@ const ResignationDetail = ({ props }) => {
     const [financeClearance, setFinanceClearance] = useState({});
     const [hrClearance, setHrClearance] = useState({});
     const [errorMsg, setErrorMsg] = useState('');
-    const formFields = [
-        "FinalComments"
-    ];
+    const formFields = ["FinalComments"];
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -34,24 +33,24 @@ const ResignationDetail = ({ props }) => {
         stateSchema[formField].error = "";
         validationStateSchema[formField].required = true;
     });
-    stateSchema['selectFields'] = ["FinalComments"];
+  
 
     const onSubmitForm = (value) => {
-        // showLoader(true);
+        showLoader(true);
         let payload = {};
         for (const key in value) {
             payload[key] = value[key].value;
         }
 
         payload = { ...payload, 'Status': status };
-        sp.web.lists.getByTitle("ResignationList").items.getById(ID).update(payload).then(items => {
-            // showLoader(false);
-            // getEmployeeClearanceDetails(ID);
-            // window.location.href = "?component=itClearanceDashboard";
+        console.log("paylod",payload);
+        SharePointService.getListByTitle("ResignationList").items.getById(ID).update(payload).then(items => {
+            showLoader(false);
+            getEmployeeDetail();
         });
 
     };
-    const { state, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
+    const { state, disable, status, handleOnChange, handleOnSubmit } = resignationUseForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
@@ -59,17 +58,17 @@ const ResignationDetail = ({ props }) => {
 
 
     const getEmployeeDetail = () => {
-        sp.web.lists.getByTitle('ResignationList').items.getById(ID).get().then((response: any) => {
+        SharePointService.getListByTitle('ResignationList').items.getById(ID).get().then((response: any) => {
             setEmployeeDetail(response);
             console.log('response', response);
-            
+
             if (response['Status'] === "Approved") {
                 setReadOnly(true);
             }
         }, (error) => {
             setErrorMsg("No Access");
         });
-        sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
+        SharePointService.getListByTitle("ItClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setItDetail(items[0]);
                 // console.log("itclearance details", items[0]);
@@ -77,36 +76,35 @@ const ResignationDetail = ({ props }) => {
         }, (error) => {
             setErrorMsg("No Access");
         });
-        sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
+        SharePointService.getListByTitle("ManagersClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setManagerClearance(items[0]);
             }
         }, (error) => {
             setErrorMsg("No Access");
         });
-        sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
+        SharePointService.getListByTitle("OperationsClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setOperationsClearance(items[0]);
             }
         }, (error) => {
             setErrorMsg("No Access");
         });
-        sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
+        SharePointService.getListByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setFinanceClearance(items[0]);
             }
         }, (error) => {
             setErrorMsg("No Access");
-            console.log("=ff====", errorMsg, error);
         });
-        sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
+        SharePointService.getListByTitle("SalesForceClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setSalesForceClearance(items[0]);
             }
         }, (error) => {
             setErrorMsg("No Access");
         });
-        sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
+        SharePointService.getListByTitle("HrClearance").items.filter('EmployeeNameId eq ' + ID).get().then((items) => {
             if (items) {
                 setHrClearance(items[0]);
             }
@@ -135,36 +133,21 @@ const ResignationDetail = ({ props }) => {
         },
     }));
     const classes = useStyles(0);
-    const redirectHome = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href =  url;
-        }
-    };
-    const handleClick = (url, ID) => {
-        event.preventDefault();
-        if (ID) {
-            window.location.href = "?component=" + url + "&resignationId=" + ID;
-        }
-        else {
-            window.location.href = "?component=" + url;
-        }
-    };
+
     return (
         <Paper className="root">
-            {employeeDetail['Status'] != "Approved" ?
+            {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
+            {employeeDetail['HrStatus'] != "Approved" && employeeDetail['FinanceStatus'] != "Approved" && employeeDetail['ItStatus'] != "Approved" && employeeDetail['ManagerStatus'] != "Approved" && employeeDetail['emplStatus'] != "Approved" && employeeDetail['Operations_x002f_AdminStatus'] != "Approved" && employeeDetail['SalesforceStatus'] != "Approved" ? 
                 <div className="formView">
                     <Typography variant="h5" component="h3">
                         Clearance Details
                 </Typography>
                     <Breadcrumbs separator="›" aria-label="breadcrumb">
-                        <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                        <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                             <HomeIcon className={classes.icon} /> {strings.Home}
                         </Link>
-                        <Link color="inherit" onClick={() => handleClick(strings.ResigntionDashboard, "")}>
-                        Clearance Dashboard
+                        <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ResigntionDashboard, "")}>
+                            Clearance Dashboard
                     </Link>
                         <Typography color="textPrimary">Clearance Details</Typography>
                     </Breadcrumbs>
@@ -201,42 +184,42 @@ const ResignationDetail = ({ props }) => {
                                     <td>Manager Clearance</td>
                                     {managerClearance ? <td>
                                         {managerClearance && managerClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => handleClick('managerClearance', managerClearance['ID'])}>{managerClearance['Status']}</Link> : "Approved"}
+                                            <Link onClick={() => SharePointService.redirectTo('managerClearance', managerClearance['ID'])}>{managerClearance['Status']}</Link> : "Approved"}
                                     </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>IT Clearance</td>
                                     {itDetail ? <td>
                                         {itDetail && itDetail['Status'] != "Approved" ?
-                                            <Link onClick={() => handleClick('itClearance', itDetail['ID'])}>{itDetail['Status']}</Link> : "Approved"}
+                                            <Link onClick={() => SharePointService.redirectTo('itClearance', itDetail['ID'])}>{itDetail['Status']}</Link> : "Approved"}
                                     </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>SalesForce Clearance</td>
                                     {salesForceClearance ? <td>
                                         {salesForceClearance && salesForceClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => handleClick('salesForceClearance', salesForceClearance['ID'])}>{salesForceClearance['Status']}</Link> : "Approved"}
+                                            <Link onClick={() => SharePointService.redirectTo('salesForceClearance', salesForceClearance['ID'])}>{salesForceClearance['Status']}</Link> : "Approved"}
                                     </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>Finance Clearance</td>
                                     {financeClearance ? <td>
                                         {financeClearance && financeClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => handleClick('financeClearance', financeClearance['ID'])}>{financeClearance['Status']}</Link> : "Approved"}
+                                            <Link onClick={() => SharePointService.redirectTo('financeClearance', financeClearance['ID'])}>{financeClearance['Status']}</Link> : "Approved"}
                                     </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>Operations/Admin Clearance</td>
                                     {operationsClearance ? <td>
                                         {operationsClearance && operationsClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => handleClick('operationsClearance', operationsClearance['ID'])}>{operationsClearance['Status']}</Link> : "Approved"}
+                                            <Link onClick={() => SharePointService.redirectTo('operationsClearance', operationsClearance['ID'])}>{operationsClearance['Status']}</Link> : "Approved"}
                                     </td> : <td>No Access</td>}
                                 </tr>
                                 <tr>
                                     <td>HR Clearance</td>
                                     {hrClearance ? <td>
                                         {hrClearance && hrClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => handleClick('hrClearance', hrClearance['ID'])}>{hrClearance['Status']}</Link> : "Approved"}
+                                            <Link onClick={() => SharePointService.redirectTo('hrClearance', hrClearance['ID'])}>{hrClearance['Status']}</Link> : "Approved"}
                                     </td> : <td>No Access</td>}
                                 </tr>
                             </tbody>
@@ -381,7 +364,7 @@ const ResignationDetail = ({ props }) => {
                                             <tbody>
                                                 <tr>
                                                     <td>SDFC License termination:
-                                                        email to Katie.loescher@edifecs.com
+                                                    email to Katie.loescher@edifecs.com
                                                     </td>
                                                     <td>{salesForceClearance && salesForceClearance['LicenseTermination']} </td>
                                                     <td>{salesForceClearance['LicenseTerminationComment']}</td>
@@ -522,11 +505,11 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['ELBalance']}</td>
                                                     <td>{hrClearance['ELBalanceComments']} </td>
                                                 </tr>
-                                                <tr>
+                                                {/* <tr>
                                                     <td>Shift Allowance</td>
                                                     <td>{hrClearance['ShiftAllowance']}</td>
                                                     <td>{hrClearance['ShiftAllowanceComments']} </td>
-                                                </tr>
+                                                </tr> */}
                                                 <tr>
                                                     <td>Terminate on Hr systems - ADP, Bamboo,
                                                         <br /> Org.Wizard, Jobvite, Savior
@@ -534,11 +517,11 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['TerminateOnHRSystems']}</td>
                                                     <td>{hrClearance['TerminateOnHRSystemsComments']} </td>
                                                 </tr>
-                                                <tr>
+                                                {/* <tr>
                                                     <td>Shortfall of Notice (Waiver if any)</td>
                                                     <td>{hrClearance['ShiftAllowance']}</td>
                                                     <td>{hrClearance['ShiftAllowanceComments']} </td>
-                                                </tr>
+                                                </tr> */}
                                                 <tr>
                                                     <td colSpan={3}>Payroll, Compliance & Benefits:</td>
                                                 </tr>
@@ -547,7 +530,7 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['Gratuity']}</td>
                                                     <td>{hrClearance['GratuityComments']} </td>
                                                 </tr>
-                                                <tr>
+                                              {/*   <tr>
                                                     <td>Insurance Deductions</td>
                                                     <td>{hrClearance['Insurance']}</td>
                                                     <td>{hrClearance['InsuranceComments']} </td>
@@ -556,7 +539,7 @@ const ResignationDetail = ({ props }) => {
                                                     <td>PF/ESI</td>
                                                     <td>{hrClearance['PF_x002f_ESI']}</td>
                                                     <td>{hrClearance['PF_x002f_ESIComments']} </td>
-                                                </tr>
+                                                </tr> */}
                                                 <tr>
                                                     <td>Others (Specify)</td>
                                                     <td>{hrClearance['Others']}</td>

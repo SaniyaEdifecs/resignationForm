@@ -1,8 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Typography, TextField, Button, Container, Grid, Breadcrumbs, Link, makeStyles } from '@material-ui/core';
-import { sp } from '@pnp/sp';
-import useForm from '../UseForm';
+
 import '../CommonStyleSheet.scss';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
@@ -10,24 +9,25 @@ import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@materi
 import MaskedInput from 'react-text-mask';
 import DateFnsUtils from '@date-io/date-fns';
 import HomeIcon from '@material-ui/icons/Home';
+import { Alert } from '@material-ui/lab';
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 import SharePointService from '../SharePointServices';
-import * as moment from 'moment';
-import { dateAdd } from '@pnp/common';
+import resignationUseForm from '../Resignations/ResignationUseForm';
 
 const EmployeeDetails = (props) => {
     let ID = props.Id;
     const [readOnly, setReadOnly] = useState(false);
+    const [showMsg, setShowMsg] = useState(false);
+    const [buttonVisibility, setButtonVisibility] = useState(true);
     let currentUser: any = [];
     // Define your state schema
     const [employeeNameId, setEmployeeNameId] = useState();
-    const formFields = [ "EmployeeCode", "FirstName","LastName","PersonalEmail","PersonalPhone","LastWorkingDate","ResignationDate","Location","WorkEmail" ];
+    const formFields = ["EmployeeCode", "FirstName", "LastName", "PersonalEmail", "PersonalPhone", "LastWorkingDate", "ResignationDate", "Location", "WorkEmail"];
     const mask = ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
         stateSchema[formField] = {};
-
         validationStateSchema[formField] = {};
         stateSchema[formField].value = "";
         stateSchema[formField].error = "";
@@ -36,15 +36,13 @@ const EmployeeDetails = (props) => {
             regex: '',
             error: ''
         };
-
     });
-    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = useForm(
+    const { state, handleOnChange, handleOnSubmit, disable, setState, handleOnBlur, setIsDirty } = resignationUseForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
     );
     const handleDateChange = (event) => {
-        console.log(event)
         setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
     };
     const _getPeoplePickerItems = (items) => {
@@ -68,11 +66,31 @@ const EmployeeDetails = (props) => {
         fontSize: '13px',
         margin: '0',
     };
+    const getStatusDetails = (status) => {
+        switch (status) {
+            case "null" || "Not Started" || "Pending":
+                setButtonVisibility(true);
+                break;
+            case "Approved":
+                setReadOnly(true);
+                setButtonVisibility(false);
+                setEditAccessPermissions('Approved');
+                break;
+            case "Canceled":
+                setShowMsg(true);
+                setEditAccessPermissions('Canceled');
+                break;
+            default:
+                setButtonVisibility(true);
+                break;
+        }
+    };
 
     const getEmployeeDetails = (clearanceId) => {
-        sp.web.lists.getByTitle("Employee%20Details").items.getById(clearanceId).get().then((detail: any) => {
+        SharePointService.getListByTitle("Employee%20Details").items.getById(clearanceId).get().then((detail: any) => {
             console.log("detail", detail);
             setEmployeeNameId(detail.EmployeeNameId);
+            getStatusDetails(detail.Status);
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
@@ -81,7 +99,7 @@ const EmployeeDetails = (props) => {
                         stateSchema['ResignationDate'].value = new Date();
                         stateSchema['ResignationDate'].error = "";
                     }
-                } else   {
+                } else {
                     stateSchema[formField].value = detail[formField] + "";
                     stateSchema[formField].error = "";
                 }
@@ -90,8 +108,8 @@ const EmployeeDetails = (props) => {
             // setDisable(true);
         });
     };
-    const setEditAccessPermissions = () => {
-        sp.web.currentUser.get().then((response) => {
+    const setEditAccessPermissions = (statusValue) => {
+        SharePointService.getCurrentUser().then((response) => {
             currentUser = response;
             if (currentUser) {
                 const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('Employee%20Details')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
@@ -101,14 +119,26 @@ const EmployeeDetails = (props) => {
                     }).then(permissionResponse => {
                         console.log("permissions reponse", permissionResponse);
                         let permissionLevel = permissionResponse;
-                        if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
-                            setReadOnly(false);
-                        } else if (permissionLevel.High == 48 && permissionLevel.Low == 134287360) {
-                            setReadOnly(true);
-                        } else if (permissionResponse.error) {
-                            console.log(permissionResponse.error);
-                            setReadOnly(true);
+                        if (statusValue == 'Approved' || statusValue == 'Canceled') {
+                            SharePointService.getCurrentUserGroups().then((groups: any) => {
+                                let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
+                                if (statusValue == 'Approved') {
+                                    setReadOnly(isGroupOwner ? false : true);
+                                } else {
+                                    setReadOnly(isGroupOwner ? true : false);
+                                }
+                            });
+                        } else {
+                            if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
+                                setReadOnly(false);
+                            } else if (permissionResponse.error ||
+                                // (permissionLevel.High == 176 && permissionLevel.Low == 138612833) ||
+                                (permissionLevel.High == 48 && permissionLevel.Low == 134287360)) {
+                                console.log("permissionResponse.error:", permissionResponse.error);
+                                setReadOnly(true);
+                            }
                         }
+
                     });
 
             }
@@ -118,14 +148,15 @@ const EmployeeDetails = (props) => {
         if (props) {
             getEmployeeDetails(ID);
         }
-        setEditAccessPermissions();
     }, []);
 
     const addListItem = (elements) => {
-        let list = sp.web.lists.getByTitle("Employee%20Details");
+        elements = {...elements, 'Status': 'Approved'};
+
+        
         if (ID) {
-            list.items.getById(ID).update(elements).then(item => {
-                sp.web.lists.getByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location, 'emplStatus': 'Approved' }).then(response => {
+            SharePointService.getListByTitle("Employee%20Details").items.getById(ID).update(elements).then(item => {
+                SharePointService.getListByTitle("ResignationList").items.getById(employeeNameId).update({ 'PersonalEmail': elements.PersonalEmail, 'ResignationDate': elements.ResignationDate, 'Location': elements.Location, 'emplStatus': 'Approved','PersonalPhone': elements.PersonalPhone}).then(response => {
                 });
                 if (item) {
                     window.location.href = "?component=resignationDetail&resignationId=" + employeeNameId;
@@ -141,14 +172,7 @@ const EmployeeDetails = (props) => {
         }
         addListItem(value);
     }
-    const redirectHome = (url, resignationId) => {
-        event.preventDefault();
-        if (resignationId) {
-            window.location.href = "?component=" + url + "&resignationId=" + resignationId;
-        } else {
-            window.location.href = url;
-        }
-    };
+
     const useStyles = makeStyles(theme => ({
         link: {
             display: 'flex',
@@ -167,11 +191,14 @@ const EmployeeDetails = (props) => {
                     {strings.EmployeDetails}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
-                    <Link color="inherit" onClick={() => redirectHome(strings.HomeUrl, "")} className={classes.link}>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
                     <Typography color="textPrimary">Employee Details</Typography>
                 </Breadcrumbs>
+                {showMsg && <div >
+                    <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
+                </div>}
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
@@ -224,8 +251,9 @@ const EmployeeDetails = (props) => {
                             {state.Location.error && <p style={errorStyle}>{state.Location.error}</p>}
                         </Grid>
                     </Grid>
-
-                    <Button type="submit" className="marginTop16" variant="contained" disabled={disable || readOnly} color="primary">Submit</Button>
+                    {buttonVisibility ?
+                        <Button type="submit" className="marginTop16" variant="contained" disabled={disable || readOnly} color="primary">Submit</Button>
+                        : null}
                 </form>
             </div>
         </Container>
