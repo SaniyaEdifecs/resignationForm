@@ -137,7 +137,7 @@ const ResignationForm = (props) => {
                                         ['FirstName']: ({ value: eFirstName, error: "" }),
                                         ['LastName']: ({ value: eLastName, error: "" }),
                                         ['WorkEmail']: ({ value: eEmail, error: "" }),
-                                        ['ID']: ({ value: peoplePickerValue.id, error: "" }),
+                                        // ['ID']: ({ value: peoplePickerValue.id, error: "" }),
                                         ['JobTitle']: ({ value: profileProps['Title'], error: "" }),
                                         ['Department']: ({ value: departmentDetails.Value, error: "" }),
                                         ['ManagerEmail']: ({ value: managerDetails.Value, error: "" }),
@@ -154,7 +154,7 @@ const ResignationForm = (props) => {
                 });
         } else {
             setState(prevState => ({
-                ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }), ['WorkEmail']: ({ value: "", error: "" }), ['ID']: ({ value: "", error: "" }), ['JobTitle']: ({ value: "", error: "" }), ['ManagerEmail']: ({ value: "", error: "" }), ['Department']: ({ value: "", error: "" }), ['ManagerFirstName']: ({ value: "", error: "" }), ['ManagerLastName']: ({ value: "", error: "" })
+                ...prevState, ['FirstName']: ({ value: "", error: "" }), ['LastName']: ({ value: "", error: "" }), ['WorkEmail']: ({ value: "", error: "" }), ['JobTitle']: ({ value: "", error: "" }), ['ManagerEmail']: ({ value: "", error: "" }), ['Department']: ({ value: "", error: "" }), ['ManagerFirstName']: ({ value: "", error: "" }), ['ManagerLastName']: ({ value: "", error: "" })
             }));
         }
     };
@@ -207,7 +207,7 @@ const ResignationForm = (props) => {
         elements = { ...elements, EmployeeName: state.FirstName + " " + state.LastName, ManagerName: state.ManagerFirstName + " " + state.ManagerLastName };
         
         if (ID) {
-            elements = { ...elements, 'ID': ID };
+            elements = { ...elements};
             SharePointService.getListByTitle("ResignationList").items.getById(ID).update(elements).then(response => {
                 window.scrollTo(0, 0);
                 setState(stateSchema);
@@ -217,6 +217,7 @@ const ResignationForm = (props) => {
         } else {
             showLoader(true);
             elements = { ...elements, 'Status': 'In Progress' };
+            console.log("elements", elements);
             SharePointService.getListByTitle("ResignationList").items.add(elements).then((response: ItemAddResult): void => {
                 let item = response.data;
                 if (item) {
