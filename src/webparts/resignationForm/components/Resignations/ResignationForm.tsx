@@ -217,7 +217,6 @@ const ResignationForm = (props) => {
         } else {
             showLoader(true);
             elements = { ...elements, 'Status': 'In Progress' };
-            console.log("elements", elements);
             SharePointService.getListByTitle("ResignationList").items.add(elements).then((response: ItemAddResult): void => {
                 let item = response.data;
                 if (item) {

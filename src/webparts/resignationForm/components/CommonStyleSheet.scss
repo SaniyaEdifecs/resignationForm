@@ -9,12 +9,24 @@
   h5 {
     margin-bottom: 5px;
   }
-  .MuiTableCell-root {
-    border: 1px solid rgba(224, 224, 224, 1);
-  }
   tr {
+    &.MuiTableRow-root{
+      &:last-child{
+        td{
+          border: 1px solid rgba(224, 224, 224, 1);
+        }
+      }
+
+    }
     &:hover {
       background: $hover-gray;
+    }
+    td,th{
+      &.MuiTableCell-root {
+        border-bottom: 0;
+        padding: 10px;
+        font-size: 13px !important;
+      }
     }
   }
 }

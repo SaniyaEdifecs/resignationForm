@@ -138,14 +138,13 @@ const ResignationList = (props) => {
                     setShowActionButton(true);
                 }
             });
-            console.log('owners', isResignationOwner);
-
             return isResignationOwner;
         });
     };
     const handleChildClick = (value: boolean) => {
-        setOpenDialog(value);
-        if (openDialog) {
+        console.log("isCancled",value, openDialog);
+        setOpenDialog(false);
+        if (value) {
             getResignationList();
         }
     }

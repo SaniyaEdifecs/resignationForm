@@ -11,6 +11,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import Typography from '@material-ui/core/Typography';
 import { sp } from '@pnp/sp';
 import './CommonStyleSheet.scss';
+import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 
 const styles = (theme: Theme) =>
     createStyles({
@@ -62,91 +63,99 @@ const DialogActions = withStyles((theme: Theme) => ({
 const ConfirmationDialog = ({ props, content, onChildClick }) => {
     const [open, setOpen] = useState(false);
     const [showSuccessMsg, setShowSuccessMsg] = useState(false);
-    const revokeResignation = () => {
-        let payload: any = { 'Status': 'Canceled', 'HrStatus': 'Canceled', 'FinanceStatus': 'Canceled', 'ItStatus': 'Canceled', 'ManagerStatus': 'Canceled', 'SalesforceStatus': 'Canceled', 'Operations_x002f_AdminStatus': 'Canceled', 'emplStatus':'Canceled' };
+    const [loader, showLoader] = useState(false);
+    const handleClose = (isCanceled) => {
+        setOpen(false);
+        onChildClick(isCanceled);
+    };
+    const cancelRevoke = () => {
+        setOpen(false);
+        onChildClick(false);
+    }
+    useEffect(() => { setOpen(props); }, [props]);
+
+    const revokeResignation = (isCanceled) => {
+        let payload: any = { 'Status': 'Canceled', 'HrStatus': 'Canceled', 'FinanceStatus': 'Canceled', 'ItStatus': 'Canceled', 'ManagerStatus': 'Canceled', 'SalesforceStatus': 'Canceled', 'Operations_x002f_AdminStatus': 'Canceled', 'emplStatus': 'Canceled' };
+        showLoader(true);
         sp.web.lists.getByTitle("ResignationList").items.getById(content.ID).update(payload).then(items => {
             if (items) {
+                showLoader(false);
                 setShowSuccessMsg(true);
-                sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((ITList:any)=>{
-                    if(ITList.length){
-                        sp.web.lists.getByTitle("ItClearance").items.getById(ITList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((ITList: any) => {
+                    if (ITList.length) {
+                        sp.web.lists.getByTitle("ItClearance").items.getById(ITList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((managerList:any)=>{
-                    if(managerList.length){
-                        sp.web.lists.getByTitle("ManagersClearance").items.getById(managerList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((managerList: any) => {
+                    if (managerList.length) {
+                        sp.web.lists.getByTitle("ManagersClearance").items.getById(managerList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((opsList:any)=>{
-                    if(opsList.length){
-                        sp.web.lists.getByTitle("OperationsClearance").items.getById(opsList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((opsList: any) => {
+                    if (opsList.length) {
+                        sp.web.lists.getByTitle("OperationsClearance").items.getById(opsList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq '+content.ID).get().then((financeList:any)=>{
-                    if(financeList.length){
-                        sp.web.lists.getByTitle("Finance%20Clearance").items.getById(financeList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((financeList: any) => {
+                    if (financeList.length) {
+                        sp.web.lists.getByTitle("Finance%20Clearance").items.getById(financeList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((sfList:any)=>{
-                    if(sfList.length){
-                        sp.web.lists.getByTitle("SalesForceClearance").items.getById(sfList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((sfList: any) => {
+                    if (sfList.length) {
+                        sp.web.lists.getByTitle("SalesForceClearance").items.getById(sfList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq '+content.ID).get().then((hrList:any)=>{
-                    if(hrList.length){
-                        sp.web.lists.getByTitle("HrClearance").items.getById(hrList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((hrList: any) => {
+                    if (hrList.length) {
+                        sp.web.lists.getByTitle("HrClearance").items.getById(hrList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("Employee%20Details").items.filter('EmployeeNameId eq '+content.ID).get().then((employeeList:any)=>{
-                    if(employeeList.length){
-                        sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeList[0]['ID']).update({'Status':'Canceled'}).then(items => {
+                sp.web.lists.getByTitle("Employee%20Details").items.filter('EmployeeNameId eq ' + content.ID).get().then((employeeList: any) => {
+                    if (employeeList.length) {
+                        sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
 
-                setTimeout(() => { handleClose(); }, 5000);
-
-                // window.location.reload();
+                setTimeout(() => {
+                    handleClose(isCanceled);
+                    setOpen(false);
+                    setShowSuccessMsg(false);
+                }, 5000);
             }
 
         });
     }
 
-    const handleClose = () => {
-        setOpen(false);
-        onChildClick(false);
-    };
-    const cancelRevoke = ()=>{
-        setOpen(false);
-    }
-    useEffect(() => { setOpen(props); }, [props]);
 
     return (
         <div>
-            <Dialog aria-labelledby="customized-dialog-title" open={open}>
+            <Dialog onClose={() => handleClose(false)} aria-labelledby="customized-dialog-title" open={open}>
                 {showSuccessMsg ?
-                    <DialogTitle id="customized-dialog-title" onClose={handleClose}>
+                    <DialogTitle id="customized-dialog-title" onClose={() => handleClose(false)}>
                         Clearance revoked successfully!
-                </DialogTitle> : <div>
+                </DialogTitle> :
+                    <div>
                         <DialogContent >
-                            Are you sure to revoke <b>{content.Title}'s</b> clearance?
+                            Are you sure to revoke <b>{content.EmployeeName}'s</b> clearance?
                       </DialogContent>
                         <DialogActions>
-                            <Button  variant="contained" onClick={revokeResignation} color="primary" className="descLink">
+                            <Button variant="contained" onClick={() => revokeResignation(true)} color="primary" className="descLink">
                                 Yes
-                    </Button>
+                             </Button>
                             <Button variant="contained" onClick={cancelRevoke} >
                                 No
-                    </Button>
+                             </Button>
                         </DialogActions></div>}
             </Dialog>
-        </div>
+        </div >
     );
 };
 export default ConfirmationDialog;
