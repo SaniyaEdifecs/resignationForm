@@ -103,7 +103,7 @@ const Navigation = (props) => {
             switch (path) {
                 case strings.ResigntionDashboard:
                     return <ResignationList props={props} />;
-                case strings.RootUrl + strings.ItDashboard:
+                case strings.ItDashboard:
                     return <ITClearanceDashboard />;
                 case "https://edifecs.sharepoint.com/sites/PC/SitePages/Manager-Dashboard.aspx":
                     return <ManagerClearanceDashboard />;

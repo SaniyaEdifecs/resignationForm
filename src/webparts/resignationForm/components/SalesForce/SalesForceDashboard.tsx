@@ -84,7 +84,7 @@ const SalesForceDashboard = (props) => {
 
     const getClearanceList = () => {
         showLoader(true);
-        SharePointService.getListByTitle("SalesForceClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
+        SharePointService.getListByTitle("SalesForceClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").orderBy("Created", false).get().then((items: any) => {
             showLoader(false);
             if (items) {
                 setEmployeeDetails(items);

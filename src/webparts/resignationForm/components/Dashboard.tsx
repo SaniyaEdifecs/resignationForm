@@ -50,13 +50,13 @@ const Dashboard = (props) => {
         window.location.href = "?component=resignationForm";
     };
     return (
-        <div className="dashboardWrapper">
-            <Grid container spacing={3}>
+        <div className="dashboardWrapper" >
+            <Grid container spacing={3} >
                 {/* <Grid item xs={12}>
                     <MessageBar>Click on Initiate Clearance Form button to initiate Clearance process for an associate.</MessageBar>
                 </Grid> */}
                 {hideButton ? "" :
-                    <Grid item xs={12} className="rightAlign marginTop16" >
+                    <Grid item xs={12} className="marginTop16 centerAlign" justify="center">
                         <Button type="button" variant="contained" color="primary" onClick={handleClick}>Initiate Clearance Form</Button>
                     </Grid>}
             </Grid>

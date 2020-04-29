@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles, Snackbar } from '@material-ui/core';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
@@ -18,6 +18,7 @@ const ManagerClearance = (props) => {
     let currentUser: any = [];
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [showMsg, setShowMsg] = useState(false);
+    const [open, setOpen] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
@@ -75,7 +76,9 @@ const ManagerClearance = (props) => {
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("ManagersClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
+            setOpen(true);
             getEmployeeClearanceDetails(ID);
+            setOpen(true);
             // window.location.href = "?component=itClearanceDashboard";
         }, (error: any): void => {
             // console.log('Error while creating the item: ' + error);
@@ -194,10 +197,20 @@ const ManagerClearance = (props) => {
         fontSize: '13px',
         margin: '0',
     };
-
+    const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+            setOpen(false);
+      };
     return (
         <div>
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
+            <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success">
+                    Form Submitted Successfully!
+                    </Alert>
+            </Snackbar>
             <Typography variant="h5" component="h5">
                 {strings.ManagerClearance}
             </Typography>
@@ -224,7 +237,7 @@ const ManagerClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Handover Complete</td>
+                            <td>Handover Complete<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.HandoverComplete.value} disabled={readOnly} id="HandoverComplete" onBlur={handleOnBlur} onChange={handleOnChange} name="HandoverComplete" autoFocus>
@@ -239,7 +252,7 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Data Backup</td>
+                            <td>Data Backup<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.DataBackup.value} id="DataBackup" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="DataBackup"  >
@@ -254,7 +267,7 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Email Backup</td>
+                            <td>Email Backup<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.EmailBackup.value} id="EmailBackup" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="EmailBackup"  >
@@ -269,7 +282,7 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Notice Waiver(No. of days)</td>
+                            <td>Notice Waiver(No. of days)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.NoticeWaiver.value} id="NoticeWaiver" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="NoticeWaiver"  >
@@ -284,7 +297,7 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Access Removal(All Applications)</td>
+                            <td>Access Removal(All Applications)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.AccessRemoval.value} disabled={readOnly} id="AccessRemoval" onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemoval"  >
@@ -299,7 +312,7 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Email Re-routing</td>
+                            <td>Email Re-routing<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.EmailRe_x002d_routing.value} disabled={readOnly} id="EmailRe_x002d_routing" onBlur={handleOnBlur} onChange={handleOnChange} name="EmailRe_x002d_routing"  >
@@ -314,7 +327,7 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Others (specify)</td>
+                            <td>Others (specify)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Others_x0028_specify_x0029_.value} disabled={readOnly} id="Others_x0028_specify_x0029_" onBlur={handleOnBlur} onChange={handleOnChange} name="Others_x0028_specify_x0029_"  >
@@ -337,7 +350,7 @@ const ManagerClearance = (props) => {
 
                         {state.DuesPending.value === 'NotifyAssociate' ?
                             <div>
-                                <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Message To Associate" name="MessageToAssociate" disabled={readOnly} placeholder="Enter message here..." multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnChange} value={state.MessageToAssociate.value} />
+                                <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Message To Associate*" name="MessageToAssociate" disabled={readOnly} placeholder="Enter message here..." multiline margin="normal" variant="outlined" onChange={handleOnChange} onBlur={handleOnChange} value={state.MessageToAssociate.value} />
                                 {state.MessageToAssociate.error && <p style={errorStyle}>{state.MessageToAssociate.error}</p>}
                             </div>
                             : ''}

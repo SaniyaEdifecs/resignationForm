@@ -84,7 +84,7 @@ const OperationsAdminDashboard = (props) => {
 
     const getClearanceList = () => {
         showLoader(true);
-        SharePointService.getListByTitle("OperationsClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
+        SharePointService.getListByTitle("OperationsClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").orderBy("Created", false).get().then((items: any) => {
             showLoader(false);
             if (items) {
                 setEmployeeDetails(items);
@@ -131,7 +131,7 @@ const OperationsAdminDashboard = (props) => {
         <Paper className="root removeBoxShadow" >
             <div>
                 <Typography variant="h5" component="h3">
-                    Operations/Admin {strings.Dashboard}
+                    Operations {strings.Dashboard}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
                     <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>

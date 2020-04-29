@@ -99,7 +99,7 @@ const ResignationList = (props) => {
 
     const getResignationList = () => {
         showLoader(true);
-        SharePointService.getListByTitle("ResignationList").items.get().then((items: any) => {
+        SharePointService.getListByTitle("ResignationList").items.orderBy("Created", false).get().then((items: any) => {
             showLoader(false);
             if (items) {
                 setEmployeeLists(items);

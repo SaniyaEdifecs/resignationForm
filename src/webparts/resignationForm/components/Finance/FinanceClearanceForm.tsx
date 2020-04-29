@@ -222,7 +222,7 @@ const FinanceClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Loan/Imprest Balance</td>
+                            <td>Loan/Imprest Balance<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Loan_x002f_ImprestBalance.value} disabled={readOnly} id="Loan_x002f_ImprestBalance" onBlur={handleOnBlur} onChange={handleOnChange} name="Loan_x002f_ImprestBalance" autoFocus >
@@ -237,7 +237,7 @@ const FinanceClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Travel Advance/Expenses</td>
+                            <td>Travel Advance/Expenses<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.TravelAdvance_x002f_Expenses.value} disabled={readOnly} id="TravelAdvance_x002f_Expenses" onBlur={handleOnBlur} onChange={handleOnChange} name="TravelAdvance_x002f_Expenses"  >
@@ -252,7 +252,7 @@ const FinanceClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Telephone Reimbursement</td>
+                            <td>Telephone Reimbursement<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.TelephoneReimbursement.value} disabled={readOnly} id="TelephoneReimbursement" onBlur={handleOnBlur} onChange={handleOnChange} name="TelephoneReimbursement"  >
@@ -267,7 +267,7 @@ const FinanceClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Revoke all confedential Information(credit cards, debit card, bank account login credentials etc)</td>
+                            <td>Revoke all confedential Information(credit cards, debit card, bank account login credentials etc)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.ConfidentialInformation.value} disabled={readOnly} id="ConfidentialInformation" onBlur={handleOnBlur} onChange={handleOnChange} name="ConfidentialInformation"  >
@@ -282,7 +282,7 @@ const FinanceClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Talentoz Access</td>
+                            <td>Talentoz Access<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.TalentozAccess.value} id="TalentozAccess" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="TalentozAccess"  >
@@ -298,7 +298,7 @@ const FinanceClearance = (props) => {
                         </tr>
 
                         <tr>
-                            <td>Investement Proofs as required for income tax</td>
+                            <td>Investement Proofs as required for income tax<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.InvestmentProofs.value} disabled={readOnly} id="InvestmentProofs" onBlur={handleOnBlur} onChange={handleOnChange} name="InvestmentProofs"  >
@@ -313,7 +313,7 @@ const FinanceClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>1. House Rent Receipts</td>
+                            <td>1. House Rent Receipts<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.HouseRentReceipts.value} disabled={readOnly} id="HouseRentReceipts" onBlur={handleOnBlur} onChange={handleOnChange} name="HouseRentReceipts"  >
@@ -328,7 +328,7 @@ const FinanceClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>2. Investement u/s 80C</td>
+                            <td>2. Investement u/s 80C<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Investment80C.value} id="Investment80C" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Investment80C"  >
@@ -343,7 +343,7 @@ const FinanceClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>3. Housing Loan</td>
+                            <td>3. Housing Loan<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.HousingLoan.value} disabled={readOnly} id="HousingLoan" onBlur={handleOnBlur} onChange={handleOnChange} name="HousingLoan"  >

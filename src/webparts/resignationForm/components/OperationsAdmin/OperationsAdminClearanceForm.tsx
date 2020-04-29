@@ -223,9 +223,9 @@ const OperationsAdminClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Pedestal Keys</td>
+                            <td>Pedestal Keys<span>*</span></td>
                             <td>
-                                <FormControl>
+                                <FormControl required>
                                     <Select value={state.PedestalKeys.value} disabled={readOnly} id="PedestalKeys" onBlur={handleOnBlur} onChange={handleOnChange} name="PedestalKeys" autoFocus>
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
@@ -238,7 +238,7 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Car/Bikes Stickers</td>
+                            <td>Car/Bikes Stickers<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Stickers.value} disabled={readOnly} id="Stickers" onBlur={handleOnBlur} onChange={handleOnChange} name="Stickers"  >
@@ -253,7 +253,7 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Library Books</td>
+                            <td>Library Books<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.LibraryBooks.value} disabled={readOnly} id="LibraryBooks" onBlur={handleOnBlur} onChange={handleOnChange} name="LibraryBooks"  >
@@ -268,7 +268,7 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Sim Card</td>
+                            <td>Sim Card<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.SimCard.value} disabled={readOnly} id="SimCard" onBlur={handleOnBlur} onChange={handleOnChange} name="SimCard"  >
@@ -283,7 +283,7 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Visiting Cards</td>
+                            <td>Visiting Cards<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.VisitingCards.value} disabled={readOnly} id="VisitingCards" onBlur={handleOnBlur} onChange={handleOnChange} name="VisitingCards"  >
@@ -298,7 +298,7 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Kuoni & Concur Access</td>
+                            <td>Kuoni & Concur Access<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.KuoniConcurAccess.value} disabled={readOnly} id="KuoniConcurAccess" onBlur={handleOnBlur} onChange={handleOnChange} name="KuoniConcurAccess"  >
@@ -313,7 +313,7 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Biometric Access</td>
+                            <td>Biometric Access<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.BiometricAccess.value} disabled={readOnly} id="BiometricAccess" onBlur={handleOnBlur} onChange={handleOnChange} name="BiometricAccess"  >
@@ -328,7 +328,7 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Others(specify)</td>
+                            <td>Others(specify)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Others.value} disabled={readOnly} id="Others" onBlur={handleOnBlur} onChange={handleOnChange} name="Others"  >

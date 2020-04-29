@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Paper, makeStyles, CircularProgress } from '@material-ui/core';
-import { Typography, TextField, Button} from '@material-ui/core';
+import { Typography, TextField, Button } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import resignationUseForm from './ResignationUseForm';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
@@ -33,7 +33,7 @@ const ResignationDetail = ({ props }) => {
         stateSchema[formField].error = "";
         validationStateSchema[formField].required = true;
     });
-  
+
 
     const onSubmitForm = (value) => {
         showLoader(true);
@@ -43,7 +43,7 @@ const ResignationDetail = ({ props }) => {
         }
 
         payload = { ...payload, 'Status': status };
-        console.log("paylod",payload);
+        console.log("paylod", payload);
         SharePointService.getListByTitle("ResignationList").items.getById(ID).update(payload).then(items => {
             showLoader(false);
             getEmployeeDetail();
@@ -137,7 +137,7 @@ const ResignationDetail = ({ props }) => {
     return (
         <Paper className="root">
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
-            {employeeDetail['HrStatus'] != "Approved" && employeeDetail['FinanceStatus'] != "Approved" && employeeDetail['ItStatus'] != "Approved" && employeeDetail['ManagerStatus'] != "Approved" && employeeDetail['emplStatus'] != "Approved" && employeeDetail['Operations_x002f_AdminStatus'] != "Approved" && employeeDetail['SalesforceStatus'] != "Approved" ? 
+            {employeeDetail['HrStatus'] != "Approved" && employeeDetail['FinanceStatus'] != "Approved" && employeeDetail['ItStatus'] != "Approved" && employeeDetail['ManagerStatus'] != "Approved" && employeeDetail['emplStatus'] != "Approved" && employeeDetail['Operations_x002f_AdminStatus'] != "Approved" && employeeDetail['SalesforceStatus'] != "Approved" ?
                 <div className="formView">
                     <Typography variant="h5" component="h3">
                         Clearance Details
@@ -318,13 +318,24 @@ const ResignationDetail = ({ props }) => {
                                         <table cellPadding="0" cellSpacing="0" >
                                             <tbody>
                                                 <tr>
-                                                    <td colSpan={3}>Hardware</td>
+                                                    <td>Mailbox and important data back-up</td>
+                                                    <td>{itDetail['DataBackup']}</td>
+                                                    <td>{itDetail['DataBackupComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Access Removal (Email, User Account, All applications)</td>
+                                                    <td>{itDetail['AccessRemoval']}</td>
+                                                    <td>{itDetail['AccessRemovalComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colSpan={3}> <b>Hardware</b></td>
                                                 </tr>
                                                 <tr>
                                                     <td>Laptop/Destop/Dock Station</td>
                                                     <td>{itDetail && itDetail['Laptop_x002f_Desktop']} </td>
                                                     <td>{itDetail['DesktopComments']}</td>
                                                 </tr>
+
                                                 <tr>
                                                     <td>Others - Charger, Mouse, Headphones etc.</td>
                                                     <td>{itDetail['PeripheralDevices']} </td>
@@ -332,7 +343,7 @@ const ResignationDetail = ({ props }) => {
 
                                                 </tr>
                                                 <tr>
-                                                    <td colSpan={3}>Assigned cards</td>
+                                                    <td colSpan={3}><b>Assigned cards</b></td>
                                                 </tr>
                                                 <tr>
                                                     <td>Access Card</td>
@@ -530,7 +541,7 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['Gratuity']}</td>
                                                     <td>{hrClearance['GratuityComments']} </td>
                                                 </tr>
-                                              {/*   <tr>
+                                                {/*   <tr>
                                                     <td>Insurance Deductions</td>
                                                     <td>{hrClearance['Insurance']}</td>
                                                     <td>{hrClearance['InsuranceComments']} </td>

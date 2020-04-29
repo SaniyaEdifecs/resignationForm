@@ -4,24 +4,36 @@
   text-align: right;
   margin-bottom: 20px !important;
 }
+.centerAlign {
+  text-align: center;
+  margin-bottom: 20px !important;
+}
+.MuiFormHelperText-contained {
+  margin-left: 2px !important ;
+}
+.employeeCode{
+  .MuiFormControl-marginNormal{
+    margin-bottom: 0 !important;
+  }
+}
 .removeBoxShadow {
   box-shadow: none !important;
   h5 {
     margin-bottom: 5px;
   }
   tr {
-    &.MuiTableRow-root{
-      &:last-child{
-        td{
+    &.MuiTableRow-root {
+      &:last-child {
+        td {
           border: 1px solid rgba(224, 224, 224, 1);
         }
       }
-
     }
     &:hover {
       background: $hover-gray;
     }
-    td,th{
+    td,
+    th {
       &.MuiTableCell-root {
         border-bottom: 0;
         padding: 10px;
@@ -254,6 +266,11 @@ table {
     }
     tr {
       td {
+        &:first-child{
+         span{
+           color: red;
+         }
+        }
         &:nth-child(2) {
           > div {
             .MuiSelect-selectMenu {
@@ -493,10 +510,10 @@ select option {
     pointer-events: none;
   }
 }
-.MuiDialog-paperWidthSm{
+.MuiDialog-paperWidthSm {
   font-family: "Roboto", "Helvetica", "Arial", sans-serif;
   font-size: 20px;
-  .MuiDialogActions-root{
+  .MuiDialogActions-root {
     padding: 20px;
   }
 }
@@ -504,8 +521,7 @@ select option {
   min-width: 500px;
   background: #4caf50;
   color: #fff;
-  button[aria-label="close"]{
-    color:#fff
+  button[aria-label="close"] {
+    color: #fff;
   }
-
 }

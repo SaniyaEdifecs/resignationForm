@@ -213,7 +213,7 @@ const SalesForceClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>SFDC License Termination: Kiranpreet Kaur</td>
+                            <td>SFDC License Termination: Kiranpreet Kaur<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.LicenseTermination.value} disabled={readOnly} id="LicenseTermination" onBlur={handleOnBlur} onChange={handleOnChange} name="LicenseTermination" autoFocus>

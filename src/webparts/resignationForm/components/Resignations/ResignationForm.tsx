@@ -1,12 +1,11 @@
 import * as React from 'react';
 import resignationUseForm from './ResignationUseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, Breadcrumbs, Link, makeStyles, InputLabel, Typography, Collapse, IconButton } from '@material-ui/core';
+import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, Breadcrumbs, Link, makeStyles, InputLabel, Typography, Snackbar } from '@material-ui/core';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { sp, ItemAddResult } from '@pnp/sp';
 import Alert from '@material-ui/lab/Alert';
-import CloseIcon from '@material-ui/icons/Close';
 import { useEffect, useState, useRef } from 'react';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
@@ -18,7 +17,6 @@ const ResignationForm = (props) => {
     const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
     const [isdisable, setIsDisable] = useState(false);
     const [open, setOpen] = useState(false);
-    const scrollDiv = useRef(null);
     const [loader, showLoader] = useState(false);
     const useStyles = makeStyles(theme => ({
         link: {
@@ -79,12 +77,12 @@ const ResignationForm = (props) => {
     const handleDateChange = (event) => {
         setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: event, error: "" }) }));
     };
-   
+
     const handleEmployeeCode = (event) => {
         let regEx = /^[0-9]{4}$/;
         let employeeCode = event.target.value;
         if (employeeCode.length > 4) {
-            employeeCode = employeeCode.substring(0,4)
+            employeeCode = employeeCode.substring(0, 4)
             return false;
             // employeeCode = employeeCode.substring(1,5)
         }
@@ -205,11 +203,10 @@ const ResignationForm = (props) => {
     const addListItem = (elements) => {
         let ID = props.props;
         elements = { ...elements, EmployeeName: state.FirstName + " " + state.LastName, ManagerName: state.ManagerFirstName + " " + state.ManagerLastName };
-        
+
         if (ID) {
-            elements = { ...elements};
+            elements = { ...elements };
             SharePointService.getListByTitle("ResignationList").items.getById(ID).update(elements).then(response => {
-                window.scrollTo(0, 0);
                 setState(stateSchema);
                 setOpen(true);
                 setTimeout(() => { setOpen(false) }, 3000);
@@ -220,7 +217,7 @@ const ResignationForm = (props) => {
             SharePointService.getListByTitle("ResignationList").items.add(elements).then((response: ItemAddResult): void => {
                 let item = response.data;
                 if (item) {
-                    
+
                     SharePointService.getListByTitle("ItClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started" }).then((itResponse: ItemAddResult) => {
                     });
                     SharePointService.getListByTitle("ManagersClearance").items.add({ EmployeeNameId: item.ID, Status: "Not Started", ManagerEmail: elements.ManagerEmail }).then((mngResponse: ItemAddResult) => {
@@ -238,7 +235,6 @@ const ResignationForm = (props) => {
                     });
                     SharePointService.getListByTitle("Employee%20Details").items.add({ EmployeeNameId: item.ID, EmployeeCode: elements.EmployeeCode, FirstName: elements.FirstName, LastName: elements.LastName, LastWorkingDate: elements.LastWorkingDate, WorkEmail: elements.WorkEmail, Status: "Not Started" }).then((emplResponse: ItemAddResult) => {
                     });
-                    scrollToRef(scrollDiv);
                     showLoader(false);
                     setState(stateSchema);
                     setOpen(true);
@@ -256,32 +252,22 @@ const ResignationForm = (props) => {
         addListItem(value);
     }
 
-
-    const scrollToRef = (ref) => {
-        window.scrollTo(0, ref.current.offsetTop);
-        setTimeout(() => { setOpen(false); }, 3000);
-    };
     const classes = useStyles(0);
-
+    const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+            setOpen(false);
+      };
     return (
         <Container component="main" className="marginBottom16 root removeBoxShadow">
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
-            <div ref={scrollDiv}>
-                <Collapse in={open} >
-                    <Alert action={
-                        <IconButton
-                            aria-label="close"
-                            color="inherit"
-                            size="small"
-                            onClick={() => {
-                                setOpen(false);
-                            }}
-                        >
-                            <CloseIcon fontSize="inherit" />
-                        </IconButton>
-                    } severity="success">Form Submitted Successfully!</Alert>
-                </Collapse>
-            </div>
+                 <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+                    <Alert onClose={handleClose} severity="success">
+                    Form Submitted Successfully!
+                    </Alert>
+                </Snackbar>
+  
             <div className="">
                 <Typography variant="h5" component="h3">
                     Clearance Form
@@ -294,7 +280,7 @@ const ResignationForm = (props) => {
                 </Breadcrumbs>
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
+                        <Grid item xs={12} sm={6} className='employeeCode'>
                             <TextField variant="outlined" placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleEmployeeCode} onBlur={handleEmployeeCode} helperText="Please write code as written on pay slip" autoFocus />
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
                         </Grid>
@@ -359,7 +345,7 @@ const ResignationForm = (props) => {
                     </Grid>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
-                            <FormControl variant="outlined" className="fluid MuiFormControl-marginNormal">
+                            <FormControl variant="outlined" className="fluid MuiFormControl-marginNormal" required>
                                 <InputLabel htmlFor="reason">Reason for Resignation</InputLabel>
                                 <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} id="reason" onChange={handleOnChange} onBlur={handleOnChange} disabled={isdisable} name="ResignationReason"  >
                                     {resignationReasonList.map((list, index) => <MenuItem key={index} value={list}>{list}</MenuItem>)}

@@ -228,7 +228,7 @@ const HrClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Resignation email & acceptance</td>
+                            <td>Resignation email & acceptance<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Resignationemailacceptance.value} disabled={readOnly} id="Resignationemailacceptance" onBlur={handleOnBlur} onChange={handleOnChange} name="Resignationemailacceptance" autoFocus>
@@ -243,7 +243,7 @@ const HrClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Exit Interview</td>
+                            <td>Exit Interview<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.ExitInterview.value} disabled={readOnly} id="ExitInterview" onBlur={handleOnBlur} onChange={handleOnChange} name="ExitInterview"  >
@@ -258,7 +258,7 @@ const HrClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Relocation/Referral Bonus</td>
+                            <td>Relocation/Referral Bonus<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Relocation_x002f_ReferralBonus.value} disabled={readOnly} id="Relocation_x002f_ReferralBonus" onBlur={handleOnBlur} onChange={handleOnChange} name="Relocation_x002f_ReferralBonus"  >
@@ -273,7 +273,7 @@ const HrClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Sign-on Bonus</td>
+                            <td>Sign-on Bonus<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Sign_x002d_onBonus.value} id="Sign_x002d_onBonus" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Sign_x002d_onBonus"  >
@@ -289,7 +289,7 @@ const HrClearance = (props) => {
                         </tr>
 
                         <tr>
-                            <td>EL Balance</td>
+                            <td>EL Balance<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.ELBalance.value} id="ELBalance" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="ELBalance"  >
@@ -426,7 +426,7 @@ const HrClearance = (props) => {
                         </tr>
                         */}
                         <tr>
-                            <td>Terminate On Hr Systems</td>
+                            <td>Terminate On Hr Systems<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.TerminateOnHRSystems.value} disabled={readOnly} id="TerminateOnHRSystems" onBlur={handleOnBlur} onChange={handleOnChange} name="TerminateOnHRSystems"  >
@@ -441,7 +441,7 @@ const HrClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Shortfall of Notice (Waiver if any)</td>
+                            <td>Shortfall of Notice (Waiver if any)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Waiver.value} disabled={readOnly} id="Waiver" onBlur={handleOnBlur} onChange={handleOnChange} name="Waiver"  >
@@ -457,7 +457,7 @@ const HrClearance = (props) => {
                         </tr>
 
                         <tr>
-                            <td>Gratuity</td>
+                            <td>Gratuity<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Gratuity.value} id="Gratuity" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Gratuity"  >
@@ -473,7 +473,7 @@ const HrClearance = (props) => {
                         </tr>
 
                         <tr>
-                            <td>Others (Specify)</td>
+                            <td>Others (Specify)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Others.value} id="Others" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="Others"  >

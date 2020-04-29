@@ -85,7 +85,7 @@ const ManagerClearanceDashboard = (props) => {
 
     const getClearanceList = () => {
         showLoader(true);
-        SharePointService.getListByTitle("ManagersClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").get().then((items: any) => {
+        SharePointService.getListByTitle("ManagersClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/Id', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").orderBy("Created", false).get().then((items: any) => {
             showLoader(false);
             if (items) {
                 setEmployeeDetails(items);

@@ -243,7 +243,7 @@ const ItClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Mailbox and important data back-up</td>
+                            <td>Mailbox and important data back-up<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.DataBackup.value} disabled={readOnly} id="DataBackup" onBlur={handleOnBlur} onChange={handleOnChange} name="DataBackup" autoFocus>
@@ -258,7 +258,7 @@ const ItClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Access Removal (Email, User Account, All applications)</td>
+                            <td>Access Removal (Email, User Account, All applications)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.AccessRemoval.value} id="DataBackup" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemoval"  >
@@ -273,7 +273,7 @@ const ItClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Phone & SIM/Data card</td>
+                            <td>Phone & SIM/Data card<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.DataCard.value} id="DataCard" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="DataCard"  >
@@ -288,7 +288,7 @@ const ItClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Laptop/Desktop/Dock Station</td>
+                            <td>Laptop/Desktop/Dock Station<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Laptop_x002f_Desktop.value} disabled={readOnly} id="Laptop_x002f_Desktop" onBlur={handleOnBlur} onChange={handleOnChange} name="Laptop_x002f_Desktop"  >
@@ -303,7 +303,7 @@ const ItClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Access Card</td>
+                            <td>Access Card<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.AccessCard.value} disabled={readOnly} id="AccessCard" onBlur={handleOnBlur} onChange={handleOnChange} name="AccessCard"  >
@@ -318,7 +318,7 @@ const ItClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>ID Card</td>
+                            <td>ID Card<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.IDCard.value} disabled={readOnly} id="IDCard" onBlur={handleOnBlur} onChange={handleOnChange} name="IDCard"  >
@@ -333,7 +333,7 @@ const ItClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Others- Chargers, mouse, headphones etc</td>
+                            <td>Others- Chargers, mouse, headphones etc<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.PeripheralDevices.value} disabled={readOnly} required id="PeripheralDevices" onBlur={handleOnBlur} onChange={handleOnChange} name="PeripheralDevices"  >
