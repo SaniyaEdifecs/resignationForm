@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles,Snackbar } from '@material-ui/core';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
 import Link from '@material-ui/core/Link';
+import Backdrop from '@material-ui/core/Backdrop';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
@@ -16,7 +17,7 @@ const HrClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
-
+    const [open, setOpen] = useState(false);
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
@@ -55,6 +56,7 @@ const HrClearance = (props) => {
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("HrClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
+            setOpen(true);
             getEmployeeClearanceDetails(ID);
             // window.location.href = "?component=itClearanceDashboard";
         }, (error: any): void => {
@@ -196,12 +198,33 @@ const HrClearance = (props) => {
                 marginTop: theme.spacing(2),
             },
         },
+        backdrop: {
+            zIndex: theme.zIndex.drawer + 1,
+            color: '#fff',
+        },
     }));
     const classes = useStyles(0);
+    const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
+    // Backdrop
+    const handleBackdropClose = () => {
+        showLoader(false);
+    };
 
     return (
         <div>
-            {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
+            <Backdrop className={classes.backdrop} open={loader} onClick={handleBackdropClose}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
+            <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success">
+                    Form Submitted Successfully!
+                    </Alert>
+            </Snackbar>
             <Typography variant="h5" component="h5">
                 {strings.HrClearance}
             </Typography>

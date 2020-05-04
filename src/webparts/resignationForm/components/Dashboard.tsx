@@ -1,12 +1,13 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import * as strings from 'ResignationFormWebPartStrings';
-import { Grid, Button } from '@material-ui/core';
+import { Grid, Button, Link } from '@material-ui/core';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import '../components/CommonStyleSheet.scss';
 import ResignationList from "./Resignations/ResignationList";
 import { sp } from "@pnp/sp";
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import SharePointService from "./SharePointServices";
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -26,12 +27,12 @@ const Dashboard = (props) => {
             currentUser = response;
             console.log("==", currentUser);
             if (currentUser) {
-                const url = strings.RootUrl +"/_api/web/sitegroups/getByName('Resignation Group - Owners')/Users?$filter=Id eq " + currentUser.Id;
+                const url = strings.RootUrl + "/_api/web/sitegroups/getByName('Resignation Group - Owners')/Users?$filter=Id eq " + currentUser.Id;
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
-                        console.log("permissions reponse==", permissionResponse);
+                        // console.log("permissions reponse==", permissionResponse);
                         let permissionLevel = permissionResponse;
                         if (permissionLevel.value.length > 0) {
                             setHideButton(false);
@@ -62,42 +63,45 @@ const Dashboard = (props) => {
             </Grid>
             <Grid container spacing={3} className="marginTop16 ">
                 <Grid item xs={6} sm={4} justify="center" className="marginTop16">
-                    <a href="https://edifecs.sharepoint.com/sites/PC/SitePages/Clearance-Dashboard.aspx" target="_blank">
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ResigntionDashboard, "")}>
                         <i className='ms-Icon ms-Icon--BulletedList' aria-hidden="true"></i> <br /> Clearance {strings.Dashboard}
-                    </a>
+                    </Link>
+
                 </Grid>
                 <Grid item xs={6} sm={4} justify="center" className="marginTop16">
-                    <a href="https://edifecs.sharepoint.com/sites/PC/SitePages/HR-Dashboard.aspx" target="_blank">
-                        <i className="ms-Icon ms-Icon--People" aria-hidden="true"></i> <br /> HR {strings.Dashboard}
-                    </a>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HrDashboard, "")}>
+                        <i className='ms-Icon ms-Icon--People' aria-hidden="true"></i> <br />  HR {strings.Dashboard}
+                    </Link>
+
                 </Grid>
                 <Grid item xs={6} sm={4} justify="center" className="marginTop16">
-                    <a href="https://edifecs.sharepoint.com/sites/PC/SitePages/IT-Dashboard.aspx">
-                        <i className="ms-Icon ms-Icon--LaptopSelected" aria-hidden="true"></i> <br /> IT {strings.Dashboard}
-                    </a>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ItDashboard, "")}>
+                        <i className='ms-Icon ms-Icon--LaptopSelected' aria-hidden="true"></i> <br />  IT {strings.Dashboard}
+                    </Link>
                 </Grid>
                 <Grid item xs={6} sm={4} className="marginTop16">
-                    <a href="https://edifecs.sharepoint.com/sites/PC/SitePages/Operations-Dashboard.aspx" target="_blank">
-                        <i className="ms-Icon ms-Icon--Settings" aria-hidden="true"></i> <br /> Operations {strings.Dashboard}
-                    </a>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.OpsDashboard, "")}>
+                        <i className='ms-Icon ms-Icon--Settings' aria-hidden="true"></i> <br />  Operations {strings.Dashboard}
+                    </Link>
                 </Grid>
                 <Grid item xs={6} sm={4} className="marginTop16">
-                    <a href="https://edifecs.sharepoint.com/sites/PC/SitePages/Finance-Dashboard.aspx" target="_blank">
-                        <i className="ms-Icon ms-Icon--Money" aria-hidden="true"></i> <br /> Finance {strings.Dashboard}
-                    </a>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.FinanceDashboard, "")}>
+                        <i className='ms-Icon ms-Icon--Money' aria-hidden="true"></i> <br />  Finance {strings.Dashboard}
+                    </Link>
                 </Grid>
                 <Grid item xs={6} sm={4} className="marginTop16">
-                    <a href="https://edifecs.sharepoint.com/sites/PC/SitePages/SalesForce-Dashboard.aspx" target="_blank">
-                        <i className="ms-Icon ms-Icon--AzureAPIManagement" aria-hidden="true"></i> <br /> SalesForce {strings.Dashboard}
-                    </a>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.SalesForceDashboard, "")}>
+                        <i className='ms-Icon ms-Icon--AzureAPIManagement' aria-hidden="true"></i> <br />  SalesForce {strings.Dashboard}
+                    </Link>
                 </Grid>
                 <Grid item xs={6} sm={4} className="marginTop16">
-                    <a href="https://edifecs.sharepoint.com/sites/PC/SitePages/Manager-Dashboard.aspx" >
-                        <i className="ms-Icon ms-Icon--PartyLeader" aria-hidden="true"></i> <br />  Manager {strings.Dashboard}
-                    </a>
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ManagerDashboard, "")}>
+                        <i className='ms-Icon ms-Icon--AzureAPIManagement' aria-hidden="true"></i> <br />  Manager {strings.Dashboard}
+                    </Link>
+
                 </Grid>
-            </Grid>
-        </div>
+            </Grid >
+        </div >
     );
 };
 

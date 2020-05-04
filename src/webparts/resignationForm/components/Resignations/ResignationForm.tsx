@@ -1,7 +1,7 @@
 import * as React from 'react';
 import resignationUseForm from './ResignationUseForm';
 import { PeoplePicker, PrincipalType } from "@pnp/spfx-controls-react/lib/PeoplePicker";
-import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, Breadcrumbs, Link, makeStyles, InputLabel, Typography, Snackbar } from '@material-ui/core';
+import { Button, TextField, Grid, Container, Select, MenuItem, FormControl, Breadcrumbs, Link, makeStyles, InputLabel, Typography, Snackbar, Backdrop } from '@material-ui/core';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import { sp, ItemAddResult } from '@pnp/sp';
@@ -26,6 +26,10 @@ const ResignationForm = (props) => {
             marginRight: theme.spacing(0.5),
             width: 20,
             height: 20,
+        },
+        backdrop: {
+            zIndex: theme.zIndex.drawer + 1,
+            color: '#fff',
         },
     }));
     const formFields = [
@@ -251,23 +255,29 @@ const ResignationForm = (props) => {
         }
         addListItem(value);
     }
-
-    const classes = useStyles(0);
     const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
         if (reason === 'clickaway') {
-          return;
+            return;
         }
-            setOpen(false);
-      };
+        setOpen(false);
+    };
+    // Backdrop
+    const handleBackdropClose = () => {
+        showLoader(false);
+    };
+    const classes = useStyles(0);
     return (
         <Container component="main" className="marginBottom16 root removeBoxShadow">
-            {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
-                 <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
-                    <Alert onClose={handleClose} severity="success">
+            <Backdrop className={classes.backdrop} open={loader} onClick={handleBackdropClose}>
+                <CircularProgress color="inherit" />
+            </Backdrop>
+            <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success">
                     Form Submitted Successfully!
                     </Alert>
-                </Snackbar>
-  
+            </Snackbar>
+
+
             <div className="">
                 <Typography variant="h5" component="h3">
                     Clearance Form

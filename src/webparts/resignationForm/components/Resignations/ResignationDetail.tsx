@@ -59,10 +59,12 @@ const ResignationDetail = ({ props }) => {
 
     const getEmployeeDetail = () => {
         SharePointService.getListByTitle('ResignationList').items.getById(ID).get().then((response: any) => {
-            setEmployeeDetail(response);
-            console.log('response', response);
 
+            if (response) {
+                setEmployeeDetail(response);
+            }
             if (response['Status'] === "Approved") {
+
                 setReadOnly(true);
             }
         }, (error) => {
@@ -133,100 +135,13 @@ const ResignationDetail = ({ props }) => {
         },
     }));
     const classes = useStyles(0);
-
+    console.log('status', employeeDetail['HrStatus']);
     return (
         <Paper className="root">
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
-            {employeeDetail['HrStatus'] != "Approved" && employeeDetail['FinanceStatus'] != "Approved" && employeeDetail['ItStatus'] != "Approved" && employeeDetail['ManagerStatus'] != "Approved" && employeeDetail['emplStatus'] != "Approved" && employeeDetail['Operations_x002f_AdminStatus'] != "Approved" && employeeDetail['SalesforceStatus'] != "Approved" ?
-                <div className="formView">
-                    <Typography variant="h5" component="h3">
-                        Clearance Details
-                </Typography>
-                    <Breadcrumbs separator="›" aria-label="breadcrumb">
-                        <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
-                            <HomeIcon className={classes.icon} /> {strings.Home}
-                        </Link>
-                        <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ResigntionDashboard, "")}>
-                            Clearance Dashboard
-                    </Link>
-                        <Typography color="textPrimary">Clearance Details</Typography>
-                    </Breadcrumbs>
-                    <div className="clearanceTable">
-                        {employeeDetail ? <table cellPadding="0" cellSpacing="0">
-                            <tbody>
-                                <tr>
-                                    <th colSpan={2}><h3>Employee Details</h3></th>
-                                </tr>
-                                <tr>
-                                    <th>Employee Code</th>
-                                    <td>{employeeDetail['EmployeeCode']}</td>
-                                </tr>
-                                <tr>
-                                    <th>Employee Name</th>
-                                    <td>{employeeDetail['EmployeeName']}</td>
-                                </tr>
-                                <tr>
-                                    <th>Department</th>
-                                    <td>{employeeDetail['Department']}</td>
-                                </tr>
-                                <tr>
-                                    <th>Title</th>
-                                    <td>{employeeDetail['JobTitle']}</td>
-                                </tr>
-                                <tr>
-                                    <th>Last Working Date</th>
-                                    <td><Moment format="DD/MM/YYYY">{employeeDetail['LastWorkingDate']}</Moment></td>
-                                </tr>
-                                <tr>
-                                    <th colSpan={2}><h3>Clearance Status</h3></th>
-                                </tr>
-                                <tr>
-                                    <td>Manager Clearance</td>
-                                    {managerClearance ? <td>
-                                        {managerClearance && managerClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => SharePointService.redirectTo('managerClearance', managerClearance['ID'])}>{managerClearance['Status']}</Link> : "Approved"}
-                                    </td> : <td>No Access</td>}
-                                </tr>
-                                <tr>
-                                    <td>IT Clearance</td>
-                                    {itDetail ? <td>
-                                        {itDetail && itDetail['Status'] != "Approved" ?
-                                            <Link onClick={() => SharePointService.redirectTo('itClearance', itDetail['ID'])}>{itDetail['Status']}</Link> : "Approved"}
-                                    </td> : <td>No Access</td>}
-                                </tr>
-                                <tr>
-                                    <td>SalesForce Clearance</td>
-                                    {salesForceClearance ? <td>
-                                        {salesForceClearance && salesForceClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => SharePointService.redirectTo('salesForceClearance', salesForceClearance['ID'])}>{salesForceClearance['Status']}</Link> : "Approved"}
-                                    </td> : <td>No Access</td>}
-                                </tr>
-                                <tr>
-                                    <td>Finance Clearance</td>
-                                    {financeClearance ? <td>
-                                        {financeClearance && financeClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => SharePointService.redirectTo('financeClearance', financeClearance['ID'])}>{financeClearance['Status']}</Link> : "Approved"}
-                                    </td> : <td>No Access</td>}
-                                </tr>
-                                <tr>
-                                    <td>Operations/Admin Clearance</td>
-                                    {operationsClearance ? <td>
-                                        {operationsClearance && operationsClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => SharePointService.redirectTo('operationsClearance', operationsClearance['ID'])}>{operationsClearance['Status']}</Link> : "Approved"}
-                                    </td> : <td>No Access</td>}
-                                </tr>
-                                <tr>
-                                    <td>HR Clearance</td>
-                                    {hrClearance ? <td>
-                                        {hrClearance && hrClearance['Status'] != "Approved" ?
-                                            <Link onClick={() => SharePointService.redirectTo('hrClearance', hrClearance['ID'])}>{hrClearance['Status']}</Link> : "Approved"}
-                                    </td> : <td>No Access</td>}
-                                </tr>
-                            </tbody>
-                        </table> : null}
-                    </div>
-                </div>
-                : <div className="formView clearanceReviewForm">
+            {(employeeDetail['HrStatus'] === "Approved") && (employeeDetail['FinanceStatus'] === "Approved") && (employeeDetail['ItStatus'] === "Approved") && (employeeDetail['ManagerStatus'] === "Approved") && (employeeDetail['emplStatus'] === "Approved") && (employeeDetail['Operations_x002f_AdminStatus'] === "Approved") && (employeeDetail['SalesforceStatus'] === "Approved") ?
+
+                <div className="formView clearanceReviewForm">
                     <Typography variant="h5" component="h3">
                         Clearance Review
                     </Typography>
@@ -580,6 +495,93 @@ const ResignationDetail = ({ props }) => {
                                 </div>
                                 <Button type="submit" className="marginTop16" variant="contained" color="primary" disabled={disable}>Submit</Button>
                             </form>}
+                    </div>
+                </div> : <div className="formView">
+                    <Typography variant="h5" component="h3">
+                        Clearance Details
+                     </Typography>
+                    <Breadcrumbs separator="›" aria-label="breadcrumb">
+                        <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
+                            <HomeIcon className={classes.icon} /> {strings.Home}
+                        </Link>
+                        <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ResigntionDashboard, "")}>
+                            Clearance Dashboard
+                        </Link>
+                        <Typography color="textPrimary">Clearance Details</Typography>
+                    </Breadcrumbs>
+                    <div className="clearanceTable">
+                        {employeeDetail ? <table cellPadding="0" cellSpacing="0">
+                            <tbody>
+                                <tr>
+                                    <th colSpan={2}><h3>Employee Details</h3></th>
+                                </tr>
+                                <tr>
+                                    <th>Employee Code</th>
+                                    <td>{employeeDetail['EmployeeCode']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Employee Name</th>
+                                    <td>{employeeDetail['EmployeeName']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Department</th>
+                                    <td>{employeeDetail['Department']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Title</th>
+                                    <td>{employeeDetail['JobTitle']}</td>
+                                </tr>
+                                <tr>
+                                    <th>Last Working Date</th>
+                                    <td><Moment format="DD/MM/YYYY">{employeeDetail['LastWorkingDate']}</Moment></td>
+                                </tr>
+                                <tr>
+                                    <th colSpan={2}><h3>Clearance Status</h3></th>
+                                </tr>
+                                <tr>
+                                    <td>Manager Clearance</td>
+                                    {managerClearance ? <td>
+                                        {managerClearance && managerClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => SharePointService.redirectTo('managerClearance', managerClearance['ID'])}>{managerClearance['Status']}</Link> : "Approved"}
+                                    </td> : <td>No Access</td>}
+                                </tr>
+                                <tr>
+                                    <td>IT Clearance</td>
+                                    {itDetail ? <td>
+                                        {itDetail && itDetail['Status'] != "Approved" ?
+                                            <Link onClick={() => SharePointService.redirectTo('itClearance', itDetail['ID'])}>{itDetail['Status']}</Link> : "Approved"}
+                                    </td> : <td>No Access</td>}
+                                </tr>
+                                <tr>
+                                    <td>SalesForce Clearance</td>
+                                    {salesForceClearance ? <td>
+                                        {salesForceClearance && salesForceClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => SharePointService.redirectTo('salesForceClearance', salesForceClearance['ID'])}>{salesForceClearance['Status']}</Link> : "Approved"}
+                                    </td> : <td>No Access</td>}
+                                </tr>
+                                <tr>
+                                    <td>Finance Clearance</td>
+                                    {financeClearance ? <td>
+                                        {financeClearance && financeClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => SharePointService.redirectTo('financeClearance', financeClearance['ID'])}>{financeClearance['Status']}</Link> : "Approved"}
+                                    </td> : <td>No Access</td>}
+                                </tr>
+                                <tr>
+                                    <td>Operations/Admin Clearance</td>
+                                    {operationsClearance ? <td>
+                                        {operationsClearance && operationsClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => SharePointService.redirectTo('operationsClearance', operationsClearance['ID'])}>{operationsClearance['Status']}</Link> : "Approved"}
+                                    </td> : <td>No Access</td>}
+                                </tr>
+                                <tr>
+                                    <td>HR Clearance</td>
+                                    {hrClearance ? <td>
+                                        {hrClearance && hrClearance['Status'] != "Approved" ?
+                                            <Link onClick={() => SharePointService.redirectTo('hrClearance', hrClearance['ID'])}>{hrClearance['Status']}</Link> : "Approved"}
+                                    </td> : <td>No Access</td>}
+                                </tr>
+                            </tbody>
+                        </table> : null}
                     </div>
                 </div>
             }

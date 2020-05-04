@@ -99,7 +99,6 @@ const Navigation = (props) => {
             }
         }
         else {
-            console.log('here path');
             switch (path) {
                 case strings.ResigntionDashboard:
                     return <ResignationList props={props} />;

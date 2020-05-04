@@ -498,7 +498,10 @@ select option {
 .MuiRadio-colorSecondary.Mui-checked {
   color: $theme-color !important;
 }
-
+.MuiLink-root {
+  cursor: pointer;
+  text-decoration: none !important;
+}
 .link,
 .descLink {
   color: $theme-color;
@@ -524,4 +527,20 @@ select option {
   button[aria-label="close"] {
     color: #fff;
   }
+}
+
+.MuiAlert-standardSuccess {
+  color: #fff !important;
+  font-weight: 500;
+  background-color: #4caf50 !important;
+  .MuiAlert-icon {
+      color: #fff !important;
+  }
+}
+.MuiSnackbar-anchorOriginBottomCenter {
+  left: 50% !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  transform: translate(-50%, -50%) !important;
+  top: 50% !important;
 }
