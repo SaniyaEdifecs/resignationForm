@@ -38,6 +38,7 @@ const ResignationForm = (props) => {
         "LastName",
         "WorkEmail",
         "LastWorkingDate",
+        "ResignationDate",
         "ResignationReason",
         "OtherReason",
         "Department",
@@ -53,7 +54,7 @@ const ResignationForm = (props) => {
     formFields.forEach(formField => {
         stateSchema[formField] = {};
         validationStateSchema[formField] = {};
-        if (formField === "LastWorkingDate") {
+        if (formField === "LastWorkingDate" || formField === "ResignationDate" ) {
             stateSchema[formField].value = new Date();
         } else {
             stateSchema[formField].value = "";
@@ -338,13 +339,23 @@ const ResignationForm = (props) => {
 
                         </Grid>
                     </Grid>
-                    <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail" />
-                    {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
                     <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                            <TextField disabled={isdisable} variant="outlined" margin="normal" required fullWidth label="Manager Email" value={state.ManagerEmail.value} onChange={handleOnChange} onBlur={handleOnBlur} name="ManagerEmail" />
+                            {state.ManagerEmail.error && <p style={errorStyle}>{state.ManagerEmail.error}</p>}
+                        </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Work Email" disabled={isdisable}
                                 value={state.WorkEmail.value} name="WorkEmail" autoComplete="WorkEmail" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.WorkEmail.error && <p style={errorStyle}>{state.WorkEmail.error}</p>}
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6}>
+                        <MuiPickersUtilsProvider utils={DateFnsUtils} >
+                                <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy"
+                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
+                            </MuiPickersUtilsProvider>
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <MuiPickersUtilsProvider utils={DateFnsUtils} >

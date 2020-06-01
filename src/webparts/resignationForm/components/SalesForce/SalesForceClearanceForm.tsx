@@ -270,6 +270,7 @@ const SalesForceClearance = (props) => {
                             </div>
                             : ''}
                     </RadioGroup>
+                    {state.DuesPending.error ? <p style={errorStyle}>{state.DuesPending.error}</p> : ''}
                 </div>
                 {buttonVisibility ? <div>
                     {!disable || state.DuesPending.value === 'NotifyAssociate' ?

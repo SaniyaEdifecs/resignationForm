@@ -23,8 +23,10 @@ const OperationsAdminClearance = (props) => {
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
+    const options1 = ['Received', 'Not Received','NA'];
+    const options2 = ['Activated', 'Deactivated'];
     const formFields = [
-        "BiometricAccess", "BiometricAccessComments", "KuoniConcurAccess", "KuoniConcurAccessComments", "LibraryBooks", "LibraryBooksComments", "Others", "OthersComments", "PedestalKeys", "PedestalKeysComments", "SimCard", "SimCardComments", "StickerComments", "Stickers", "VisitingCards", "VisitingCardsComments", "MessageToAssociate", "AdditionalInformation", "DuesPending"
+        "BiometricAccess", "BiometricAccessComments", "KuoniConcurAccess", "KuoniConcurAccessComments", "Others", "OthersComments", "PedestalKeys", "PedestalKeysComments", "SimCard", "SimCardComments", "StickerComments", "Stickers", "VisitingCards", "VisitingCardsComments", "MessageToAssociate", "AdditionalInformation", "DuesPending","StationaryClearanceComments","StationaryClearance"
     ];
 
     var stateSchema = {};
@@ -90,6 +92,8 @@ const OperationsAdminClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         SharePointService.getListByTitle("OperationsClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
+            console.log(detail);
+            
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
@@ -251,7 +255,7 @@ const OperationsAdminClearance = (props) => {
                             <td>
                                 <FormControl required>
                                     <Select value={state.PedestalKeys.value} disabled={readOnly} id="PedestalKeys" onBlur={handleOnBlur} onChange={handleOnChange} name="PedestalKeys" autoFocus>
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                        {options1.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.PedestalKeys.error && <p style={errorStyle}>{state.PedestalKeys.error}</p>}
                                 </FormControl>
@@ -266,7 +270,7 @@ const OperationsAdminClearance = (props) => {
                             <td>
                                 <FormControl>
                                     <Select value={state.Stickers.value} disabled={readOnly} id="Stickers" onBlur={handleOnBlur} onChange={handleOnChange} name="Stickers"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                        {options1.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.Stickers.error && <p style={errorStyle}>{state.Stickers.error}</p>}
                                 </FormControl>
@@ -276,7 +280,7 @@ const OperationsAdminClearance = (props) => {
                                 {state.StickerComments.error && <p style={errorStyle}>{state.StickerComments.error}</p>}
                             </td>
                         </tr>
-                        <tr>
+                        {/* <tr>
                             <td>Library Books<span>*</span></td>
                             <td>
                                 <FormControl>
@@ -290,13 +294,28 @@ const OperationsAdminClearance = (props) => {
                                 <TextField margin="normal" disabled={readOnly} onChange={handleOnChange} onBlur={handleOnBlur} required name="LibraryBooksComments" value={state.LibraryBooksComments.value} />
                                 {state.LibraryBooksComments.error && <p style={errorStyle}>{state.LibraryBooksComments.error}</p>}
                             </td>
+                        </tr> */}
+                         <tr>
+                            <td>Stationary Clearance<span>*</span></td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.StationaryClearance.value} disabled={readOnly} id="StationaryClearance" onBlur={handleOnBlur} onChange={handleOnChange} name="StationaryClearance"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.StationaryClearance.error && <p style={errorStyle}>{state.StationaryClearance.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" disabled={readOnly} onChange={handleOnChange} onBlur={handleOnBlur} required name="StationaryClearanceComments" value={state.StationaryClearanceComments.value} />
+                                {state.StationaryClearanceComments.error && <p style={errorStyle}>{state.StationaryClearanceComments.error}</p>}
+                            </td>
                         </tr>
                         <tr>
-                            <td>Sim Card<span>*</span></td>
+                            <td>SIM Card/ Dongle/Mobile<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.SimCard.value} disabled={readOnly} id="SimCard" onBlur={handleOnBlur} onChange={handleOnChange} name="SimCard"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                        {options1.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.SimCard.error && <p style={errorStyle}>{state.SimCard.error}</p>}
                                 </FormControl>
@@ -322,11 +341,11 @@ const OperationsAdminClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Kuoni & Concur Access<span>*</span></td>
+                            <td>Travel Portal Access<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.KuoniConcurAccess.value} disabled={readOnly} id="KuoniConcurAccess" onBlur={handleOnBlur} onChange={handleOnChange} name="KuoniConcurAccess"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                        {options2.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.KuoniConcurAccess.error && <p style={errorStyle}>{state.KuoniConcurAccess.error}</p>}
                                 </FormControl>
@@ -341,7 +360,7 @@ const OperationsAdminClearance = (props) => {
                             <td>
                                 <FormControl>
                                     <Select value={state.BiometricAccess.value} disabled={readOnly} id="BiometricAccess" onBlur={handleOnBlur} onChange={handleOnChange} name="BiometricAccess"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                        {options2.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.BiometricAccess.error && <p style={errorStyle}>{state.BiometricAccess.error}</p>}
                                 </FormControl>
@@ -386,6 +405,7 @@ const OperationsAdminClearance = (props) => {
                             </div>
                             : ''}
                     </RadioGroup>
+                    {state.DuesPending.error ? <p style={errorStyle}>{state.DuesPending.error}</p> : ''}
                 </div>
                 {buttonVisibility ? <div>
                     {!disable || state.DuesPending.value === 'NotifyAssociate' ?

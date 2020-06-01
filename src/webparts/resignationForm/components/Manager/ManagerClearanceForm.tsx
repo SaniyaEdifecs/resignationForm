@@ -366,7 +366,6 @@ const ManagerClearance = (props) => {
                             </div>
                             : ''}
                         <FormControlLabel value="GrantClearance" control={<Radio disabled={readOnly} />} label="Grant Clearance" />
-
                         {state.DuesPending.value === 'GrantClearance' ?
                             <div>
                                 <TextField id="outlined-textarea" className="MuiFormControl-root MuiTextField-root MuiFormControl-marginNormal MuiFormControl-fullWidth" label="Additional Information" name="AdditionalInformation" disabled={readOnly} placeholder="Any additional information" multiline margin="normal" variant="outlined" value={state.AdditionalInformation.value} onChange={handleOnChange} onBlur={handleOnChange}
@@ -375,6 +374,7 @@ const ManagerClearance = (props) => {
                             </div>
                             : ''}
                     </RadioGroup>
+                    {state.DuesPending.error ? <p style={errorStyle}>{state.DuesPending.error}</p> : ''}
                 </div>
                 {buttonVisibility ? <div>
                     {!disable || state.DuesPending.value === 'NotifyAssociate' ?

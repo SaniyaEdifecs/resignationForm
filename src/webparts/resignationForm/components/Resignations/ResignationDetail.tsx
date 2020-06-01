@@ -318,12 +318,12 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{operationsClearance['StickerComments']} </td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Library Books</td>
-                                                    <td>{operationsClearance['LibraryBooks']}</td>
-                                                    <td>{operationsClearance['LibraryBooksComments']} </td>
+                                                    <td>Stationary Clearance</td>
+                                                    <td>{operationsClearance['StationaryClearance']}</td>
+                                                    <td>{operationsClearance['StationaryClearanceComments']} </td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Sim Card</td>
+                                                    <td>SIM Card/ Dongle/Mobile</td>
                                                     <td>{operationsClearance['SimCard']}</td>
                                                     <td>{operationsClearance['SimCardComments']} </td>
                                                 </tr>
@@ -333,7 +333,7 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{operationsClearance['VisitingCardsComments']} </td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Kuoni & Concur Access</td>
+                                                    <td>Travel Portal Access</td>
                                                     <td>{operationsClearance['KuoniConcurAccess']}</td>
                                                     <td>{operationsClearance['KuoniConcurAccessComments']} </td>
                                                 </tr>
