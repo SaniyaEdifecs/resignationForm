@@ -9,6 +9,7 @@ import Link from '@material-ui/core/Link';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import * as strings from 'ResignationFormWebPartStrings';
+import Moment from 'react-moment';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
@@ -18,11 +19,12 @@ const ManagerClearance = (props) => {
     let detail: any;
     let currentUser: any = [];
     const [buttonVisibility, setButtonVisibility] = useState(true);
+    const [resignationDetails, setResignationDetails] = useState([])
     const [showMsg, setShowMsg] = useState(false);
     const [open, setOpen] = useState(false);
     const [loader, showLoader] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
-      const options = ['Yes', 'No', 'NA'];
+    const options = ['Yes', 'No', 'NA'];
     const formFields = [
         "AccessRemoval", "AccessRemovalComments", "DataBackup", "DataBackupComments", "EmailBackup", "EmailBackupComments", "EmailRe_x002d_routing", "EmailRe_x002d_routingComments", "HandoverComplete", "HandoverCompleteComments", "NoticeWaiver", "NoticeWaiverComments", "OtherComments", "Others_x0028_specify_x0029_", "MessageToAssociate", "AdditionalInformation", "DuesPending",
     ];
@@ -49,6 +51,11 @@ const ManagerClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         SharePointService.getListByTitle("ManagersClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
+            console.log('detail', detail);
+            SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
+                console.log("resignDetails", resignDetails);
+                setResignationDetails(resignDetails);
+            })
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
@@ -137,7 +144,6 @@ const ManagerClearance = (props) => {
                             } else if (permissionResponse.error ||
                                 (permissionLevel.High == 176 && permissionLevel.Low == 138612833) ||
                                 (permissionLevel.High == 48 && permissionLevel.Low == 134287360)) {
-                                console.log("permissionResponse.error:", permissionResponse.error);
                                 setReadOnly(true);
                             }
                         }
@@ -212,6 +218,18 @@ const ManagerClearance = (props) => {
         showLoader(false);
     };
 
+    const daysdifference = (date1, date2) => {
+        // The number of milliseconds in one day
+        var ONEDAY = 1000 * 60 * 60 * 24;
+        // Convert both dates to milliseconds
+        var date1_ms = new Date(date1);
+        var date2_ms = new Date(date2);
+        // Calculate the difference in milliseconds
+        var difference_ms = Math.abs(date1_ms.getTime() - date2_ms.getTime());
+
+        // Convert back to days and return
+        return Math.round(difference_ms / ONEDAY);
+    }
     return (
         <div>
             <Backdrop className={classes.backdrop} open={loader} onClick={handleBackdropClose}>
@@ -237,7 +255,30 @@ const ManagerClearance = (props) => {
             {showMsg && <div className={classes.root}>
                 <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
             </div>}
+
             <form onSubmit={handleOnSubmit} className="clearanceForm">
+                <table cellSpacing="0" cellPadding="0" className="employeeDetails">
+                    <thead>
+                        <tr>
+                            <th colSpan={6} align="left"> Employee Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr >
+                            <td><span>Employee Name: </span><span>{resignationDetails['EmployeeName']}</span></td>
+
+                            <td><span>Resignation Date: </span><span> <Moment format="DD/MM/YYYY">{resignationDetails['ResignationDate']}</Moment></span></td>
+
+                            <td><span>Last working Date: </span><span><Moment format="DD/MM/YYYY">{resignationDetails['LastWorkingDate']}</Moment></span></td>
+                        </tr>
+                        <tr>
+                        <td><span>Notice Period Served: </span><span>{daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} days</span></td>
+
+                            <td colSpan={2}><span>Shortfall Notice Period: </span><span>{45 - daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} days</span></td>
+                        </tr>
+
+                    </tbody>
+                </table>
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
                         <tr>
@@ -248,10 +289,40 @@ const ManagerClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
+                            <td>Would you like to waive off shortfall?<span>*</span></td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.NoticeWaiver.value} id="NoticeWaiver" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="NoticeWaiver"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.NoticeWaiver.error && <p style={errorStyle}>{state.NoticeWaiver.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="NoticeWaiverComments" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.NoticeWaiverComments.value} />
+                                {state.NoticeWaiverComments.error && <p style={errorStyle}>{state.NoticeWaiverComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td >Have you removed all access(Applications)? <span>*</span> </td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.AccessRemoval.value} disabled={readOnly} id="AccessRemoval" onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemoval"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.AccessRemoval.error && <p style={errorStyle}>{state.AccessRemoval.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemovalComments" value={state.AccessRemovalComments.value} />
+                                {state.AccessRemovalComments.error && <p style={errorStyle}>{state.AccessRemovalComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Handover Complete<span>*</span></td>
                             <td>
                                 <FormControl>
-                                    <Select value={state.HandoverComplete.value} disabled={readOnly} id="HandoverComplete" onBlur={handleOnBlur} onChange={handleOnChange} name="HandoverComplete" autoFocus>
+                                    <Select value={state.HandoverComplete.value} disabled={readOnly} id="HandoverComplete" onBlur={handleOnBlur} onChange={handleOnChange} name="HandoverComplete" >
                                         {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
                                     </Select>
                                     {state.HandoverComplete.error && <p style={errorStyle}>{state.HandoverComplete.error}</p>}
@@ -263,7 +334,11 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Data Backup<span>*</span></td>
+                            <td colSpan={3}><p className="height44"><b>Instructions for IT</b></p></td>
+                        </tr>
+                        <tr>
+                            <td>Data Backup<span>*</span>
+                            </td>
                             <td>
                                 <FormControl>
                                     <Select value={state.DataBackup.value} id="DataBackup" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="DataBackup"  >
@@ -292,36 +367,8 @@ const ManagerClearance = (props) => {
                                 {state.EmailBackupComments.error && <p style={errorStyle}>{state.EmailBackupComments.error}</p>}
                             </td>
                         </tr>
-                        <tr>
-                            <td>Notice Waiver(No. of days)<span>*</span></td>
-                            <td>
-                                <FormControl>
-                                    <Select value={state.NoticeWaiver.value} id="NoticeWaiver" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="NoticeWaiver"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
-                                    </Select>
-                                    {state.NoticeWaiver.error && <p style={errorStyle}>{state.NoticeWaiver.error}</p>}
-                                </FormControl>
-                            </td>
-                            <td>
-                                <TextField margin="normal" name="NoticeWaiverComments" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.NoticeWaiverComments.value} />
-                                {state.NoticeWaiverComments.error && <p style={errorStyle}>{state.NoticeWaiverComments.error}</p>}
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Access Removal(All Applications)<span>*</span></td>
-                            <td>
-                                <FormControl>
-                                    <Select value={state.AccessRemoval.value} disabled={readOnly} id="AccessRemoval" onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemoval"  >
-                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
-                                    </Select>
-                                    {state.AccessRemoval.error && <p style={errorStyle}>{state.AccessRemoval.error}</p>}
-                                </FormControl>
-                            </td>
-                            <td>
-                                <TextField margin="normal" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemovalComments" value={state.AccessRemovalComments.value} />
-                                {state.AccessRemovalComments.error && <p style={errorStyle}>{state.AccessRemovalComments.error}</p>}
-                            </td>
-                        </tr>
+
+
                         <tr>
                             <td>Email Re-routing<span>*</span></td>
                             <td>

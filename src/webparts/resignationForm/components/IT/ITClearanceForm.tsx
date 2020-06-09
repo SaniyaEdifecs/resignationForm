@@ -24,7 +24,7 @@ const ItClearance = (props) => {
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "DataBackup", "AccessRemoval", "DataCard", "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "AccessRemovalComments", "DataBackupComments", "DataCardComments", "DesktopComments", "IDCardComments", "MessageToAssociate", "AdditionalInformation", 'DuesPending'
+   "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments",  "DesktopComments", "IDCardComments", "MessageToAssociate", "AdditionalInformation", 'DuesPending', 'SecondaryDeviceComments', 'SecondaryDevice'
     ];
     const nonRequiredFields: any = ['AdditionalInformation', 'MessageToAssociate']
     var stateSchema = {};
@@ -93,6 +93,7 @@ const ItClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         SharePointService.getListByTitle("ItClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
+            console.log('it detail', detail);
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
@@ -267,7 +268,7 @@ const ItClearance = (props) => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
+                        {/* <tr>
                             <td>Mailbox and important data back-up<span>*</span></td>
                             <td>
                                 <FormControl>
@@ -281,8 +282,8 @@ const ItClearance = (props) => {
                                 <TextField margin="normal" name="DataBackupComments" disabled={readOnly} required value={state.DataBackupComments.value} onBlur={handleOnBlur} onChange={handleOnChange} />
                                 {state.DataBackupComments.error && <p style={errorStyle}>{state.DataBackupComments.error}</p>}
                             </td>
-                        </tr>
-                        <tr>
+                        </tr> */}
+                        {/* <tr>
                             <td>Access Removal (Email, User Account, All applications)<span>*</span></td>
                             <td>
                                 <FormControl>
@@ -296,8 +297,8 @@ const ItClearance = (props) => {
                                 <TextField margin="normal" name="AccessRemovalComments" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.AccessRemovalComments.value} />
                                 {state.AccessRemovalComments.error && <p style={errorStyle}>{state.AccessRemovalComments.error}</p>}
                             </td>
-                        </tr>
-                        <tr>
+                        </tr> */}
+                        {/* <tr>
                             <td>Phone & SIM/Data card<span>*</span></td>
                             <td>
                                 <FormControl>
@@ -311,9 +312,9 @@ const ItClearance = (props) => {
                                 <TextField margin="normal" name="DataCardComments" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DataCardComments.value} />
                                 {state.DataCardComments.error && <p style={errorStyle}>{state.DataCardComments.error}</p>}
                             </td>
-                        </tr>
+                        </tr> */}
                         <tr>
-                            <td>Laptop/Desktop/Dock Station<span>*</span></td>
+                            <td> Primary Device (Laptop/Desktop)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Laptop_x002f_Desktop.value} disabled={readOnly} id="Laptop_x002f_Desktop" onBlur={handleOnBlur} onChange={handleOnChange} name="Laptop_x002f_Desktop"  >
@@ -325,6 +326,21 @@ const ItClearance = (props) => {
                             <td>
                                 <TextField margin="normal" name="DesktopComments" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.DesktopComments.value} />
                                 {state.DesktopComments.error && <p style={errorStyle}>{state.DesktopComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td> Secondary Device (Laptop/Desktop)<span>*</span></td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.SecondaryDevice.value} disabled={readOnly} id="SecondaryDevice" onBlur={handleOnBlur} onChange={handleOnChange} name="SecondaryDevice"  >
+                                        {options.map((option, index) => <MenuItem key={index} value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.SecondaryDevice.error && <p style={errorStyle}>{state.SecondaryDevice.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="SecondaryDeviceComments" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.SecondaryDeviceComments.value} />
+                                {state.SecondaryDeviceComments.error && <p style={errorStyle}>{state.SecondaryDeviceComments.error}</p>}
                             </td>
                         </tr>
                         <tr>

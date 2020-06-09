@@ -11,8 +11,8 @@
 .MuiFormHelperText-contained {
   margin-left: 2px !important ;
 }
-.employeeCode{
-  .MuiFormControl-marginNormal{
+.employeeCode {
+  .MuiFormControl-marginNormal {
     margin-bottom: 0 !important;
   }
 }
@@ -257,7 +257,7 @@ table {
     padding: 0 !important;
   }
   table {
-    margin: 0;
+    margin: 0 0 20px;
     thead {
       background: lightgray;
       th {
@@ -266,10 +266,10 @@ table {
     }
     tr {
       td {
-        &:first-child{
-         span{
-           color: red;
-         }
+        &:first-child {
+          span {
+            color: red;
+          }
         }
         &:nth-child(2) {
           > div {
@@ -281,6 +281,9 @@ table {
               margin-bottom: 5px !important;
             }
           }
+        }
+        span:first-child {
+          font-weight: 500;
         }
       }
     }
@@ -309,6 +312,22 @@ table {
   }
   button {
     margin: 3px 10px 0 0;
+  }
+  .employeeDetails {
+    width: 100%;
+    tr {
+      td {
+        &:first-child {
+          span {
+            color: rgb(51, 63, 72);
+          }
+        }
+        span{
+          height: 44px;
+          line-height: 44px;
+        }
+      }
+    }
   }
 }
 
@@ -534,7 +553,7 @@ select option {
   font-weight: 500;
   background-color: #4caf50 !important;
   .MuiAlert-icon {
-      color: #fff !important;
+    color: #fff !important;
   }
 }
 .MuiSnackbar-anchorOriginBottomCenter {
@@ -543,4 +562,11 @@ select option {
   bottom: 0 !important;
   transform: translate(-50%, -50%) !important;
   top: 50% !important;
+}
+
+.height44 {
+  height: 44px;
+  font-weight: 600;
+  margin: 0;
+  line-height: 44px;
 }

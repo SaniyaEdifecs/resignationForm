@@ -82,7 +82,9 @@ const ResignationForm = (props) => {
     const handleDateChange = (event) => {
         setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: event, error: "" }) }));
     };
-
+    const handleResignationDateChange = (event) => {
+        setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
+    };
     const handleEmployeeCode = (event) => {
         let regEx = /^[0-9]{4}$/;
         let employeeCode = event.target.value;
@@ -354,7 +356,7 @@ const ResignationForm = (props) => {
                         <Grid item xs={12} sm={6}>
                         <MuiPickersUtilsProvider utils={DateFnsUtils} >
                                 <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy"
-                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
+                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleResignationDateChange} />
                             </MuiPickersUtilsProvider>
                         </Grid>
                         <Grid item xs={12} sm={6}>
