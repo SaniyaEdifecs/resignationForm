@@ -276,7 +276,7 @@ const EmployeeDetails = (props) => {
                         </Grid>
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
-                                <TextField variant="outlined" margin="normal" required fullWidth label="Location" value={state.Location.value} name="Location" onBlur={handleOnBlur} autoComplete="Location" onChange={handleOnChange} />
+                                <TextField variant="outlined" margin="normal" required fullWidth label="Address Details " value={state.Location.value} name="Location" onBlur={handleOnBlur} autoComplete="Location" onChange={handleOnChange} />
                                 {state.Location.error && <p style={errorStyle}>{state.Location.error}</p>}
                             </Grid>
                         </Grid>

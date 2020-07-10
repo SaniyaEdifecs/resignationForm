@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles, Snackbar  } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles, Snackbar } from '@material-ui/core';
 import useForm from '../UseForm';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -12,19 +12,22 @@ import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
+import Moment from 'react-moment';
 
 const ItClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
     const [buttonVisibility, setButtonVisibility] = useState(true);
+    const [resignationDetails, setResignationDetails] = useState([]);
+    const [confirmMsg, setConfirmMsg] = useState('Form Saved Successfully!');
     const [showMsg, setShowMsg] = useState(false);
     const [open, setOpen] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-   "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments",  "DesktopComments", "IDCardComments", "MessageToAssociate", "AdditionalInformation", 'DuesPending', 'SecondaryDeviceComments', 'SecondaryDevice'
+        "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "DesktopComments", "IDCardComments", "MessageToAssociate", "AdditionalInformation", 'DuesPending', 'SecondaryDeviceComments', 'SecondaryDevice'
     ];
     const nonRequiredFields: any = ['AdditionalInformation', 'MessageToAssociate']
     var stateSchema = {};
@@ -52,7 +55,14 @@ const ItClearance = (props) => {
         for (const key in value) {
             payload[key] = value[key].value;
         }
+        if (payload['DuesPending'] == 'NotifyAssociate') {
+            setConfirmMsg('Message Sent to Employee');
 
+        } else if (payload['DuesPending'] == 'GrantClearance') {
+            setConfirmMsg('Form Submitted Successfully')
+        } else {
+            setConfirmMsg('Form Saved Successfully!')
+        }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("ItClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
@@ -94,8 +104,14 @@ const ItClearance = (props) => {
         SharePointService.getListByTitle("ItClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
             console.log('it detail', detail);
+            SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
+                setResignationDetails(resignDetails);
+            });
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
+            SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
+                setResignationDetails(resignDetails);
+            });
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
@@ -122,7 +138,6 @@ const ItClearance = (props) => {
                     .then((response: SPHttpClientResponse): Promise<any> => {
                         return response.json();
                     }).then(permissionResponse => {
-                        console.log("permissionResponse:", permissionResponse);
                         let permissionLevel = permissionResponse;
                         if (statusValue == 'Approved' || statusValue == 'Canceled') {
                             SharePointService.getCurrentUserGroups().then((groups: any) => {
@@ -234,12 +249,12 @@ const ItClearance = (props) => {
     };
     return (
         <div>
-          <Backdrop className={classes.backdrop} open={loader} onClick={handleBackdropClose}>
+            <Backdrop className={classes.backdrop} open={loader} onClick={handleBackdropClose}>
                 <CircularProgress color="inherit" />
             </Backdrop>
             <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success">
-                    Form Submitted Successfully!
+                    {confirmMsg}
                 </Alert>
             </Snackbar>
             <Typography variant="h5" component="h5">
@@ -258,7 +273,23 @@ const ItClearance = (props) => {
                 <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
             </div>}
             <form onSubmit={handleOnSubmit} className="clearanceForm">
-
+                <table cellSpacing="0" cellPadding="0" className="employeeDetails">
+                    <thead>
+                        <tr>
+                            <th colSpan={6} align="left"> Employee Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr >
+                            <td><span>Employee Name: </span><span>{resignationDetails['EmployeeName']}</span></td>
+                            <td><span>Employee Code: </span><span>{resignationDetails['EmployeeCode']}</span></td>
+                        </tr>
+                        <tr>
+                            <td><span>Resignation Date: </span><span> <Moment format="DD/MM/YYYY">{resignationDetails['ResignationDate']}</Moment></span></td>
+                            <td><span>Last working Date: </span><span><Moment format="DD/MM/YYYY">{resignationDetails['LastWorkingDate']}</Moment></span></td>
+                        </tr>
+                    </tbody>
+                </table>
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
                         <tr>

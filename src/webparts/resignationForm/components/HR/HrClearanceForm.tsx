@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles,Snackbar } from '@material-ui/core';
+import { Typography, TextField, Button, MenuItem, FormControl, Select, FormControlLabel, RadioGroup, Radio, makeStyles, Snackbar } from '@material-ui/core';
 import useForm from '../UseForm';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import '../CommonStyleSheet.scss';
@@ -12,6 +12,7 @@ import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
+import Moment from 'react-moment';
 
 const HrClearance = (props) => {
     let ID = props.Id;
@@ -19,12 +20,14 @@ const HrClearance = (props) => {
     let currentUser: any = [];
     const [open, setOpen] = useState(false);
     const [buttonVisibility, setButtonVisibility] = useState(true);
+    const [resignationDetails, setResignationDetails] = useState([]);
+    const [confirmMsg, setConfirmMsg] = useState('Form Saved Successfully!');
     const [showMsg, setShowMsg] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "Resignationemailacceptance", "ResignationAcceptancecomments", "ELBalance", "ELBalanceComments",  "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments",  "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments",  "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "Others", "OthersComments"
+        "Resignationemailacceptance", "ResignationAcceptancecomments", "ELBalance", "ELBalanceComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "Others", "OthersComments"
     ];
 
     var stateSchema = {};
@@ -52,7 +55,14 @@ const HrClearance = (props) => {
         for (const key in value) {
             payload[key] = value[key].value;
         }
+        if (payload['DuesPending'] == 'NotifyAssociate') {
+            setConfirmMsg('Message Sent to Employee');
 
+        } else if (payload['DuesPending'] == 'GrantClearance') {
+            setConfirmMsg('Form Submitted Successfully')
+        } else {
+            setConfirmMsg('Form Saved Successfully!')
+        }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("HrClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
@@ -73,6 +83,9 @@ const HrClearance = (props) => {
             detail = response;
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
+            SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
+                setResignationDetails(resignDetails);
+            });
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
@@ -222,8 +235,8 @@ const HrClearance = (props) => {
             </Backdrop>
             <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success">
-                    Form Submitted Successfully!
-                    </Alert>
+                    {confirmMsg}
+                </Alert>
             </Snackbar>
             <Typography variant="h5" component="h5">
                 {strings.HrClearance}
@@ -241,6 +254,23 @@ const HrClearance = (props) => {
                 <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
             </div>}
             <form onSubmit={handleOnSubmit} className="clearanceForm">
+                <table cellSpacing="0" cellPadding="0" className="employeeDetails">
+                    <thead>
+                        <tr>
+                            <th colSpan={6} align="left"> Employee Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr >
+                            <td><span>Employee Name: </span><span>{resignationDetails['EmployeeName']}</span></td>
+                            <td><span>Employee Code: </span><span>{resignationDetails['EmployeeCode']}</span></td>
+                        </tr>
+                        <tr>
+                            <td><span>Resignation Date: </span><span> <Moment format="DD/MM/YYYY">{resignationDetails['ResignationDate']}</Moment></span></td>
+                            <td><span>Last working Date: </span><span><Moment format="DD/MM/YYYY">{resignationDetails['LastWorkingDate']}</Moment></span></td>
+                        </tr>
+                    </tbody>
+                </table>
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
                         <tr>

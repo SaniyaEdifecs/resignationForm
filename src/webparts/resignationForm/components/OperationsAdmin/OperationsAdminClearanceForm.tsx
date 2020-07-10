@@ -12,12 +12,15 @@ import HomeIcon from '@material-ui/icons/Home';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
+import Moment from 'react-moment';
 
 const OperationsAdminClearance = (props) => {
     let ID = props.Id;
     let currentUser: any = [];
     let detail: any;
     const [buttonVisibility, setButtonVisibility] = useState(true);
+    const [confirmMsg, setConfirmMsg] = useState('Form Saved Successfully!');
+    const [resignationDetails, setResignationDetails] = useState([])
     const [showMsg, setShowMsg] = useState(false);
     const [open, setOpen] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
@@ -26,7 +29,7 @@ const OperationsAdminClearance = (props) => {
     const options1 = ['Received', 'Not Received','NA'];
     const options2 = ['Activated', 'Deactivated'];
     const formFields = [
-        "BiometricAccess", "BiometricAccessComments", "KuoniConcurAccess", "KuoniConcurAccessComments", "Others", "OthersComments", "PedestalKeys", "PedestalKeysComments", "SimCard", "SimCardComments", "StickerComments", "Stickers", "VisitingCards", "VisitingCardsComments", "MessageToAssociate", "AdditionalInformation", "DuesPending","StationaryClearanceComments","StationaryClearance"
+        "BiometricAccess", "BiometricAccessComments", "KuoniConcurAccess", "KuoniConcurAccessComments", "Others", "OthersComments", "PedestalKeys", "PedestalKeysComments", "SimCard", "SimCardComments", "StickerComments", "Stickers", "MessageToAssociate", "AdditionalInformation", "DuesPending","StationaryClearanceComments","StationaryClearance"
     ];
 
     var stateSchema = {};
@@ -52,6 +55,14 @@ const OperationsAdminClearance = (props) => {
         let payload = {};
         for (const key in value) {
             payload[key] = value[key].value;
+        }
+        if(payload['DuesPending'] == 'NotifyAssociate'){
+            setConfirmMsg('Message Sent to Employee');
+            
+        }else if(payload['DuesPending'] == 'GrantClearance'){
+            setConfirmMsg('Form Submitted Successfully')
+        }else{
+            setConfirmMsg('Form Saved Successfully!')
         }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("OperationsClearance").items.getById(ID).update(payload).then(items => {
@@ -92,10 +103,11 @@ const OperationsAdminClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         SharePointService.getListByTitle("OperationsClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
-            console.log(detail);
-            
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
+            SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
+                setResignationDetails(resignDetails);
+            });
             formFields.forEach(formField => {
                 if (detail[formField] == null) {
                     stateSchema[formField].value = "";
@@ -105,11 +117,9 @@ const OperationsAdminClearance = (props) => {
                     stateSchema[formField].error = "";
                 }
             });
-            // console.log("getdetail", stateSchema);
             setState(prevState => ({ ...prevState, stateSchema }));
         }, (error: any): void => {
             setButtonVisibility(true);
-            // console.log('Error while creating the item: ' + error);
         });
     };
 
@@ -222,7 +232,7 @@ const OperationsAdminClearance = (props) => {
             </Backdrop>
             <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success">
-                    Form Submitted Successfully!
+                {confirmMsg}
                     </Alert>
             </Snackbar>
             <Typography variant="h5" component="h5">
@@ -241,6 +251,23 @@ const OperationsAdminClearance = (props) => {
                 <Alert severity="warning" className="marginTop16">This resignation is withdrawn - No Action Required!</Alert>
             </div>}
             <form onSubmit={handleOnSubmit} className="clearanceForm">
+            <table cellSpacing="0" cellPadding="0" className="employeeDetails">
+                    <thead>
+                        <tr>
+                            <th colSpan={6} align="left"> Employee Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr >
+                            <td><span>Employee Name: </span><span>{resignationDetails['EmployeeName']}</span></td>
+                            <td><span>Employee Code: </span><span>{resignationDetails['EmployeeCode']}</span></td>
+                        </tr>
+                        <tr>
+                            <td><span>Resignation Date: </span><span> <Moment format="DD/MM/YYYY">{resignationDetails['ResignationDate']}</Moment></span></td>
+                            <td><span>Last working Date: </span><span><Moment format="DD/MM/YYYY">{resignationDetails['LastWorkingDate']}</Moment></span></td>
+                        </tr>
+                    </tbody>
+                </table>
                 <table cellSpacing="0" cellPadding="0">
                     <thead>
                         <tr>
@@ -325,7 +352,7 @@ const OperationsAdminClearance = (props) => {
                                 {state.SimCardComments.error && <p style={errorStyle}>{state.SimCardComments.error}</p>}
                             </td>
                         </tr>
-                        <tr>
+                        {/* <tr>
                             <td>Visiting Cards<span>*</span></td>
                             <td>
                                 <FormControl>
@@ -339,7 +366,7 @@ const OperationsAdminClearance = (props) => {
                                 <TextField margin="normal" disabled={readOnly} onChange={handleOnChange} onBlur={handleOnBlur} required name="VisitingCardsComments" value={state.VisitingCardsComments.value} />
                                 {state.VisitingCardsComments.error && <p style={errorStyle}>{state.VisitingCardsComments.error}</p>}
                             </td>
-                        </tr>
+                        </tr> */}
                         <tr>
                             <td>Travel Portal Access<span>*</span></td>
                             <td>

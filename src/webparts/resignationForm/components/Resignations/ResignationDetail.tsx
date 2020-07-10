@@ -184,9 +184,25 @@ const ResignationDetail = ({ props }) => {
                                         <table cellPadding="0" cellSpacing="0" >
                                             <tbody>
                                                 <tr>
-                                                    <td>Handover complete</td>
-                                                    <td>{managerClearance && managerClearance['HandoverComplete']} </td>
+                                                    <td>Do you approve early relieving (short of notice period)?</td>
+                                                    <td>{managerClearance && managerClearance['NoticeWaiver']} </td>
+                                                    <td>{managerClearance['NoticeWaiverComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Do you approve the recovery amount, if any (after adjustment of short fall of notice period with paid leaves)?</td>
+                                                    <td>{managerClearance['RecoveryAmount']} </td>
+                                                    <td>{managerClearance['RecoveryAmountComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Have you removed all access(Applications)?</td>
+                                                    <td> {managerClearance['AccessRemoval']}</td>
+                                                    <td>{managerClearance['AccessRemovalComments']} </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Handover Complete</td>
+                                                    <td>{managerClearance['HandoverComplete']} </td>
                                                     <td>{managerClearance['HandoverCompleteComments']}</td>
+
                                                 </tr>
                                                 <tr>
                                                     <td>Data Backup</td>
@@ -199,16 +215,8 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{managerClearance['EmailBackup']}</td>
                                                     <td>{managerClearance['EmailBackupComments']}</td>
                                                 </tr>
-                                                <tr>
-                                                    <td>Notice Waiver (No. of days)</td>
-                                                    <td>{managerClearance['NoticeWaiver']}</td>
-                                                    <td>{managerClearance['NoticeWaiverComments']}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>Access removal (All applications)</td>
-                                                    <td> {managerClearance['AccessRemoval']}</td>
-                                                    <td>{managerClearance['AccessRemovalComments']} </td>
-                                                </tr>
+
+
                                                 <tr>
                                                     <td>Email re-routing</td>
                                                     <td>{managerClearance['EmailRe_x002d_routing']} </td>
@@ -233,6 +241,26 @@ const ResignationDetail = ({ props }) => {
                                         <table cellPadding="0" cellSpacing="0" >
                                             <tbody>
                                                 <tr>
+                                                    <td> Primary Device (Laptop/Desktop)</td>
+                                                    <td>{itDetail['Laptop_x002f_Desktop']}</td>
+                                                    <td>{itDetail['DesktopComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td> Secondary Device (Laptop/Desktop)</td>
+                                                    <td>{itDetail['SecondaryDevice']}</td>
+                                                    <td>{itDetail['SecondaryDeviceComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Access Card</td>
+                                                    <td>{itDetail['AccessCard']}</td>
+                                                    <td>{itDetail['AccessCardComments']}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>ID Card</td>
+                                                    <td>{itDetail['IDCard']}</td>
+                                                    <td>{itDetail['IDCardComments']}</td>
+                                                </tr>
+                                                {/* <tr>
                                                     <td>Mailbox and important data back-up</td>
                                                     <td>{itDetail['DataBackup']}</td>
                                                     <td>{itDetail['DataBackupComments']}</td>
@@ -249,7 +277,7 @@ const ResignationDetail = ({ props }) => {
                                                     <td>Laptop/Destop/Dock Station</td>
                                                     <td>{itDetail && itDetail['Laptop_x002f_Desktop']} </td>
                                                     <td>{itDetail['DesktopComments']}</td>
-                                                </tr>
+                                                </tr> */}
 
                                                 <tr>
                                                     <td>Others - Charger, Mouse, Headphones etc.</td>
@@ -257,24 +285,16 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{itDetail['PeripheralDevicesComments0']}</td>
 
                                                 </tr>
-                                                <tr>
+                                                {/* <tr>
                                                     <td colSpan={3}><b>Assigned cards</b></td>
                                                 </tr>
-                                                <tr>
-                                                    <td>Access Card</td>
-                                                    <td>{itDetail['AccessCard']}</td>
-                                                    <td>{itDetail['AccessCardComments']}</td>
-                                                </tr>
-                                                <tr>
-                                                    <td>ID Card</td>
-                                                    <td>{itDetail['IDCard']}</td>
-                                                    <td>{itDetail['IDCardComments']}</td>
-                                                </tr>
+                                               
+                                              
                                                 <tr>
                                                     <td>Phone & SIM/Data Card</td>
                                                     <td>{itDetail['DataCard']}</td>
                                                     <td>{itDetail['DataCardComments']} </td>
-                                                </tr>
+                                                </tr> */}
                                                 <tr>
                                                     <td>Additional Comments</td>
                                                     <td colSpan={2}>{itDetail['AdditionalInformation']}</td>
@@ -327,11 +347,11 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{operationsClearance['SimCard']}</td>
                                                     <td>{operationsClearance['SimCardComments']} </td>
                                                 </tr>
-                                                <tr>
+                                                {/* <tr>
                                                     <td>Visiting Cards</td>
                                                     <td>{operationsClearance['VisitingCards']}</td>
-                                                    <td>{operationsClearance['VisitingCardsComments']} </td>
-                                                </tr>
+                                                    <td>{operationsClearance['VisitingCardsComments']} </td> 
+                                                </tr> */}
                                                 <tr>
                                                     <td>Travel Portal Access</td>
                                                     <td>{operationsClearance['KuoniConcurAccess']}</td>

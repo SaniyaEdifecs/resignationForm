@@ -18,6 +18,7 @@ const ManagerClearance = (props) => {
     let ID = props.Id;
     let detail: any;
     let currentUser: any = [];
+    const [confirmMsg, setConfirmMsg] = useState('Form Saved Successfully!');
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [resignationDetails, setResignationDetails] = useState([])
     const [showMsg, setShowMsg] = useState(false);
@@ -27,6 +28,7 @@ const ManagerClearance = (props) => {
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
         "AccessRemoval", "AccessRemovalComments", "DataBackup", "DataBackupComments", "EmailBackup", "EmailBackupComments", "EmailRe_x002d_routing", "EmailRe_x002d_routingComments", "HandoverComplete", "HandoverCompleteComments", "NoticeWaiver", "NoticeWaiverComments", "OtherComments", "Others_x0028_specify_x0029_", "MessageToAssociate", "AdditionalInformation", "DuesPending",
+        "RecoveryAmountComments", "RecoveryAmount"
     ];
 
     var stateSchema = {};
@@ -51,9 +53,7 @@ const ManagerClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         SharePointService.getListByTitle("ManagersClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
-            console.log('detail', detail);
             SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
-                console.log("resignDetails", resignDetails);
                 setResignationDetails(resignDetails);
             })
             getStatusDetails(detail.Status);
@@ -80,7 +80,14 @@ const ManagerClearance = (props) => {
         for (const key in value) {
             payload[key] = value[key].value;
         }
-
+        if(payload['DuesPending'] == 'NotifyAssociate'){
+            setConfirmMsg('Message Sent to Employee.');
+            
+        }else if(payload['DuesPending'] == 'GrantClearance'){
+            setConfirmMsg('Form Submitted Successfully!')
+        }else{
+            setConfirmMsg('Form Saved Successfully!')
+        }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("ManagersClearance").items.getById(ID).update(payload).then(items => {
             showLoader(false);
@@ -228,7 +235,7 @@ const ManagerClearance = (props) => {
         var difference_ms = Math.abs(date1_ms.getTime() - date2_ms.getTime());
 
         // Convert back to days and return
-        return Math.round(difference_ms / ONEDAY);
+        return Math.round(difference_ms / ONEDAY) + 1;
     }
     return (
         <div>
@@ -237,7 +244,7 @@ const ManagerClearance = (props) => {
             </Backdrop>
             <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success">
-                    Form Submitted Successfully!
+                    {confirmMsg}
                     </Alert>
             </Snackbar>
             <Typography variant="h5" component="h5">
@@ -272,8 +279,7 @@ const ManagerClearance = (props) => {
                             <td><span>Last working Date: </span><span><Moment format="DD/MM/YYYY">{resignationDetails['LastWorkingDate']}</Moment></span></td>
                         </tr>
                         <tr>
-                        <td><span>Notice Period Served: </span><span>{daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} days</span></td>
-
+                            <td><span>Notice Period Served: </span><span>{daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} days</span></td>
                             <td colSpan={2}><span>Shortfall Notice Period: </span><span>{45 - daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} days</span></td>
                         </tr>
 
@@ -289,7 +295,7 @@ const ManagerClearance = (props) => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Would you like to waive off shortfall?<span>*</span></td>
+                            <td>Do you approve early relieving (short of notice period)?<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.NoticeWaiver.value} id="NoticeWaiver" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="NoticeWaiver"  >
@@ -304,7 +310,22 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td >Have you removed all access(Applications)? <span>*</span> </td>
+                            <td>Do you approve the recovery amount, if any (after adjustment of short fall of notice period with paid leaves)?<span>*</span></td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.RecoveryAmount.value} id="RecoveryAmount" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="RecoveryAmount"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.RecoveryAmount.error && <p style={errorStyle}>{state.RecoveryAmount.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="RecoveryAmountComments" disabled={readOnly} required onBlur={handleOnBlur} onChange={handleOnChange} value={state.RecoveryAmountComments.value} />
+                                {state.RecoveryAmountComments.error && <p style={errorStyle}>{state.RecoveryAmountComments.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td >Have you removed all access(Applications)?<span>*</span> </td>
                             <td>
                                 <FormControl>
                                     <Select value={state.AccessRemoval.value} disabled={readOnly} id="AccessRemoval" onBlur={handleOnBlur} onChange={handleOnChange} name="AccessRemoval"  >
