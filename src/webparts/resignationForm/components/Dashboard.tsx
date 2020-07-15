@@ -70,7 +70,7 @@ const Dashboard = (props) => {
                 </Grid>
                 <Grid item xs={6} sm={4} justify="center" className="marginTop16">
                     <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HrDashboard, "")}>
-                        <i className='ms-Icon ms-Icon--People' aria-hidden="true"></i> <br />  HR {strings.Dashboard}
+                        <i className='ms-Icon ms-Icon--People' aria-hidden="true"></i> <br />  P&C {strings.Dashboard}
                     </Link>
 
                 </Grid>

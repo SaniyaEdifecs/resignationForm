@@ -7,7 +7,7 @@ define([], function () {
     "ItClearance": "IT Clearance",
     "OpsClearance": "Operations Clearance",
     "FinanceClearance": "Finance Clearance",
-    "HrClearance": "Hr Clearance",
+    "HrClearance": "P&C Clearance",
     "SalesForceClearance": "SalesForce Clearance",
     "ManagerClearance": "Manager Clearance",
     "Dashboard": "Dashboard",

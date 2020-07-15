@@ -136,13 +136,13 @@ const HrClearanceDashboard = (props) => {
         <Paper className="root removeBoxShadow">
             <div className="">
                 <Typography variant="h5" component="h5">
-                    HR {strings.Dashboard}
+                    P&C {strings.Dashboard}
                 </Typography>
                 <Breadcrumbs separator="›" aria-label="breadcrumb" className="marginZero">
                     <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.HomeUrl, "")} className={classes.link}>
                         <HomeIcon className={classes.icon} /> {strings.Home}
                     </Link>
-                    <Typography color="textPrimary">HR {strings.Dashboard}</Typography>
+                    <Typography color="textPrimary">P&C {strings.Dashboard}</Typography>
                 </Breadcrumbs>
                 <div>
                     {loader ? <div className="msSpinner">

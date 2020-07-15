@@ -128,16 +128,21 @@ const ResignationList = (props) => {
   
     const getCurrentUserGroups = () => {
         SharePointService.getCurrentUserGroups().then((groupAccess: any) => {
-            groupAccess.forEach(group => {
-                if (group.Title == "Resignation Group - Owners") {
-                    isResignationOwner = true;
-                    setShowActionButton(true);
-                }
-                else {
-                    isResignationOwner = false;
-                    setShowActionButton(true);
-                }
-            });
+            let isGroupOwner = groupAccess.filter(group => group.Title === "Resignation Group - Owners").length;
+            setShowActionButton(isGroupOwner ? true : false);
+            // groupAccess.forEach(group => {
+            //     if (group.Title === "Resignation Group - Owners") {
+            //         isResignationOwner = true;
+
+            //         console.log('setShowActionButton',showActionButton);
+                    
+            //     }
+            //     else {
+            //         isResignationOwner = false;
+            //         setShowActionButton(false);
+            //         console.log('setShowActionButton===',showActionButton);
+            //     }
+            // });
             return isResignationOwner;
         });
     };
@@ -163,6 +168,7 @@ const ResignationList = (props) => {
 
     return (
         <div>
+        {showActionButton}
             <ConfirmationDialog props={openDialog} content={dialogData} onChildClick={handleChildClick} />
             <Paper className="root removeBoxShadow">
 
