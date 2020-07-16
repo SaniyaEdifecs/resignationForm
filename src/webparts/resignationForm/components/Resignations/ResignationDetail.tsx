@@ -1,12 +1,13 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { Paper, makeStyles, CircularProgress } from '@material-ui/core';
+import { Paper, makeStyles, CircularProgress, Snackbar } from '@material-ui/core';
 import { Typography, TextField, Button } from '@material-ui/core';
 import Link from '@material-ui/core/Link';
 import resignationUseForm from './ResignationUseForm';
 import Breadcrumbs from '@material-ui/core/Breadcrumbs';
 import HomeIcon from '@material-ui/icons/Home';
 import Moment from 'react-moment';
+import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
 import * as strings from 'ResignationFormWebPartStrings';
 import '../CommonStyleSheet.scss';
@@ -15,8 +16,10 @@ const ResignationDetail = ({ props }) => {
     let ID = props;
     const [readOnly, setReadOnly] = useState(false);
     const [loader, showLoader] = useState(false);
+    const [open, setOpen] = useState(false);
     const [employeeDetail, setEmployeeDetail] = useState({});
     const [itDetail, setItDetail] = useState({});
+    const [confirmMsg, setConfirmMsg] = useState('Form Saved Successfully!');
     const [managerClearance, setManagerClearance] = useState({});
     const [salesForceClearance, setSalesForceClearance] = useState({});
     const [operationsClearance, setOperationsClearance] = useState({});
@@ -42,15 +45,15 @@ const ResignationDetail = ({ props }) => {
             payload[key] = value[key].value;
         }
 
-        payload = { ...payload, 'Status': status };
-        console.log("paylod", payload);
+        payload = { ...payload, 'Status': 'Approved' };
         SharePointService.getListByTitle("ResignationList").items.getById(ID).update(payload).then(items => {
             showLoader(false);
+            setOpen(true);
             getEmployeeDetail();
         });
 
     };
-    const { state, disable, status, handleOnChange, handleOnSubmit } = resignationUseForm(
+    const { state, disable, setState, status, handleOnChange, handleOnSubmit } = resignationUseForm(
         stateSchema,
         validationStateSchema,
         onSubmitForm
@@ -59,7 +62,13 @@ const ResignationDetail = ({ props }) => {
 
     const getEmployeeDetail = () => {
         SharePointService.getListByTitle('ResignationList').items.getById(ID).get().then((response: any) => {
-
+            let detail = response;
+            formFields.forEach(formField => {
+                stateSchema[formField].value = detail[formField] ? detail[formField] : "";
+                stateSchema[formField].error = "";
+            });
+            // console.log("getdetail", stateSchema);
+            setState(prevState => ({ ...prevState, stateSchema }));
             if (response) {
                 setEmployeeDetail(response);
             }
@@ -136,9 +145,20 @@ const ResignationDetail = ({ props }) => {
     }));
     const classes = useStyles(0);
     console.log('status', employeeDetail['HrStatus']);
+    const handleClose = (event?: React.SyntheticEvent, reason?: string) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
     return (
         <Paper className="root">
             {loader ? <div className="loaderWrapper"><CircularProgress /></div> : null}
+            <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+                <Alert onClose={handleClose} severity="success">
+                {confirmMsg}
+                    </Alert>
+            </Snackbar>
             {(employeeDetail['HrStatus'] === "Approved") && (employeeDetail['FinanceStatus'] === "Approved") && (employeeDetail['ItStatus'] === "Approved") && (employeeDetail['ManagerStatus'] === "Approved") && (employeeDetail['emplStatus'] === "Approved") && (employeeDetail['Operations_x002f_AdminStatus'] === "Approved") && (employeeDetail['SalesforceStatus'] === "Approved") ?
 
                 <div className="formView clearanceReviewForm">

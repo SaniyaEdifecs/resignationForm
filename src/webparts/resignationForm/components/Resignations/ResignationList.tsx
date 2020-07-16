@@ -130,19 +130,7 @@ const ResignationList = (props) => {
         SharePointService.getCurrentUserGroups().then((groupAccess: any) => {
             let isGroupOwner = groupAccess.filter(group => group.Title === "Resignation Group - Owners").length;
             setShowActionButton(isGroupOwner ? true : false);
-            // groupAccess.forEach(group => {
-            //     if (group.Title === "Resignation Group - Owners") {
-            //         isResignationOwner = true;
-
-            //         console.log('setShowActionButton',showActionButton);
-                    
-            //     }
-            //     else {
-            //         isResignationOwner = false;
-            //         setShowActionButton(false);
-            //         console.log('setShowActionButton===',showActionButton);
-            //     }
-            // });
+       
             return isResignationOwner;
         });
     };
