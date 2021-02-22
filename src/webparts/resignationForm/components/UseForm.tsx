@@ -29,7 +29,6 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       setStatus("Pending");
     } else if (state['DuesPending']) {
       Object.keys(state).forEach(name => {
-
         setStatus(state['DuesPending'].value === 'NotifyAssociate' ? 'Pending' : 'Approved');
       });
     }
@@ -84,7 +83,7 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       if (!checkValidation(state)) {
         value = event.target.value;
       } else {
-        error = 'All fields are must to grant clearance.'
+        error = 'All fields are must to grant clearance.';
         setState(prevState => ({
           ...prevState,
           [name]: { value, error }
@@ -97,12 +96,12 @@ const useForm = (stateSchema, validationSchema = {}, callback) => {
       name = event.target.name;
       value = event.target.value;
     }
-
     setState(prevState => ({
       ...prevState,
       [name]: { value, error }
     }));
-  }
+  };
+
   const handleOnBlur = useCallback(
     event => {
       setInputValues(event);

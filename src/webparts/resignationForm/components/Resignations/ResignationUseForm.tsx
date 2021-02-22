@@ -55,7 +55,13 @@ const resignationUseForm = (stateSchema, validationSchema = {}, callback) => {
     name = event.target.name;
     value = event.target.value;
     let error = '';
-    if (validationSchema[name].required) {
+    // console.log('event', event.target);
+     
+    // if(event.target.type === 'checkbox'){
+    //   value= event.target.checked;
+    //   setState(prevState =>({ ...prevState, [name]:{value,error} }));
+    // }
+     if (validationSchema[name].required) {
       if (!value) {
         error = 'This is required field.';
       }

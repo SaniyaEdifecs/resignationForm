@@ -59,9 +59,9 @@ const FinanceClearance = (props) => {
             setConfirmMsg('Message Sent to Employee');
             
         }else if(payload['DuesPending'] == 'GrantClearance'){
-            setConfirmMsg('Form Submitted Successfully')
+            setConfirmMsg('Form Submitted Successfully');
         }else{
-            setConfirmMsg('Form Saved Successfully!')
+            setConfirmMsg('Form Saved Successfully!');
         }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("Finance%20Clearance").items.getById(ID).update(payload).then(items => {
@@ -114,7 +114,7 @@ const FinanceClearance = (props) => {
 
             }
         });
-    }
+    };
 
     const getStatusDetails = (status) => {
         switch (status) {

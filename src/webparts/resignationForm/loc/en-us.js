@@ -23,6 +23,7 @@ define([], function () {
     "SalesForceDashboard": "https://edifecs.sharepoint.com/sites/PC/SitePages/SalesForce-Dashboard.aspx",
     "HrDashboard": "https://edifecs.sharepoint.com/sites/PC/SitePages/HR-Dashboard.aspx",
     "ResigntionDashboard": "https://edifecs.sharepoint.com/sites/PC/SitePages/Clearance-Dashboard.aspx",
-    "FinanceDashboard": "https://edifecs.sharepoint.com/sites/PC/SitePages/Finance-Dashboard.aspx"
+    "FinanceDashboard": "https://edifecs.sharepoint.com/sites/PC/SitePages/Finance-Dashboard.aspx",
+    "EmployeeDashboard": "https://edifecs.sharepoint.com/sites/PC/SitePages/Employee-Dashboard.aspx"
   }
 });

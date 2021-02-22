@@ -29,7 +29,7 @@ const ItClearance = (props) => {
     const formFields = [
         "Laptop_x002f_Desktop", "AccessCard", "IDCard", "PeripheralDevices", "PeripheralDevicesComments0", "AccessCardComments", "DesktopComments", "IDCardComments", "MessageToAssociate", "AdditionalInformation", 'DuesPending', 'SecondaryDeviceComments', 'SecondaryDevice'
     ];
-    const nonRequiredFields: any = ['AdditionalInformation', 'MessageToAssociate']
+    const nonRequiredFields: any = ['AdditionalInformation', 'MessageToAssociate'];
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -59,9 +59,9 @@ const ItClearance = (props) => {
             setConfirmMsg('Message Sent to Employee');
 
         } else if (payload['DuesPending'] == 'GrantClearance') {
-            setConfirmMsg('Form Submitted Successfully')
+            setConfirmMsg('Form Submitted Successfully');
         } else {
-            setConfirmMsg('Form Saved Successfully!')
+            setConfirmMsg('Form Saved Successfully!');
         }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("ItClearance").items.getById(ID).update(payload).then(items => {
@@ -163,7 +163,7 @@ const ItClearance = (props) => {
 
             }
         });
-    }
+    };
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);

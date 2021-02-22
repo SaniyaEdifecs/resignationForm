@@ -51,13 +51,13 @@ const SalesForceClearance = (props) => {
         for (const key in value) {
             payload[key] = value[key].value;
         }
-        if(payload['DuesPending'] == 'NotifyAssociate'){
+        if (payload['DuesPending'] == 'NotifyAssociate') {
             setConfirmMsg('Message Sent to Employee');
-            
-        }else if(payload['DuesPending'] == 'GrantClearance'){
-            setConfirmMsg('Form Submitted Successfully')
-        }else{
-            setConfirmMsg('Form Saved Successfully!')
+
+        } else if (payload['DuesPending'] == 'GrantClearance') {
+            setConfirmMsg('Form Submitted Successfully');
+        } else {
+            setConfirmMsg('Form Saved Successfully!');
         }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("SalesForceClearance").items.getById(ID).update(payload).then(items => {
@@ -67,7 +67,7 @@ const SalesForceClearance = (props) => {
         }, (error: any): void => {
             // console.log('Error while creating the item: ' + error);
         });
-    }
+    };
     const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
@@ -170,7 +170,7 @@ const SalesForceClearance = (props) => {
 
             }
         });
-    }
+    };
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
@@ -222,8 +222,8 @@ const SalesForceClearance = (props) => {
             </Backdrop>
             <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success">
-                {confirmMsg}
-                    </Alert>
+                    {confirmMsg}
+                </Alert>
             </Snackbar>
             <Typography variant="h5" component="h5">
                 {strings.SalesForceClearance}

@@ -23,6 +23,7 @@ declare interface IResignationFormWebPartStrings {
   HrDashboard: string;
   ResigntionDashboard: string;
   FinanceDashboard: string;
+  EmployeeDashboard:string;
 }
 
 declare module 'ResignationFormWebPartStrings' {

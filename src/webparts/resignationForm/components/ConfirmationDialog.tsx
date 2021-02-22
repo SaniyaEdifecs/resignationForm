@@ -71,7 +71,7 @@ const ConfirmationDialog = ({ props, content, onChildClick }) => {
     const cancelRevoke = () => {
         setOpen(false);
         onChildClick(false);
-    }
+    };
     useEffect(() => { setOpen(props); }, [props]);
 
     const revokeResignation = (isCanceled) => {
@@ -132,7 +132,7 @@ const ConfirmationDialog = ({ props, content, onChildClick }) => {
             }
 
         });
-    }
+    };
 
 
     return (

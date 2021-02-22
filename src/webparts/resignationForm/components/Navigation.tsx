@@ -72,6 +72,8 @@ const Navigation = (props) => {
         //         return <ResignationForm context={context} props={paramvalues['resignationId']} />;
         //     case "resignationDetail":
         //         return <ResignationDetail props={paramvalues['resignationId']} />;
+        //     case "employeeDashboard":
+        //         return <EmployeeDashboard />;
         //     default:
         //         return <Dashboard context={context} />;
         // }
@@ -117,6 +119,8 @@ const Navigation = (props) => {
                     return <FinanceDashboard />;
                 case strings.OpsDashboard:
                     return <OperationsAdminDashboard />;
+                case strings.EmployeeDashboard:
+                    return <EmployeeDashboard />;
                 default:
                     return <Dashboard context={context} />;
             }

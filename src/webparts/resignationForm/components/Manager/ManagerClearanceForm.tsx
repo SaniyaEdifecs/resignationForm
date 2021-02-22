@@ -20,7 +20,7 @@ const ManagerClearance = (props) => {
     let currentUser: any = [];
     const [confirmMsg, setConfirmMsg] = useState('Form Saved Successfully!');
     const [buttonVisibility, setButtonVisibility] = useState(true);
-    const [resignationDetails, setResignationDetails] = useState([])
+    const [resignationDetails, setResignationDetails] = useState([]);
     const [showMsg, setShowMsg] = useState(false);
     const [open, setOpen] = useState(false);
     const [loader, showLoader] = useState(false);
@@ -55,7 +55,7 @@ const ManagerClearance = (props) => {
             detail = response;
             SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
                 setResignationDetails(resignDetails);
-            })
+            });
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
             formFields.forEach(formField => {
@@ -84,9 +84,9 @@ const ManagerClearance = (props) => {
             setConfirmMsg('Message Sent to Employee.');
             
         }else if(payload['DuesPending'] == 'GrantClearance'){
-            setConfirmMsg('Form Submitted Successfully!')
+            setConfirmMsg('Form Submitted Successfully!');
         }else{
-            setConfirmMsg('Form Saved Successfully!')
+            setConfirmMsg('Form Saved Successfully!');
         }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("ManagersClearance").items.getById(ID).update(payload).then(items => {
@@ -158,7 +158,7 @@ const ManagerClearance = (props) => {
 
             }
         });
-    }
+    };
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);
@@ -236,7 +236,7 @@ const ManagerClearance = (props) => {
 
         // Convert back to days and return
         return Math.round(difference_ms / ONEDAY) + 1;
-    }
+    };
     return (
         <div>
             <Backdrop className={classes.backdrop} open={loader} onClick={handleBackdropClose}>

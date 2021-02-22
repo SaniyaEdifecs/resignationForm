@@ -114,6 +114,10 @@ const ResignationList = (props) => {
     const handleClick = (event) => {
         window.location.href = "?component=resignationDetail&resignationId=" + event;
     };
+    const redirectToForm =(event) =>{
+        window.location.href = "?component=resignationForm&resignationId=" + event;
+
+    }
     const useStyles = makeStyles(theme => ({
         link: {
             display: 'flex',
@@ -135,16 +139,16 @@ const ResignationList = (props) => {
         });
     };
     const handleChildClick = (value: boolean) => {
-        console.log("isCancled",value, openDialog);
+        // console.log("isCancled",value, openDialog);
         setOpenDialog(false);
         if (value) {
             getResignationList();
         }
-    }
+    };
     const openConfirmationDialog = (employeeDetail) => {
         setDialogData(employeeDetail);
         setOpenDialog(true);
-    }
+    };
 
     useEffect(() => {
         getResignationList();
@@ -184,7 +188,8 @@ const ResignationList = (props) => {
                                         <TableCell >Reason for Resignation</TableCell>
                                         <TableCell >Department</TableCell>
                                         <TableCell >Status</TableCell>
-                                        {showActionButton ? <TableCell >Action</TableCell> : null}
+                                        {showActionButton ? <TableCell>Resignation Form</TableCell>: null}
+                                        {showActionButton ? <TableCell >Action</TableCell>:null}
                                     </TableRow>
                                 </TableHead>
                                 {employeeLists.length > 0 ? <TableBody>
@@ -200,13 +205,17 @@ const ResignationList = (props) => {
                                             <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.ResignationReason}</TableCell>
                                             <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Department}</TableCell>
                                             <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Status}</TableCell>
-                                            {showActionButton ? <TableCell className={employeeDetail.Status == 'Canceled' ? 'disableRevoke' : ''}><a className="link" onClick={() => openConfirmationDialog(employeeDetail)}>Revoke Clearance</a></TableCell> : null}
+                                            {showActionButton ? <TableCell >
+                                                <a className="link" onClick={() =>redirectToForm(employeeDetail.ID)} >Form -{employeeDetail.ID}</a></TableCell>
+                                             : null}
+                                            {showActionButton ?<TableCell className={employeeDetail.Status == 'Canceled' ? 'disableRevoke' : ''}><a className="link" onClick={() => openConfirmationDialog(employeeDetail)}>Revoke Clearance</a></TableCell> : null}
+                                         
                                         </TableRow>
                                     ))}
                                 </TableBody> :
                                     <TableBody>
                                         <TableRow>
-                                            <TableCell colSpan={showActionButton ? 8 : 7} >
+                                            <TableCell colSpan={showActionButton ? 9 : 7} >
                                                 {errorMsg ? <div>No Records Found</div> : "No Records Found"}
                                             </TableCell>
                                         </TableRow>
@@ -216,7 +225,7 @@ const ResignationList = (props) => {
                                     <TableRow>
                                         <TablePagination
                                             rowsPerPageOptions={[5, 10, 25, employeeLists.length > 25 && employeeLists.length]}
-                                            colSpan={showActionButton ? 8 : 7}
+                                            colSpan={showActionButton ? 9 : 7}
                                             count={employeeLists.length}
                                             rowsPerPage={rowsPerPage}
                                             page={page}

@@ -36,8 +36,8 @@
     th {
       &.MuiTableCell-root {
         border-bottom: 0;
-        padding: 10px;
-        font-size: 13px !important;
+        padding: 8px 6px;
+        font-size: 12px !important;
       }
     }
   }
@@ -570,4 +570,27 @@ select option {
   font-weight: 600;
   margin: 0;
   line-height: 44px;
+}
+.MuiTypography-body1{
+  &.MuiFormControlLabel-label{
+    box-shadow: none;
+    padding-left: 0;
+  }
+}
+
+.MuiTable-stickyHeader{
+  tr {
+    th,td{
+      padding: 8px 6px !important;
+      font-size: 12px !important;
+    }
+  }
+}
+
+.MuiPickersCalendarHeader-transitionContainer{
+  >p{
+    &.MuiTypography-alignCenter{
+      padding: 0 !important;
+    }
+  }
 }

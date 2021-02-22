@@ -20,7 +20,7 @@ const OperationsAdminClearance = (props) => {
     let detail: any;
     const [buttonVisibility, setButtonVisibility] = useState(true);
     const [confirmMsg, setConfirmMsg] = useState('Form Saved Successfully!');
-    const [resignationDetails, setResignationDetails] = useState([])
+    const [resignationDetails, setResignationDetails] = useState([]);
     const [showMsg, setShowMsg] = useState(false);
     const [open, setOpen] = useState(false);
     const [readOnly, setReadOnly] = useState(false);
@@ -60,9 +60,9 @@ const OperationsAdminClearance = (props) => {
             setConfirmMsg('Message Sent to Employee');
             
         }else if(payload['DuesPending'] == 'GrantClearance'){
-            setConfirmMsg('Form Submitted Successfully')
+            setConfirmMsg('Form Submitted Successfully');
         }else{
-            setConfirmMsg('Form Saved Successfully!')
+            setConfirmMsg('Form Saved Successfully!');
         }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("OperationsClearance").items.getById(ID).update(payload).then(items => {

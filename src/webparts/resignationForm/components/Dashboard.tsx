@@ -4,42 +4,29 @@ import * as strings from 'ResignationFormWebPartStrings';
 import { Grid, Button, Link } from '@material-ui/core';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import '../components/CommonStyleSheet.scss';
-import ResignationList from "./Resignations/ResignationList";
 import { sp } from "@pnp/sp";
-import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import SharePointService from "./SharePointServices";
-
-const useStyles = makeStyles((theme: Theme) =>
-    createStyles({
-        root: {
-            padding: theme.spacing(3, 2),
-        },
-    }),
-);
 
 const Dashboard = (props) => {
     let currentUser: any;
     const [hideButton, setHideButton] = useState(false);
-
 
     const setEditAccessPermissions = () => {
         sp.web.currentUser.get().then((response) => {
             currentUser = response;
             console.log("==", currentUser);
             if (currentUser) {
-                const url = strings.RootUrl + "/_api/web/sitegroups/getByName('Resignation Group - Owners')/Users?$filter=Id eq " + currentUser.Id;
-                props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
-                    .then((response: SPHttpClientResponse): Promise<any> => {
-                        return response.json();
-                    }).then(permissionResponse => {
-                        // console.log("permissions reponse==", permissionResponse);
-                        let permissionLevel = permissionResponse;
-                        if (permissionLevel.value.length > 0) {
-                            setHideButton(false);
-                        } else {
-                            setHideButton(true);
-                        }
-                    });
+                SharePointService.getCurrentUserGroups().then((groups: any) => {
+                    console.log('group list', groups);
+
+                    let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
+                    if (isGroupOwner) {
+                        setHideButton(false);
+                    } else {
+                        setHideButton(true);
+                    }
+                });
+     
 
             }
         });
@@ -53,9 +40,6 @@ const Dashboard = (props) => {
     return (
         <div className="dashboardWrapper" >
             <Grid container spacing={3} >
-                {/* <Grid item xs={12}>
-                    <MessageBar>Click on Initiate Clearance Form button to initiate Clearance process for an associate.</MessageBar>
-                </Grid> */}
                 {hideButton ? "" :
                     <Grid item xs={12} className="marginTop16 centerAlign" justify="center">
                         <Button type="button" variant="contained" color="primary" onClick={handleClick}>Initiate Clearance Form</Button>
@@ -97,6 +81,12 @@ const Dashboard = (props) => {
                 <Grid item xs={6} sm={4} className="marginTop16">
                     <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.ManagerDashboard, "")}>
                         <i className='ms-Icon ms-Icon--AzureAPIManagement' aria-hidden="true"></i> <br />  Manager {strings.Dashboard}
+                    </Link>
+
+                </Grid>
+                <Grid item xs={6} sm={4} className="marginTop16">
+                    <Link color="inherit" onClick={() => SharePointService.redirectTo(strings.EmployeeDashboard, "")}>
+                        <i className='ms-Icon ms-Icon--TemporaryUser' aria-hidden="true"></i> <br />  Employee {strings.Dashboard}
                     </Link>
 
                 </Grid>

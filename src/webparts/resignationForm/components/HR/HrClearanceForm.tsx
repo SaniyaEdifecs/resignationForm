@@ -27,7 +27,7 @@ const HrClearance = (props) => {
     const [loader, showLoader] = useState(false);
     const options = ['Yes', 'No', 'NA'];
     const formFields = [
-        "Resignationemailacceptance", "ResignationAcceptancecomments", "ELBalance", "ELBalanceComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "Others", "OthersComments"
+        "Resignationemailacceptance", "ResignationAcceptancecomments", "ELBalance", "ELBalanceComments", "ExitInterview", "ExitInterviewComments", "Gratuity", "GratuityComments", "Relocation_x002f_ReferralBonus", "Relocation_x002f_ReferralBonusCo", "Sign_x002d_onBonus", "Sign_x002d_onBonusComments", "TerminateOnHRSystems", "TerminateOnHRSystemsComments", "Waiver", "WaiverComments", "MessageToAssociate", "AdditionalInformation", "DuesPending", "Others", "OthersComments", "ReferralBonusComments", "ReferralBonus"
     ];
 
     var stateSchema = {};
@@ -59,9 +59,9 @@ const HrClearance = (props) => {
             setConfirmMsg('Message Sent to Employee');
 
         } else if (payload['DuesPending'] == 'GrantClearance') {
-            setConfirmMsg('Form Submitted Successfully')
+            setConfirmMsg('Form Submitted Successfully');
         } else {
-            setConfirmMsg('Form Saved Successfully!')
+            setConfirmMsg('Form Saved Successfully!');
         }
         payload = { ...payload, 'Status': status };
         SharePointService.getListByTitle("HrClearance").items.getById(ID).update(payload).then(items => {
@@ -72,7 +72,8 @@ const HrClearance = (props) => {
         }, (error: any): void => {
             // console.log('Error while creating the item: ' + error);
         });
-    }
+    };
+    
     const { state, setState, disable, status, saveForm, handleOnChange, handleOnBlur, handleOnSubmit } = useForm(
         stateSchema,
         validationStateSchema,
@@ -81,6 +82,7 @@ const HrClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         SharePointService.getListByTitle("HrClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
+            console.log('details', response);
             getStatusDetails(detail.Status);
             setEditAccessPermissions(detail.Status);
             SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
@@ -140,7 +142,7 @@ const HrClearance = (props) => {
 
             }
         });
-    }
+    };
 
     const getStatusDetails = (status) => {
         switch (status) {
@@ -311,7 +313,7 @@ const HrClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Relocation/Referral Bonus<span>*</span></td>
+                            <td>Relocation Bonus<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.Relocation_x002f_ReferralBonus.value} disabled={readOnly} id="Relocation_x002f_ReferralBonus" onBlur={handleOnBlur} onChange={handleOnChange} name="Relocation_x002f_ReferralBonus"  >
@@ -323,6 +325,21 @@ const HrClearance = (props) => {
                             <td>
                                 <TextField margin="normal" name="Relocation_x002f_ReferralBonusCo" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.Relocation_x002f_ReferralBonusCo.value} />
                                 {state.Relocation_x002f_ReferralBonusCo.error && <p style={errorStyle}>{state.Relocation_x002f_ReferralBonusCo.error}</p>}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Referral Bonus<span>*</span></td>
+                            <td>
+                                <FormControl>
+                                    <Select value={state.ReferralBonus.value} disabled={readOnly} id="ReferralBonus" onBlur={handleOnBlur} onChange={handleOnChange} name="ReferralBonus"  >
+                                        {options.map((option) => <MenuItem value={option}>{option}</MenuItem>)}
+                                    </Select>
+                                    {state.ReferralBonus.error && <p style={errorStyle}>{state.ReferralBonus.error}</p>}
+                                </FormControl>
+                            </td>
+                            <td>
+                                <TextField margin="normal" name="ReferralBonusComments" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} value={state.ReferralBonusComments.value} />
+                                {state.ReferralBonusComments.error && <p style={errorStyle}>{state.ReferralBonusComments.error}</p>}
                             </td>
                         </tr>
                         <tr>

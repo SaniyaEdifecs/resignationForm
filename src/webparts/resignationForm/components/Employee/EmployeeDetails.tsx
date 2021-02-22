@@ -1,8 +1,6 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { Typography, TextField, Button, Container, Grid, Breadcrumbs, Link, makeStyles, Backdrop, CircularProgress, Snackbar } from '@material-ui/core';
-
-import '../CommonStyleSheet.scss';
 import * as strings from 'ResignationFormWebPartStrings';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { MuiPickersUtilsProvider, DatePicker, KeyboardDatePicker } from '@material-ui/pickers';
@@ -13,6 +11,7 @@ import { Alert } from '@material-ui/lab';
 import { PeoplePicker, PrincipalType } from '@pnp/spfx-controls-react/lib/PeoplePicker';
 import SharePointService from '../SharePointServices';
 import resignationUseForm from '../Resignations/ResignationUseForm';
+import '../CommonStyleSheet.scss';
 
 const EmployeeDetails = (props) => {
     let ID = props.Id;
@@ -25,7 +24,7 @@ const EmployeeDetails = (props) => {
     // Define your state schema
     const [employeeNameId, setEmployeeNameId] = useState();
     const formFields = ["EmployeeCode", "FirstName", "LastName", "PersonalEmail", "PersonalPhone", "LastWorkingDate", "ResignationDate", "Location", "WorkEmail"];
-    const mask = ['(', /[1-9]/, /\d/, /\d/, ')', ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
+    const mask = [/[1-9]/, /\d/, /\d/, ' ', /\d/, /\d/, /\d/, '-', /\d/, /\d/, /\d/, /\d/];
     var stateSchema = {};
     var validationStateSchema = {};
     formFields.forEach(formField => {
@@ -124,6 +123,7 @@ const EmployeeDetails = (props) => {
                         if (statusValue == 'Approved' || statusValue == 'Canceled') {
                             SharePointService.getCurrentUserGroups().then((groups: any) => {
                                 let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
+                                setButtonVisibility(isGroupOwner?true:false);
                                 if (statusValue == 'Approved') {
                                     setReadOnly(isGroupOwner ? false : true);
                                 } else {
@@ -145,7 +145,7 @@ const EmployeeDetails = (props) => {
 
             }
         });
-    }
+    };
     useEffect(() => {
         if (props) {
             getEmployeeDetails(ID);
@@ -252,13 +252,13 @@ const EmployeeDetails = (props) => {
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <MuiPickersUtilsProvider utils={DateFnsUtils} >
-                                    <KeyboardDatePicker label="Last Working Date" className="fullWidth" format="MM-dd-yyyy"
+                                    <KeyboardDatePicker label="Last Working Date" className="fullWidth" format="dd-MM-yyyy"
                                         value={state.LastWorkingDate.value} name="LastWorkingDate" onChange={handleDateChange} />
                                 </MuiPickersUtilsProvider>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <MuiPickersUtilsProvider utils={DateFnsUtils} >
-                                    <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM-dd-yyyy" value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
+                                    <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="dd-MM-yyyy" value={state.ResignationDate.value} name="ResignationDate" onChange={handleDateChange} />
                                 </MuiPickersUtilsProvider>
                             </Grid>
                         </Grid>

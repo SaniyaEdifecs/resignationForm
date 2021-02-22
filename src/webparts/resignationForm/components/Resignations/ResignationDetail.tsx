@@ -452,14 +452,20 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['ResignationAcceptancecomments']}</td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Exit Interview Form</td>
+                                                    <td>Exit Interview</td>
                                                     <td>{hrClearance['ExitInterview']}</td>
                                                     <td>{hrClearance['ExitInterviewComments']} </td>
                                                 </tr>
                                                 <tr>
-                                                    <td>Relocation/Referral Bonus</td>
+                                                    <td>Relocation Bonus</td>
                                                     <td>{hrClearance['Relocation_x002f_ReferralBonus']}</td>
                                                     <td>{hrClearance['Relocation_x002f_ReferralBonusCo']} </td>
+                                                </tr>
+                                                
+                                                <tr>
+                                                    <td>Referral Bonus</td>
+                                                    <td>{hrClearance['ReferralBonus']}</td>
+                                                    <td>{hrClearance['ReferralBonusComments']} </td>
                                                 </tr>
                                                 <tr>
                                                     <td >Sign-on bonus</td>
@@ -483,11 +489,11 @@ const ResignationDetail = ({ props }) => {
                                                     <td>{hrClearance['TerminateOnHRSystems']}</td>
                                                     <td>{hrClearance['TerminateOnHRSystemsComments']} </td>
                                                 </tr>
-                                                {/* <tr>
+                                                <tr>
                                                     <td>Shortfall of Notice (Waiver if any)</td>
-                                                    <td>{hrClearance['ShiftAllowance']}</td>
-                                                    <td>{hrClearance['ShiftAllowanceComments']} </td>
-                                                </tr> */}
+                                                    <td>{hrClearance['Waiver']}</td>
+                                                    <td>{hrClearance['WaiverComments']} </td>
+                                                </tr>
                                                 <tr>
                                                     <td colSpan={3}>Payroll, Compliance & Benefits:</td>
                                                 </tr>
@@ -513,7 +519,7 @@ const ResignationDetail = ({ props }) => {
                                                 </tr>
                                                 <tr>
                                                     <td>Additional Comments</td>
-                                                    <td colSpan={2}>{financeClearance['AdditionalInformation']}</td>
+                                                    <td colSpan={2}>{hrClearance['AdditionalInformation']}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
