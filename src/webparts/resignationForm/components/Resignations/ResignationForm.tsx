@@ -17,6 +17,7 @@ import * as moment from 'moment';
 const ResignationForm = (props) => {
 
     const resignationReasonList = ['Voluntary Exit', 'Involuntary Exit', 'US Transfer'];
+    const noticePeriodList = [15, 45];
     const salutation = ['Mr.', 'Ms.', 'Mrs.'];
     // const resignationReasonList = ['Personal', 'Health', 'Better Opportunity', 'US Transfer', 'RG Transfer', 'Higher Education', 'Other'];
     const [isdisable, setIsDisable] = useState(false);
@@ -50,7 +51,8 @@ const ResignationForm = (props) => {
         "ManagerFirstName",
         "ManagerLastName",
         "ManagerEmail",
-        "AccountDeactivated"
+        "AccountDeactivated",
+        "noticePeriod"
     ];
 
     var stateSchema = {};
@@ -86,9 +88,14 @@ const ResignationForm = (props) => {
         onSubmitForm
     );
     const handleDateChange = (event) => {
+        console.log('LastWorkingDate local date ',new Date(event)," \n utc = ",(new Date(event)).toUTCString());
+
         setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: event, error: "" }) }));
     };
     const handleResignationDateChange = (event) => {
+        console.log('ResignationDate local date ',new Date(event)," \n utc = ",(new Date(event)).toUTCString());
+
+
         setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
     };
 
@@ -296,7 +303,7 @@ const ResignationForm = (props) => {
                         <Grid item xs={12} sm={6} className='employeeCode'>
                             <TextField variant="outlined" placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleEmployeeCode} onBlur={handleEmployeeCode} helperText="Please write code as written on pay slip" autoFocus />
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
-                            {state.EmployeeCode.value}
+                         
                         </Grid>
                         <Grid item xs={12} sm={6}>
 
@@ -387,6 +394,15 @@ const ResignationForm = (props) => {
                             </FormControl>
                             {state.ResignationReason.error && <p style={errorStyle}>{state.ResignationReason.error}</p>}
                         </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <FormControl variant="outlined" className="fluid MuiFormControl-marginNormal" required>
+                                <InputLabel htmlFor="noticePeriod">Notice Period</InputLabel>
+                                <Select defaultValue={noticePeriodList[selectedOption]} value={state.noticePeriod.value} required id="noticePeriod" onChange={handleOnChange} onBlur={handleOnChange} disabled={isdisable} name="noticePeriod"  >
+                                    {noticePeriodList.map((list, index) => <MenuItem key={index} value={list}>{list}</MenuItem>)}
+                                </Select>
+                            </FormControl>
+                            {state.noticePeriod.error && <p style={errorStyle}>{state.noticePeriod.error}</p>}
+                        </Grid>
                         <Grid item xs={12}>
                             <FormControlLabel
                                 control={
@@ -400,6 +416,7 @@ const ResignationForm = (props) => {
                                 label="Account Deactivated?"
                             />
                         </Grid>
+                        
                         {/* <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" fullWidth label="Specify(If other)" disabled={isdisable}  value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
                             {state.OtherReason.error && <p style={errorStyle}>{state.OtherReason.error}</p>}

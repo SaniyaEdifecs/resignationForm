@@ -53,7 +53,9 @@ const ManagerClearance = (props) => {
     const getEmployeeClearanceDetails = (clearanceId) => {
         SharePointService.getListByTitle("ManagersClearance").items.getById(clearanceId).get().then((response: any) => {
             detail = response;
+            // console.log(detail);
             SharePointService.getListByTitle("ResignationList").items.getById(detail.EmployeeNameId).get().then((resignDetails: any) => {
+                // console.log('resig',resignDetails);
                 setResignationDetails(resignDetails);
             });
             getStatusDetails(detail.Status);
@@ -278,9 +280,12 @@ const ManagerClearance = (props) => {
 
                             <td><span>Last working Date: </span><span><Moment format="DD/MM/YYYY">{resignationDetails['LastWorkingDate']}</Moment></span></td>
                         </tr>
+                        
                         <tr>
-                            <td><span>Notice Period Served: </span><span>{daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} days</span></td>
-                            <td colSpan={2}><span>Shortfall Notice Period: </span><span>{45 - daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} days</span></td>
+                            <td><span>Notice Period Served: </span><span>{daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} day(s)</span></td>
+                            <td colSpan={2}><span>Shortfall Notice Period: </span><span>
+                                {resignationDetails['noticePeriod'] ? 
+                                resignationDetails['noticePeriod'] - daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate']):45 - daysdifference(resignationDetails['LastWorkingDate'], resignationDetails['ResignationDate'])} day(s)</span></td>
                         </tr>
 
                     </tbody>
