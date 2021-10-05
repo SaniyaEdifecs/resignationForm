@@ -343,7 +343,9 @@ table {
     }
   }
 }
-
+.pendingState{
+  color: $theme-color;
+}
 .inlineBlock {
   display: inline-block;
 }
@@ -594,3 +596,89 @@ select option {
     }
   }
 }
+
+// .MuiTableSortLabel-root {
+//   height: 24px !important;
+// }
+.MuiTable-root{
+  margin: 0 !important;
+}
+.MuiToolbar-regular{
+  min-height: 48px !important;
+  margin-top: 20px;
+}
+.MuiTableRow-footer{
+  .MuiToolbar-regular{
+    margin-top: 0;
+  }
+}
+.removeBoxShadow{
+  tr{
+    td.MuiTableCell-root,
+    th.MuiTableCell-root{
+      padding: 5px;
+    }
+    th{
+      &.MuiButton-root{
+      font-size: 12px;
+      font-weight: bold;
+      
+      }
+      .MuiButton-text{
+        padding: 0;
+        margin: 0 !important;
+        font-weight: bold;
+        font-size: 12px;
+      }
+    }
+  }
+}
+.h100{
+  height: 100%;
+}
+.MuiTable-root{
+  overflow: hidden;
+}
+.MuiGridList-root {
+  .MuiGridListTile-root {
+    padding-top: 0 !important;
+  }
+}
+
+.MuiPaper-rounded{
+  .MuiGrid-grid-xs-6{
+    max-width: 100%;
+    width:100%;
+    flex-basis:100%;
+  }}
+  .MuiFormGroup-root {
+    
+    .MuiGrid-root {
+      &.MuiGrid-item {
+        background: gray;
+        margin-bottom: 5px;
+        .MuiTypography-root {
+          color: #ffffff;
+          padding: 3px 5px;
+          margin-bottom: 0;
+        }
+      }
+      &.MuiGrid-container {
+        .MuiGrid-item {
+          margin: 0;
+          background-color: transparent;
+          box-sizing: border-box;
+          display: flex;
+          flex-direction: column;
+          flex-basis: 50%;
+          width: 50%;
+          .MuiIconButton-root {
+            padding: 0 !important;
+          }
+          .MuiTypography-root {
+            color: rgba(0, 0, 0, 0.87);
+          }
+        }
+      }
+    }
+  }

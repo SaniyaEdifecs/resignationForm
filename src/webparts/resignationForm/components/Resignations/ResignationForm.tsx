@@ -88,32 +88,43 @@ const ResignationForm = (props) => {
         onSubmitForm
     );
     const handleDateChange = (event) => {
-        console.log('LastWorkingDate local date ',new Date(event)," \n utc = ",(new Date(event)).toUTCString());
+        let userInputLastDate = new Date(event);
+        let convertLastDatetoLocalTimezone = userInputLastDate.setHours((480 - userInputLastDate.getTimezoneOffset()) / 60);
+        let isoLastWorkingDate = new Date(convertLastDatetoLocalTimezone).toISOString();
+        console.log('convertDatetoLocalTimezone=', convertLastDatetoLocalTimezone, isoLastWorkingDate, event);
 
-        setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: event, error: "" }) }));
+        setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: isoLastWorkingDate, error: "" }) }));
     };
     const handleResignationDateChange = (event) => {
-        console.log('ResignationDate local date ',new Date(event)," \n utc = ",(new Date(event)).toUTCString());
 
+        let userInputResignationDate = new Date(event);
+        let convertResignationDatetoLocalTimezone = userInputResignationDate.setHours((480 - userInputResignationDate.getTimezoneOffset()) / 60);
+        let isoResignationDate = new Date(convertResignationDatetoLocalTimezone).toISOString();
+        console.log('convertDatetoLocalTimezone=', convertResignationDatetoLocalTimezone, isoResignationDate);
 
-        setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: event, error: "" }) }));
+        setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: isoResignationDate, error: "" }) }));
     };
 
     const handleCheckbox = (event) => {
         setState(prevState => ({ ...prevState, ['AccountDeactivated']: ({ value: event.target.checked, error: '' }) }));
     };
     const handleEmployeeCode = (event) => {
-        let regEx = /^[0-9]{4}$/;
+        console.log('==', event);
+        let mainReg = /(^c-)?[0-9]{4}$/
         let employeeCode = event.target.value;
-        if (employeeCode.length > 4) {
-            employeeCode = employeeCode.substring(0, 4);
-            return false;
-            // employeeCode = employeeCode.substring(1,5)
+        if (employeeCode.toLowerCase().includes('c-')) {
+            if (employeeCode.length > 6) {
+                employeeCode = employeeCode.substring(0, 6);
+            }
+        } else {
+            if (employeeCode.length > 4) {
+                employeeCode = employeeCode.substring(0, 4);
+            }
         }
         setState(prevState => ({
             ...prevState, ['EmployeeCode']: ({
                 value: employeeCode,
-                error: employeeCode && regEx.test(employeeCode) ? "" : "Enter 4 digit employee code. If it is less than 4, then prefix with 0."
+                error: employeeCode && mainReg.test(employeeCode) ? "" : "Enter a valid 4 or 6 (if starts with 'C-') digit employee code."
             })
         }));
     };
@@ -190,13 +201,13 @@ const ResignationForm = (props) => {
         SharePointService.getListByTitle("ResignationList").items.getById(clearanceId).get().then((detail: any) => {
             console.log('details', detail);
             formFields.forEach(formField => {
-                if(formField === 'AccountDeactivated'){
+                if (formField === 'AccountDeactivated') {
                     if (detail['AccountDeactivated'] === null || detail['AccountDeactivated'] === false) {
                         stateSchema['AccountDeactivated'].value = false;
-                    } else  { // if (detail['AccountDeactivated'] != null && detail['AccountDeactivated'] === true)
+                    } else { // if (detail['AccountDeactivated'] != null && detail['AccountDeactivated'] === true)
                         stateSchema['AccountDeactivated'].value = true;
                     }
-                }else{
+                } else {
                     stateSchema[formField].value = detail[formField] + "";
                 }
             });
@@ -262,6 +273,7 @@ const ResignationForm = (props) => {
     };
 
     function onSubmitForm(value) {
+        
         for (const key in value) {
             value[key] = value[key].value;
         }
@@ -286,7 +298,7 @@ const ResignationForm = (props) => {
             <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
                 <Alert onClose={handleClose} severity="success">
                     Form Submitted Successfully!
-                    </Alert>
+                </Alert>
             </Snackbar>
             <div>
                 <Typography variant="h5" component="h3">
@@ -301,9 +313,9 @@ const ResignationForm = (props) => {
                 <form onSubmit={handleOnSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6} className='employeeCode'>
-                            <TextField variant="outlined" placeholder="Type a number" type="number" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleEmployeeCode} onBlur={handleEmployeeCode} helperText="Please write code as written on pay slip" autoFocus />
+                            <TextField variant="outlined" placeholder="Type a number" type="text" margin="normal" required fullWidth disabled={isdisable} label="Employee Code" value={state.EmployeeCode.value} name="EmployeeCode" autoComplete="off" onChange={handleEmployeeCode} onBlur={handleEmployeeCode} helperText="Please write code as written on pay slip" autoFocus />
                             {state.EmployeeCode.error && <p style={errorStyle}>{state.EmployeeCode.error}</p>}
-                         
+
                         </Grid>
                         <Grid item xs={12} sm={6}>
 
@@ -312,7 +324,7 @@ const ResignationForm = (props) => {
                     </Grid>
 
                     <Grid container spacing={2}>
-                    <Grid item xs={3} sm={3}>
+                        <Grid item xs={3} sm={3}>
                             <FormControl variant="outlined" className="fluid MuiFormControl-marginNormal" required>
                                 <InputLabel htmlFor="salutation">Salutation</InputLabel>
                                 <Select defaultValue={salutation[selectedOption]} value={state.salutation.value} required id="salutation" onChange={handleOnChange} onBlur={handleOnChange} disabled={isdisable} name="salutation"  >
@@ -371,21 +383,7 @@ const ResignationForm = (props) => {
                         </Grid>
                     </Grid>
                     <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
-                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
-                                <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM/dd/yyyy"
-                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleResignationDateChange} />
-                            </MuiPickersUtilsProvider>
-                        </Grid>
-                        <Grid item xs={12} sm={6}>
-                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
-                                <KeyboardDatePicker label="Last Working Date" className="fullWidth" format="MM/dd/yyyy"
-                                    value={state.LastWorkingDate.value} name="LastWorkingDate" onChange={handleDateChange} />
-                            </MuiPickersUtilsProvider>
-                        </Grid>
-                    </Grid>
-                    <Grid container spacing={2}>
-                        <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={6}>
                             <FormControl variant="outlined" className="fluid MuiFormControl-marginNormal" required>
                                 <InputLabel htmlFor="reason">Reason for Separation</InputLabel>
                                 <Select defaultValue={resignationReasonList[selectedOption]} value={state.ResignationReason.value} required id="reason" onChange={handleOnChange} onBlur={handleOnChange} disabled={isdisable} name="ResignationReason"  >
@@ -403,6 +401,21 @@ const ResignationForm = (props) => {
                             </FormControl>
                             {state.noticePeriod.error && <p style={errorStyle}>{state.noticePeriod.error}</p>}
                         </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
+                                <KeyboardDatePicker label="Resignation Date" className="fullWidth" format="MM/dd/yyyy"
+                                    value={state.ResignationDate.value} name="ResignationDate" onChange={handleResignationDateChange} />
+                            </MuiPickersUtilsProvider>
+                        </Grid>
+                        <Grid item xs={12} sm={6}>
+                            <MuiPickersUtilsProvider utils={DateFnsUtils} >
+                                <KeyboardDatePicker label="Last Working Date" className="fullWidth" format="MM/dd/yyyy"
+                                    value={state.LastWorkingDate.value} name="LastWorkingDate" onChange={handleDateChange} />
+                            </MuiPickersUtilsProvider>
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={2}>
+                       
                         <Grid item xs={12}>
                             <FormControlLabel
                                 control={
@@ -416,11 +429,6 @@ const ResignationForm = (props) => {
                                 label="Account Deactivated?"
                             />
                         </Grid>
-                        
-                        {/* <Grid item xs={12} sm={6}>
-                            <TextField variant="outlined" margin="normal" fullWidth label="Specify(If other)" disabled={isdisable}  value={state.OtherReason.value} name="OtherReason" onChange={handleOnChange} onBlur={handleOnBlur} />
-                            {state.OtherReason.error && <p style={errorStyle}>{state.OtherReason.error}</p>}
-                        </Grid> */}
                     </Grid>
                     <Button type="submit" className="marginTop16" variant="contained" disabled={disable} color="primary">Submit</Button>
                 </form>

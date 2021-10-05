@@ -61,6 +61,7 @@ const DialogActions = withStyles((theme: Theme) => ({
 }))(MuiDialogActions);
 
 const ConfirmationDialog = ({ props, content, onChildClick }) => {
+    // console.log('content', content);
     const [open, setOpen] = useState(false);
     const [showSuccessMsg, setShowSuccessMsg] = useState(false);
     const [loader, showLoader] = useState(false);
@@ -77,47 +78,47 @@ const ConfirmationDialog = ({ props, content, onChildClick }) => {
     const revokeResignation = (isCanceled) => {
         let payload: any = { 'Status': 'Canceled', 'HrStatus': 'Canceled', 'FinanceStatus': 'Canceled', 'ItStatus': 'Canceled', 'ManagerStatus': 'Canceled', 'SalesforceStatus': 'Canceled', 'Operations_x002f_AdminStatus': 'Canceled', 'emplStatus': 'Canceled' };
         showLoader(true);
-        sp.web.lists.getByTitle("ResignationList").items.getById(content.ID).update(payload).then(items => {
+        sp.web.lists.getByTitle("ResignationList").items.getById(content.rowData[8]).update(payload).then(items => {
             if (items) {
                 showLoader(false);
                 setShowSuccessMsg(true);
-                sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((ITList: any) => {
+                sp.web.lists.getByTitle("ItClearance").items.filter('EmployeeNameId eq ' + content.rowData[8]).get().then((ITList: any) => {
                     if (ITList.length) {
                         sp.web.lists.getByTitle("ItClearance").items.getById(ITList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((managerList: any) => {
+                sp.web.lists.getByTitle("ManagersClearance").items.filter('EmployeeNameId eq ' + content.rowData[8]).get().then((managerList: any) => {
                     if (managerList.length) {
                         sp.web.lists.getByTitle("ManagersClearance").items.getById(managerList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((opsList: any) => {
+                sp.web.lists.getByTitle("OperationsClearance").items.filter('EmployeeNameId eq ' + content.rowData[8]).get().then((opsList: any) => {
                     if (opsList.length) {
                         sp.web.lists.getByTitle("OperationsClearance").items.getById(opsList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((financeList: any) => {
+                sp.web.lists.getByTitle("Finance%20Clearance").items.filter('EmployeeNameId eq ' + content.rowData[8]).get().then((financeList: any) => {
                     if (financeList.length) {
                         sp.web.lists.getByTitle("Finance%20Clearance").items.getById(financeList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((sfList: any) => {
+                sp.web.lists.getByTitle("SalesForceClearance").items.filter('EmployeeNameId eq ' + content.rowData[8]).get().then((sfList: any) => {
                     if (sfList.length) {
                         sp.web.lists.getByTitle("SalesForceClearance").items.getById(sfList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq ' + content.ID).get().then((hrList: any) => {
+                sp.web.lists.getByTitle("HrClearance").items.filter('EmployeeNameId eq ' + content.rowData[8]).get().then((hrList: any) => {
                     if (hrList.length) {
                         sp.web.lists.getByTitle("HrClearance").items.getById(hrList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
                     }
                 });
-                sp.web.lists.getByTitle("Employee%20Details").items.filter('EmployeeNameId eq ' + content.ID).get().then((employeeList: any) => {
+                sp.web.lists.getByTitle("Employee%20Details").items.filter('EmployeeNameId eq ' + content.rowData[8]).get().then((employeeList: any) => {
                     if (employeeList.length) {
                         sp.web.lists.getByTitle("Employee%20Details").items.getById(employeeList[0]['ID']).update({ 'Status': 'Canceled' }).then(items => {
                         });
@@ -144,7 +145,7 @@ const ConfirmationDialog = ({ props, content, onChildClick }) => {
                 </DialogTitle> :
                     <div>
                         <DialogContent >
-                            Are you sure to revoke <b>{content.EmployeeName}'s</b> clearance?
+                            Are you sure to revoke <b>{content.rowData[1]}'s</b> clearance?
                       </DialogContent>
                         <DialogActions>
                             <Button variant="contained" onClick={() => revokeResignation(true)} color="primary" className="descLink">

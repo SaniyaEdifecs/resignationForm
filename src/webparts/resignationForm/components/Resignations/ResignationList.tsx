@@ -8,7 +8,9 @@ import ConfirmationDialog from '../ConfirmationDialog';
 import '../CommonStyleSheet.scss';
 import * as strings from 'ResignationFormWebPartStrings';
 import SharePointService from '../SharePointServices';
+import MUIDataTable from "mui-datatables";
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
+import Moment from "react-moment";
 
 const useStyles1 = makeStyles((theme: Theme) =>
     createStyles({
@@ -76,6 +78,8 @@ const TablePaginationActions = (props: TablePaginationActionsProps) => {
     );
 };
 
+
+
 const ResignationList = (props) => {
     const [employeeLists, setEmployeeLists] = useState([]);
     const [errorMsg, setErrorMsg] = useState('');
@@ -102,6 +106,7 @@ const ResignationList = (props) => {
         SharePointService.getListByTitle("ResignationList").items.orderBy("Created", false).get().then((items: any) => {
             showLoader(false);
             if (items) {
+                console.log('resignation=items', items);
                 setEmployeeLists(items);
             }
         }).catch(err => {
@@ -112,9 +117,9 @@ const ResignationList = (props) => {
 
 
     const handleClick = (event) => {
-        window.location.href = "?component=resignationDetail&resignationId=" + event;
+        window.location.href = "?component=resignationDetail&resignationId=" + event.rowData[8];
     };
-    const redirectToForm =(event) =>{
+    const redirectToForm = (event) => {
         window.location.href = "?component=resignationForm&resignationId=" + event;
 
     }
@@ -129,12 +134,12 @@ const ResignationList = (props) => {
         },
     }));
     const classes = useStyles(0);
-  
+
     const getCurrentUserGroups = () => {
         SharePointService.getCurrentUserGroups().then((groupAccess: any) => {
             let isGroupOwner = groupAccess.filter(group => group.Title === "Resignation Group - Owners").length;
             setShowActionButton(isGroupOwner ? true : false);
-       
+
             return isResignationOwner;
         });
     };
@@ -145,8 +150,10 @@ const ResignationList = (props) => {
             getResignationList();
         }
     };
-    const openConfirmationDialog = (employeeDetail) => {
-        setDialogData(employeeDetail);
+    const openConfirmationDialog = (tableMeta) => {
+        // console.log('row data ', tableMeta.tableData[tableMeta.rowIndex]);
+
+        setDialogData(tableMeta);
         setOpenDialog(true);
     };
 
@@ -155,13 +162,155 @@ const ResignationList = (props) => {
         getCurrentUserGroups();
     }, []);
 
+    const options = {
+        filterType: "checkbox",
+        responsive: "stacked",
+        selectableRows: false,
+        viewColumns: true,
+        print: false,
+        download: false,
+        sortOrder: {
+            name: "Id",
+            direction: "desc",
+        },
+    };
+    const columns = [
+        {
+            label: "Employee Code",
+            name: "EmployeeCode",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    console.log('ev', tableMeta);
+                    return (
+                        <div className="h100" onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Employee Name",
+            name: "EmployeeName",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Work Email",
+            name: "WorkEmail",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Personal Email",
+            name: "PersonalEmail",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Resignation Reason",
+            name: "ResignationReason",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Department",
+            name: "Department",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Last Working Date",
+            name: "LastWorkingDate",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}><Moment format="DD/MMM/YYYY">{value}</Moment></div>
+                    );
+                }
+            },
+        },
+        {
+            label: "Status",
+            name: "Status",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: 'Resignation Form',
+            name: "ID",
+            sortable: true,
+            options: {
+                filter: false,
+                display: (showActionButton) ? true : false,
+                customBodyRender: (value, rowData) => {
+                    return (
+                        <a className="link" onClick={() => redirectToForm(value)} >Form -{value}</a>
+                    );
+                },
+            }
+        },
+        {
+            label: 'Action',
+            name: "Status",
+            sortable: true,
+            options: {
+                filter: false,
+                display: (showActionButton) ? true : false,
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div className={value == 'Canceled' ? 'disableRevoke' : ''}> <a className="link" onClick={() => openConfirmationDialog(tableMeta)} >Revoke Clearance</a></div>
+                    );
+
+                },
+            },
+        }
+
+    ];
+
+
     useEffect(() => {
     }, [openDialog]);
 
     return (
         <div>
-        {showActionButton}
-            <ConfirmationDialog props={openDialog} content={dialogData} onChildClick={handleChildClick} />
+            {openDialog === true ? <ConfirmationDialog props={openDialog} content={dialogData} onChildClick={handleChildClick} /> : ''}
             <Paper className="root removeBoxShadow">
 
                 <div className="">
@@ -175,21 +324,23 @@ const ResignationList = (props) => {
                         <Typography color="textPrimary">Clearance {strings.Dashboard}</Typography>
                     </Breadcrumbs>
                     <div>
-                        {loader ? <div className="msSpinner">
+                         {loader ? <div className="msSpinner">
                             <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
                         </div> :
-                            <Table stickyHeader aria-label="sticky table">
+                           /* <Table stickyHeader aria-label="sticky table">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell >Employee Code</TableCell>
+                                        <TableCell>Employee Code</TableCell>
                                         <TableCell >Employee Name</TableCell>
                                         <TableCell >Work Email</TableCell>
                                         <TableCell >Personal Email</TableCell>
                                         <TableCell >Reason for Resignation</TableCell>
                                         <TableCell >Department</TableCell>
                                         <TableCell >Status</TableCell>
-                                        {showActionButton ? <TableCell>Resignation Form</TableCell>: null}
-                                        {showActionButton ? <TableCell >Action</TableCell>:null}
+                                        <TableCell >Last Working Date</TableCell>
+
+                                        {showActionButton ? <TableCell>Resignation Form</TableCell> : null}
+                                        {showActionButton ? <TableCell >Action</TableCell> : null}
                                     </TableRow>
                                 </TableHead>
                                 {employeeLists.length > 0 ? <TableBody>
@@ -205,11 +356,12 @@ const ResignationList = (props) => {
                                             <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.ResignationReason}</TableCell>
                                             <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Department}</TableCell>
                                             <TableCell onClick={() => handleClick(employeeDetail.ID)}>{employeeDetail.Status}</TableCell>
+                                            <TableCell onClick={() => handleClick(employeeDetail.ID)}> <Moment format="DD/MM/YYYY">{employeeDetail.LastWorkingDate}</Moment></TableCell>
                                             {showActionButton ? <TableCell >
-                                                <a className="link" onClick={() =>redirectToForm(employeeDetail.ID)} >Form -{employeeDetail.ID}</a></TableCell>
-                                             : null}
-                                            {showActionButton ?<TableCell className={employeeDetail.Status == 'Canceled' ? 'disableRevoke' : ''}><a className="link" onClick={() => openConfirmationDialog(employeeDetail)}>Revoke Clearance</a></TableCell> : null}
-                                         
+                                                <a className="link" onClick={() => redirectToForm(employeeDetail.ID)} >Form -{employeeDetail.ID}</a></TableCell>
+                                                : null}
+                                            {showActionButton ? <TableCell className={employeeDetail.Status == 'Canceled' ? 'disableRevoke' : ''}><a className="link" onClick={() => openConfirmationDialog(employeeDetail)}>Revoke Clearance</a></TableCell> : null}
+
                                         </TableRow>
                                     ))}
                                 </TableBody> :
@@ -239,7 +391,14 @@ const ResignationList = (props) => {
                                         />
                                     </TableRow>
                                 </TableFooter>
-                            </Table>}
+                            </Table>} */
+
+                        <MUIDataTable
+                            title={""}
+                            data={employeeLists}
+                            columns={columns}
+                            options={options}
+                        />}
                     </div>
                 </div>
             </Paper >

@@ -7,17 +7,10 @@ const resignationUseForm = (stateSchema, validationSchema = {}, callback) => {
   const [disable, setDisable] = useState(true);
   const [isDirty, setIsDirty] = useState(false);
 
-  // // Disable button in initial render.
-  // useEffect(() => { setDisable(true); }, []);
-
   const validateState = useCallback(() => {
     const hasErrorInState = Object.keys(validationSchema).some(key => {
       const isInputFieldRequired = validationSchema[key].required;
       const stateValue = state[key].value;
-
-      // if ((key === 'ResignationReason' || key === 'OtherReason') && state.ResignationReason.value !== 'Other') {
-
-      // }
       let validateStateValue: boolean;
       const stateError = state[key].error;
 
@@ -55,12 +48,14 @@ const resignationUseForm = (stateSchema, validationSchema = {}, callback) => {
     name = event.target.name;
     value = event.target.value;
     let error = '';
-    // console.log('event', event.target);
+    console.log('event', event.target);
      
     // if(event.target.type === 'checkbox'){
     //   value= event.target.checked;
     //   setState(prevState =>({ ...prevState, [name]:{value,error} }));
     // }
+
+
      if (validationSchema[name].required) {
       if (!value) {
         error = 'This is required field.';

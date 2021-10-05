@@ -8,6 +8,7 @@ import '../CommonStyleSheet.scss';
 import * as strings from 'ResignationFormWebPartStrings';
 import { Spinner, SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
 import SharePointService from '../SharePointServices';
+import MUIDataTable from "mui-datatables";
 
 const useStyles1 = makeStyles((theme: Theme) =>
     createStyles({
@@ -88,13 +89,124 @@ const EmployeeDashboard = (props) => {
             showLoader(false);
             if (items) {
                 setEmployeeDetails(items);
-                console.log("details ==", employeeDetails);
+                // console.log("details ==", items);
             }
         }).catch(err => {
             showLoader(false);
             setErrorMsg("No Records Found");
         });
     };
+
+    const options = {
+        filterType: "checkbox",
+        responsive: "stacked",
+        selectableRows: false,
+        viewColumns: true,
+        print: false,
+        download: false,
+        sortOrder: {
+            name: "Id",
+            direction: "desc",
+        },
+    };
+    const columns = [
+        {
+            label: "ID",
+            name: "Id",
+            sortable: true,
+            options: {
+                filter: false,
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div className="h100"  onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Employee Code",
+            name: "EmployeeCode",
+            sortable: true,
+            options: {
+                filter: false,
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div className="h100"  onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Employee Name",
+            name: "FirstName",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value +" " +tableMeta.rowData[7]}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Work Email",
+            name: "WorkEmail",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Personal Email",
+            name: "PersonalEmail",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    // console.log('lastworking date', tableMeta);
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Personal Phone",
+            name: "PersonalPhone",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    // console.log('lastworking date', tableMeta);
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Status",
+            name: "Status",
+            sortable: true,
+            options: {
+                customBodyRender: (value, tableMeta) => {
+                    return (
+                        <div onClick={() => handleClick(tableMeta)}  className={(value == "Pending" || value == "Not Started" ? 'pendingState' : null)}>{value}</div>
+                    );
+                }
+            }
+        },
+        {
+            label: "Last Name",
+            name: "LastName",
+            sortable: true,
+            options: {
+               display: false,
+            }
+        },
+    ];
     useEffect(() => {
         getClearanceList();
     }, []);
@@ -113,7 +225,7 @@ const EmployeeDashboard = (props) => {
 
 
     const handleClick = (event) => {
-        window.location.href = "?component=employeeDetails&resignationId=" + event;
+        window.location.href = "?component=employeeDetails&resignationId=" + event.rowData[0];
     };
 
     const useStyles = makeStyles(theme => ({
@@ -140,69 +252,73 @@ const EmployeeDashboard = (props) => {
                     </Link>
                     <Typography color="textPrimary">Employee {strings.Dashboard}</Typography>
                 </Breadcrumbs>
-                {/* <Typography variant="h5" component="h3">
-                    IT Clearance Dashboard
-                </Typography> */}
-                {/* //Removed class tableWrapper */}
+         
                 <div>
                     {loader ? <div className="msSpinner">
                         <Spinner label="Fetching data, wait..." size={SpinnerSize.large} />
                     </div> :
-                        <Table >
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>ID</TableCell>
-                                    <TableCell >Employee Code</TableCell>
-                                    <TableCell >Employee Name</TableCell>
-                                    <TableCell >Work Email</TableCell>
-                                    <TableCell >Personal Email</TableCell>
-                                    <TableCell >Personal Phone</TableCell>
-                                    <TableCell >Status</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            {employeeDetails.length > 0 ? <TableBody>
-                                {(rowsPerPage > 0
-                                    ? employeeDetails.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                    : employeeDetails
-                                ).map((EmployeeDetail, index) => (
-                                    <TableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
-                                        <TableCell component="th" scope="row">{EmployeeDetail.Id}</TableCell>
-                                        <TableCell> {EmployeeDetail.EmployeeCode}</TableCell>
-                                        <TableCell >{EmployeeDetail.FirstName +' '+ EmployeeDetail.LastName}</TableCell>
-                                        <TableCell >{EmployeeDetail.WorkEmail}</TableCell>
-                                        <TableCell >{EmployeeDetail.PersonalEmail}</TableCell>
-                                        <TableCell >{EmployeeDetail.PersonalPhone}</TableCell>
-                                        <TableCell >{EmployeeDetail.Status}</TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody> :
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell colSpan={7} >
-                                            {errorMsg ? <div>No Records Found</div> : "No Records Found"}
-                                        </TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            }
-                            <TableFooter>
-                                <TableRow>
-                                    <TablePagination
-                                        rowsPerPageOptions={[5, 10, 25, employeeDetails.length > 25 && employeeDetails.length]}
-                                        colSpan={7}
-                                        count={employeeDetails.length}
-                                        rowsPerPage={rowsPerPage}
-                                        page={page}
-                                        SelectProps={{
-                                            inputProps: { 'aria-label': 'rows per page' },
-                                            native: true,
-                                        }}
-                                        onChangePage={handleChangePage}
-                                        onChangeRowsPerPage={handleChangeRowsPerPage}
-                                        ActionsComponent={TablePaginationActions}
-                                    />
-                                </TableRow>
-                            </TableFooter>
-                        </Table>}
+                        // <Table >
+                        //     <TableHead>
+                        //         <TableRow>
+                        //             <TableCell>ID</TableCell>
+                        //             <TableCell >Employee Code</TableCell>
+                        //             <TableCell >Employee Name</TableCell>
+                        //             <TableCell >Work Email</TableCell>
+                        //             <TableCell >Personal Email</TableCell>
+                        //             <TableCell >Personal Phone</TableCell>
+                        //             <TableCell >Status</TableCell>
+                        //         </TableRow>
+                        //     </TableHead>
+                        //     {employeeDetails.length > 0 ? <TableBody>
+                        //         {(rowsPerPage > 0
+                        //             ? employeeDetails.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                        //             : employeeDetails
+                        //         ).map((EmployeeDetail, index) => (
+                        //             <TableRow key={EmployeeDetail.Id} onClick={() => handleClick(EmployeeDetail.Id)} className={(EmployeeDetail.Status == "Pending" || EmployeeDetail.Status == "Not Started" ? 'pendingState' : null)}>
+                        //                 <TableCell component="th" scope="row">{EmployeeDetail.Id}</TableCell>
+                        //                 <TableCell> {EmployeeDetail.EmployeeCode}</TableCell>
+                        //                 <TableCell >{EmployeeDetail.FirstName +' '+ EmployeeDetail.LastName}</TableCell>
+                        //                 <TableCell >{EmployeeDetail.WorkEmail}</TableCell>
+                        //                 <TableCell >{EmployeeDetail.PersonalEmail}</TableCell>
+                        //                 <TableCell >{EmployeeDetail.PersonalPhone}</TableCell>
+                        //                 <TableCell >{EmployeeDetail.Status}</TableCell>
+                        //             </TableRow>
+                        //         ))}
+                        //     </TableBody> :
+                        //         <TableBody>
+                        //             <TableRow>
+                        //                 <TableCell colSpan={7} >
+                        //                     {errorMsg ? <div>No Records Found</div> : "No Records Found"}
+                        //                 </TableCell>
+                        //             </TableRow>
+                        //         </TableBody>
+                        //     }
+                        //     <TableFooter>
+                        //         <TableRow>
+                        //             <TablePagination
+                        //                 rowsPerPageOptions={[5, 10, 25, employeeDetails.length > 25 && employeeDetails.length]}
+                        //                 colSpan={7}
+                        //                 count={employeeDetails.length}
+                        //                 rowsPerPage={rowsPerPage}
+                        //                 page={page}
+                        //                 SelectProps={{
+                        //                     inputProps: { 'aria-label': 'rows per page' },
+                        //                     native: true,
+                        //                 }}
+                        //                 onChangePage={handleChangePage}
+                        //                 onChangeRowsPerPage={handleChangeRowsPerPage}
+                        //                 ActionsComponent={TablePaginationActions}
+                        //             />
+                        //         </TableRow>
+                        //     </TableFooter>
+                        // </Table>
+                        <MUIDataTable
+                        title={""}
+                        data={employeeDetails}
+                        columns={columns}
+                        options={options}
+                    />
+                        }
                 </div>
             </div>
         </Paper>

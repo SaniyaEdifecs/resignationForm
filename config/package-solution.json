@@ -3,7 +3,7 @@
   "solution": {
     "name": "resignation-form-client-side-solution",
     "id": "e84530d1-f24b-4df4-91ab-ac207026258f",
-    "version": "1.0.2.3",
+    "version": "2.0.0.1",
     "includeClientSideAssets": true,
     "isDomainIsolated": false
   },
