@@ -87,24 +87,29 @@ const ResignationForm = (props) => {
         validationStateSchema,
         onSubmitForm
     );
-    const handleDateChange = (event) => {
-        let userInputLastDate = new Date(event);
-        let convertLastDatetoLocalTimezone = userInputLastDate.setHours((480 - userInputLastDate.getTimezoneOffset()) / 60);
-        let isoLastWorkingDate = new Date(convertLastDatetoLocalTimezone).toISOString();
-        console.log('convertDatetoLocalTimezone=', convertLastDatetoLocalTimezone, isoLastWorkingDate, event);
-
-        setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: isoLastWorkingDate, error: "" }) }));
-    };
+  
     const handleResignationDateChange = (event) => {
+        let npDays = state.noticePeriod.value -1;
+        // console.log('npdays',npDays);
 
         let userInputResignationDate = new Date(event);
         let convertResignationDatetoLocalTimezone = userInputResignationDate.setHours((480 - userInputResignationDate.getTimezoneOffset()) / 60);
         let isoResignationDate = new Date(convertResignationDatetoLocalTimezone).toISOString();
-        console.log('convertDatetoLocalTimezone=', convertResignationDatetoLocalTimezone, isoResignationDate);
+        // console.log('convertDatetoLocalTimezone=', convertResignationDatetoLocalTimezone, isoResignationDate);
 
         setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: isoResignationDate, error: "" }) }));
+     let calculatedLSWD =   event.setDate(event.getDate() + npDays);
+     handleDateChange(calculatedLSWD);
     };
+    const handleDateChange = (event) => {
+        
+        let userInputLastDate = new Date(event);
+        let convertLastDatetoLocalTimezone = userInputLastDate.setHours((480 - userInputLastDate.getTimezoneOffset()) / 60);
+        let isoLastWorkingDate = new Date(convertLastDatetoLocalTimezone).toISOString();
+        // console.log('convertDatetoLocalTimezone=', convertLastDatetoLocalTimezone, isoLastWorkingDate, event);
 
+        setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: isoLastWorkingDate, error: "" }) }));
+    };
     const handleCheckbox = (event) => {
         setState(prevState => ({ ...prevState, ['AccountDeactivated']: ({ value: event.target.checked, error: '' }) }));
     };
@@ -343,7 +348,6 @@ const ResignationForm = (props) => {
                             {state.LastName.error && <p style={errorStyle}>{state.LastName.error}</p>}
                         </Grid>
                     </Grid>
-
                     <Grid container spacing={2}>
                         <Grid item xs={12} sm={6}>
                             <TextField variant="outlined" margin="normal" required fullWidth label="Department" disabled={isdisable}
@@ -415,7 +419,6 @@ const ResignationForm = (props) => {
                         </Grid>
                     </Grid>
                     <Grid container spacing={2}>
-                       
                         <Grid item xs={12}>
                             <FormControlLabel
                                 control={

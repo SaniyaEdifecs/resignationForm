@@ -38,7 +38,6 @@ const resignationUseForm = (stateSchema, validationSchema = {}, callback) => {
     } else {
       setStatus("Approved");
     }
-
   }, [state]);
 
   let name: any;
@@ -54,7 +53,10 @@ const resignationUseForm = (stateSchema, validationSchema = {}, callback) => {
     //   value= event.target.checked;
     //   setState(prevState =>({ ...prevState, [name]:{value,error} }));
     // }
+  // if(event.target.name === "noticePeriod"){
 
+  //   handleDateChange()
+  // }
 
      if (validationSchema[name].required) {
       if (!value) {
