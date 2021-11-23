@@ -12,10 +12,13 @@ import * as strings from 'ResignationFormWebPartStrings';
 import SharePointService from '../SharePointServices';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
+import {DateTime} from "luxon";
 import * as moment from 'moment';
 
 const ResignationForm = (props) => {
 
+// console.log('props', props);
+   
     const resignationReasonList = ['Voluntary Exit', 'Involuntary Exit', 'US Transfer'];
     const noticePeriodList = [15, 45];
     const salutation = ['Mr.', 'Ms.', 'Mrs.'];
@@ -87,27 +90,40 @@ const ResignationForm = (props) => {
         validationStateSchema,
         onSubmitForm
     );
-  
-    const handleResignationDateChange = (event) => {
+    Date.prototype["stdTimezoneOffset"] = function () {
+        var jan = new Date(this.getFullYear(), 0, 1);
+        var jul = new Date(this.getFullYear(), 6, 1);
+        return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
+    }
+    
+    Date.prototype["isDstObserved"] = function () {
+        return this.getTimezoneOffset() < this.stdTimezoneOffset();
+    }
+
+
+    
+    const handleResignationDateChange = (dateValue) => {
         let npDays = state.noticePeriod.value -1;
-        // console.log('npdays',npDays);
-
-        let userInputResignationDate = new Date(event);
-        let convertResignationDatetoLocalTimezone = userInputResignationDate.setHours((480 - userInputResignationDate.getTimezoneOffset()) / 60);
-        let isoResignationDate = new Date(convertResignationDatetoLocalTimezone).toISOString();
-        // console.log('convertDatetoLocalTimezone=', convertResignationDatetoLocalTimezone, isoResignationDate);
-
+        console.log('date value, np',dateValue, npDays);
+        const pacific = DateTime.fromObject({ year: dateValue.getFullYear(), month: dateValue.getMonth() + 1, day: dateValue.getDate() }, { zone: "America/Los_Angeles" });
+        // let convertResignationDatetoLocalTimezone = dateValue.setHours((480 - dateValue.getTimezoneOffset()) / 60);
+        // let isoResignationDate = new Date(convertResignationDatetoLocalTimezone).toISOString();
+        // let isoResignationDate = new Date(dateValue).toISOString();
+        let isoResignationDate = pacific.toISO();
+        // console.log('Resignation date pacific =',isoResignationDate);
         setState(prevState => ({ ...prevState, ['ResignationDate']: ({ value: isoResignationDate, error: "" }) }));
-     let calculatedLSWD =   event.setDate(event.getDate() + npDays);
-     handleDateChange(calculatedLSWD);
+        let calculatedLSWD =   new Date(dateValue.setDate(dateValue.getDate() + npDays));
+        handleDateChange(calculatedLSWD);
     };
-    const handleDateChange = (event) => {
-        
-        let userInputLastDate = new Date(event);
-        let convertLastDatetoLocalTimezone = userInputLastDate.setHours((480 - userInputLastDate.getTimezoneOffset()) / 60);
-        let isoLastWorkingDate = new Date(convertLastDatetoLocalTimezone).toISOString();
-        // console.log('convertDatetoLocalTimezone=', convertLastDatetoLocalTimezone, isoLastWorkingDate, event);
 
+    const handleDateChange = (dateValue) => {
+        // let convertLastDatetoLocalTimezone = dateValue.setHours((480 - dateValue.getTimezoneOffset()) / 60);
+        // let isoLastWorkingDate = new Date(convertLastDatetoLocalTimezone).toISOString();
+        // let isoLastWorkingDate = new Date(dateValue).toISOString();
+        const pacific = DateTime.fromObject({ year: dateValue.getFullYear(), month: dateValue.getMonth() + 1, day: dateValue.getDate() }, { zone: "America/Los_Angeles" });
+        let isoLastWorkingDate = pacific.toISO();
+
+        // console.log('Last Working date pacific =',isoLastWorkingDate);
         setState(prevState => ({ ...prevState, ['LastWorkingDate']: ({ value: isoLastWorkingDate, error: "" }) }));
     };
     const handleCheckbox = (event) => {
@@ -278,7 +294,7 @@ const ResignationForm = (props) => {
     };
 
     function onSubmitForm(value) {
-        
+        console.log(value);
         for (const key in value) {
             value[key] = value[key].value;
         }

@@ -13,6 +13,8 @@ import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
 import Moment from 'react-moment';
+import { sp } from '@pnp/sp';
+import { PermissionKind } from "@pnp/sp";
 
 const ItClearance = (props) => {
     let ID = props.Id;
@@ -130,9 +132,12 @@ const ItClearance = (props) => {
     };
 
     const setEditAccessPermissions = (statusValue) => {
-        SharePointService.getCurrentUser().then((response) => {
+        SharePointService.getCurrentUser().then(async (response) => {
             currentUser = response;
+           
+// console.log("perms perm", currentUserPermission);
             if (currentUser) {
+                let currentUserPermission = await sp.web.lists.getByTitle('ItClearance').userHasPermissions(currentUser.LoginName, PermissionKind.EditListItems);
                 const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('ItClearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
@@ -150,12 +155,10 @@ const ItClearance = (props) => {
                                 setButtonVisibility(isGroupOwner ? true : false);
                             });
                         } else {
-                            if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
+                            if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) || currentUserPermission) {
                                 setReadOnly(false);
-                            } else if (permissionResponse.error ||
-                                (permissionLevel.High == 176 && permissionLevel.Low == 138612833) ||
-                                (permissionLevel.High == 48 && permissionLevel.Low == 134287360)) {
-                                console.log("permissionResponse.error:", permissionResponse.error);
+                            } else if (permissionResponse.error){                               
+                                console.log("permissionResponse.error: currentUserPermission",currentUserPermission, permissionResponse.error);
                                 setReadOnly(true);
                             }
                         }
@@ -164,6 +167,7 @@ const ItClearance = (props) => {
             }
         });
     };
+   
     useEffect(() => {
         if (ID) {
             getEmployeeClearanceDetails(ID);

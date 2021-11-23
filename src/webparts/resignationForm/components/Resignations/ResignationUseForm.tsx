@@ -47,7 +47,7 @@ const resignationUseForm = (stateSchema, validationSchema = {}, callback) => {
     name = event.target.name;
     value = event.target.value;
     let error = '';
-    console.log('event', event.target);
+    // console.log('event', event.target);
      
     // if(event.target.type === 'checkbox'){
     //   value= event.target.checked;
