@@ -27,6 +27,7 @@ const ResignationDetail = ({ props }) => {
   const [confirmMsg, setConfirmMsg] = useState("Form Saved Successfully!");
   const [managerClearance, setManagerClearance] = useState({});
   const [salesForceClearance, setSalesForceClearance] = useState({});
+  const [employeeClearance,setEmployeeClearance]=useState({});
   const [operationsClearance, setOperationsClearance] = useState({});
   const [financeClearance, setFinanceClearance] = useState({});
   const [hrClearance, setHrClearance] = useState({});
@@ -148,6 +149,19 @@ const ResignationDetail = ({ props }) => {
         (items) => {
           if (items) {
             setSalesForceClearance(items[0]);
+          }
+        },
+        (error) => {
+          setErrorMsg("No Access");
+        }
+      );
+      SharePointService.getListByTitle("Employee%20Details")
+      .items.filter("EmployeeNameId eq " + ID)
+      .get()
+      .then(
+        (items) => {
+          if (items) {
+            setEmployeeClearance(items[0]);
           }
         },
         (error) => {
@@ -915,6 +929,29 @@ const ResignationDetail = ({ props }) => {
                             }
                           >
                             {hrClearance["Status"]}
+                          </Link>
+                        ) : (
+                          "Approved"
+                        )}
+                      </td>
+                    ) : (
+                      <td>No Access</td>
+                    )}
+                  </tr>
+                  <tr>
+                    <td>Employee Clearance</td>
+                    {employeeClearance ? (
+                      <td>
+                        {employeeClearance && employeeClearance["Status"] != "Approved" ? (
+                          <Link
+                            onClick={() =>
+                              SharePointService.redirectTo(
+                                "employeeDetails",
+                                employeeClearance["ID"]
+                              )
+                            }
+                          >
+                            {employeeClearance["Status"]}
                           </Link>
                         ) : (
                           "Approved"
