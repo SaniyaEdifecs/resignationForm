@@ -13,6 +13,7 @@ import Moment from 'react-moment';
 import { SPHttpClient, SPHttpClientResponse } from "@microsoft/sp-http";
 import { Alert } from '@material-ui/lab';
 import SharePointService from '../SharePointServices';
+import { PermissionKind, sp } from '@pnp/sp';
 
 const ManagerClearance = (props) => {
     let ID = props.Id;
@@ -127,9 +128,10 @@ const ManagerClearance = (props) => {
     };
 
     const setEditAccessPermissions = (statusValue) => {
-        SharePointService.getCurrentUser().then((response) => {
+        SharePointService.getCurrentUser().then(async (response) => {
             currentUser = response;
             if (currentUser) {
+                let currentUserPermission = await sp.web.lists.getByTitle('ManagersClearance').userHasPermissions(currentUser.LoginName, PermissionKind.EditListItems);
                 const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('ManagersClearance')/items(" + ID + ")/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
@@ -148,11 +150,10 @@ const ManagerClearance = (props) => {
                                 setButtonVisibility(isGroupOwner ? true : false);
                             });
                         } else {
-                            if (permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) {
+                            if ((permissionLevel.High == 2147483647 && permissionLevel.Low == 4294705151) || currentUserPermission) {
                                 setReadOnly(false);
-                            } else if (permissionResponse.error ||
-                                (permissionLevel.High == 176 && permissionLevel.Low == 138612833) ||
-                                (permissionLevel.High == 48 && permissionLevel.Low == 134287360)) {
+                            } else if (permissionResponse.error){                               
+                                console.log("permissionResponse.error: currentUserPermission",currentUserPermission, permissionResponse.error);
                                 setReadOnly(true);
                             }
                         }

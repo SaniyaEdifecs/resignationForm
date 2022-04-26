@@ -85,9 +85,8 @@ const FinanceClearance = (props) => {
     const setEditAccessPermissions = (statusValue) => {
         SharePointService.getCurrentUser().then(async (response) => {
             currentUser = response;
-
             if (currentUser) {
-                let currentUserPermission = await sp.web.lists.getByTitle('ItClearance').userHasPermissions(currentUser.LoginName, PermissionKind.EditListItems);
+                let currentUserPermission = await sp.web.lists.getByTitle('Finance%20Clearance').userHasPermissions(currentUser.LoginName, PermissionKind.EditListItems);
                 const url = props.context.pageContext.site.absoluteUrl + "/_api/web/lists/getbytitle('Finance%20Clearance')/getusereffectivepermissions(@u)?@u='" + encodeURIComponent(currentUser.LoginName) + "'";
                 props.context.spHttpClient.get(url, SPHttpClient.configurations.v1)
                     .then((response: SPHttpClientResponse): Promise<any> => {
