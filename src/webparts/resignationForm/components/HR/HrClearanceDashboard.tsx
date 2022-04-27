@@ -88,7 +88,7 @@ const HrClearanceDashboard = (props) => {
 
     const getClearanceList = () => {
         showLoader(true);
-        SharePointService.getListByTitle("HrClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName', 'EmployeeName/LastWorkingDate').expand("EmployeeName").orderBy("Created", false).get().then((items: any) => {
+        SharePointService.getListByTitle("HrClearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName', 'EmployeeName/LastWorkingDate').expand("EmployeeName").orderBy("Created", false).getAll().then((items: any) => {
             showLoader(false);
             if (items) {
                 items = items.map(item => {

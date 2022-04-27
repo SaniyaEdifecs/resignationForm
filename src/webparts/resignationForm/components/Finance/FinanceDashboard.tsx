@@ -28,7 +28,7 @@ const FinanceDashboard = (props) => {
 
     const getClearanceList = () => {
         showLoader(true);
-        SharePointService.getListByTitle("Finance%20Clearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").orderBy("Created", false).get().then((items: any) => {
+        SharePointService.getListByTitle("Finance%20Clearance").items.select('Id', 'Status', 'EmployeeNameId', 'EmployeeName/EmployeeCode', 'EmployeeName/EmployeeName', 'EmployeeName/ManagerName').expand("EmployeeName").orderBy("Created", false).getAll().then((items: any) => {
             showLoader(false);
             if (items) {
                 items = items.map(item => {

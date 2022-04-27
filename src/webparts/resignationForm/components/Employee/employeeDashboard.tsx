@@ -85,7 +85,7 @@ const EmployeeDashboard = (props) => {
 
     const getClearanceList = () => {
         showLoader(true);
-        SharePointService.getListByTitle("Employee%20Details").items.orderBy("Created", false).get().then((items: any) => {
+        SharePointService.getListByTitle("Employee%20Details").items.orderBy("Created", false).getAll().then((items: any) => {
             showLoader(false);
             if (items) {
                 setEmployeeDetails(items);

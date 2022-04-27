@@ -2,7 +2,6 @@ import * as React from "react";
 import { useEffect, useState } from "react";
 import * as strings from 'ResignationFormWebPartStrings';
 import { Grid, Button, Link } from '@material-ui/core';
-import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 import '../components/CommonStyleSheet.scss';
 import { sp } from "@pnp/sp";
 import SharePointService from "./SharePointServices";
@@ -17,17 +16,13 @@ const Dashboard = (props) => {
             console.log("==", currentUser);
             if (currentUser) {
                 SharePointService.getCurrentUserGroups().then((groups: any) => {
-                    console.log('group list', groups);
-
-                    let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
+                      let isGroupOwner = groups.filter(group => group.Title === "Resignation Group - Owners").length;
                     if (isGroupOwner) {
                         setHideButton(false);
                     } else {
                         setHideButton(true);
                     }
                 });
-     
-
             }
         });
     };
