@@ -316,7 +316,7 @@ const ManagerClearance = (props) => {
                             </td>
                         </tr>
                         <tr>
-                            <td>Do you approve the recovery amount, if any (after adjustment of short fall of notice period with paid leaves)?<span>*</span></td>
+                            <td>If there is a shortfall of notice period then will you waive of the remaining days? (please justify in comment if shortfall needs to be adjusted with paid leaves or not)<span>*</span></td>
                             <td>
                                 <FormControl>
                                     <Select value={state.RecoveryAmount.value} id="RecoveryAmount" disabled={readOnly} onBlur={handleOnBlur} onChange={handleOnChange} name="RecoveryAmount"  >
