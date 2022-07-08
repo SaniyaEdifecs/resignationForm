@@ -33,7 +33,7 @@
     "@types/webpack-env": "1.13.1",
     "date-fns": "^2.0.0-beta.5",
     "luxon": "^2.1.1",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "mui-datatables": "^3.7.8",
     "office-ui-fabric-react": "6.189.2",
     "react": "16.8.5",
